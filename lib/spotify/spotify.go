@@ -12,8 +12,6 @@ import (
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 )
 
-type Track = spotify.SavedTrack
-
 type SpotfyClient struct {
 	client *spotify.Client
 }
@@ -39,24 +37,6 @@ func New(ctx context.Context) (*SpotfyClient, error) {
 	return &SpotfyClient{
 		client: client,
 	}, nil
-}
-
-func (s *SpotfyClient) GetAllTracks(ctx context.Context) ([]Track, error) {
-	return jsoncache.CachedExec("spotify_savedTracks", func() ([]Track, error) {
-		return s._GetAllTracks(ctx)
-	})
-}
-func (s *SpotfyClient) _GetAllTracks(ctx context.Context) ([]Track, error) {
-	var allTracks []Track
-	var err error
-	for resp, err := s.client.CurrentUsersTracks(ctx, spotify.Limit(50)); err == nil; err = s.client.NextPage(ctx, resp) {
-		log.Printf("len(resp.Tracks)=%d", len(resp.Tracks))
-		allTracks = append(allTracks, resp.Tracks...)
-	}
-	if !errors.Is(err, spotify.ErrNoMorePages) && err != nil {
-		return nil, err
-	}
-	return allTracks, nil
 }
 
 func (s *SpotfyClient) GetAllPlaylists(ctx context.Context) (playlists []spotify.SimplePlaylist, err error) {
