@@ -2,34 +2,23 @@ package spotify
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
-	"path"
 
+	"github.com/m-nny/universe/lib/jsoncache"
+	spotifyauth "github.com/zmb3/spotify/v2/auth"
 	"golang.org/x/oauth2"
 )
 
-const tokenCacheLocation = ".cache/spotify.json"
-
-func getToken(ctx context.Context) (*oauth2.Token, error) {
-	if cachedToken, err := getCachedToken(); err == nil && cachedToken != nil {
-		return cachedToken, nil
-	}
-	token, err := getTokenUsingApi(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if err := setCachedToken(token); err != nil {
-		return nil, err
-	}
-	return token, nil
+func getTokenCached(ctx context.Context, auth *spotifyauth.Authenticator) (*oauth2.Token, error) {
+	return jsoncache.CachedExec("spotify_token", func() (*oauth2.Token, error) {
+		return getToken(ctx, auth)
+	})
 }
 
-func getTokenUsingApi(ctx context.Context) (*oauth2.Token, error) {
+func getToken(ctx context.Context, auth *spotifyauth.Authenticator) (*oauth2.Token, error) {
 	state := "42"
 	url := auth.AuthURL(state)
 	log.Printf("Login using following url:\n%s", url)
@@ -62,29 +51,4 @@ func getTokenUsingApi(ctx context.Context) (*oauth2.Token, error) {
 	case err := <-errCh:
 		return nil, err
 	}
-}
-
-func setCachedToken(token *oauth2.Token) error {
-	dir := path.Dir(tokenCacheLocation)
-	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
-		return err
-	}
-	tokenJson, err := json.MarshalIndent(token, "  ", "  ")
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(tokenCacheLocation, tokenJson, os.ModePerm)
-}
-
-func getCachedToken() (*oauth2.Token, error) {
-	data, err := os.ReadFile(tokenCacheLocation)
-	if err != nil {
-		return nil, err
-	}
-	var token *oauth2.Token
-
-	if err := json.Unmarshal(data, &token); err != nil {
-		return nil, err
-	}
-	return token, nil
 }

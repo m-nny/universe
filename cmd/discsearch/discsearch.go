@@ -13,8 +13,13 @@ func main() {
 		log.Fatalf("Could not load .env: %v", err)
 	}
 	ctx := context.Background()
-	if err := spotify.GetAllTracks(ctx); err != nil {
-		log.Fatalf("Error getting all tracks: %v", err)
+	spotifyClient, err := spotify.New(ctx)
+	if err != nil {
+		log.Fatalf("Error getting spotify client: %v", err)
 	}
-	log.Printf("discsearch finished")
+	tracks, err := spotifyClient.GetAllTracks(ctx)
+	if err != nil {
+		log.Fatalf("Error getting all Tracks: %v", err)
+	}
+	log.Printf("found total %d Tracks", len(tracks))
 }
