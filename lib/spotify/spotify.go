@@ -12,6 +12,8 @@ import (
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 )
 
+type ID = spotify.ID
+
 type SpotfyClient struct {
 	client *spotify.Client
 }

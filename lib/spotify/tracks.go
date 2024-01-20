@@ -10,39 +10,40 @@ import (
 	"github.com/zmb3/spotify/v2"
 )
 
+var _tracks = make(map[spotify.ID]*Track)
+
 type Track struct {
 	Id          spotify.ID
 	Name        string
 	ArtistNames []string
 	ArtistIds   []spotify.ID
-	AlbumName   string
-	AlbumId     spotify.ID
+	Album       *Album
 }
 
-func getTrack(track spotify.SavedTrack) Track {
-	var artistNames []string
-	var artistIds []spotify.ID
-	for _, artist := range track.Artists {
-		artistNames = append(artistNames, artist.Name)
-		artistIds = append(artistIds, artist.ID)
+func getTrack(savedTrack spotify.SavedTrack) *Track {
+	id := savedTrack.ID
+	if val := _tracks[id]; val != nil {
+		return val
 	}
-	return Track{
-		Id:          track.ID,
-		Name:        track.Name,
+	artistNames, artistIds := getArtistNames(savedTrack.Artists)
+	album := getAlbum(savedTrack.Album)
+	track := &Track{
+		Id:          savedTrack.ID,
+		Name:        savedTrack.Name,
 		ArtistNames: artistNames,
 		ArtistIds:   artistIds,
-		AlbumName:   track.Album.Name,
-		AlbumId:     track.Album.ID,
+		Album:       album,
 	}
+	return track
 }
 
-func (s *SpotfyClient) GetAllTracks(ctx context.Context) ([]Track, error) {
-	return jsoncache.CachedExec("spotify_savedTracks", func() ([]Track, error) {
+func (s *SpotfyClient) GetAllTracks(ctx context.Context) ([]*Track, error) {
+	return jsoncache.CachedExec("spotify_savedTracks", func() ([]*Track, error) {
 		return s._GetAllTracks(ctx)
 	})
 }
-func (s *SpotfyClient) _GetAllTracks(ctx context.Context) ([]Track, error) {
-	var allTracks []Track
+func (s *SpotfyClient) _GetAllTracks(ctx context.Context) ([]*Track, error) {
+	var allTracks []*Track
 	var err error
 	for resp, err := s.client.CurrentUsersTracks(ctx, spotify.Limit(50)); err == nil; err = s.client.NextPage(ctx, resp) {
 		log.Printf("len(resp.Tracks)=%d", len(resp.Tracks))
