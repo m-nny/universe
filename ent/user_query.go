@@ -13,17 +13,19 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/m-nny/universe/ent/playlist"
 	"github.com/m-nny/universe/ent/predicate"
+	"github.com/m-nny/universe/ent/track"
 	"github.com/m-nny/universe/ent/user"
 )
 
 // UserQuery is the builder for querying User entities.
 type UserQuery struct {
 	config
-	ctx           *QueryContext
-	order         []user.OrderOption
-	inters        []Interceptor
-	predicates    []predicate.User
-	withPlaylists *PlaylistQuery
+	ctx             *QueryContext
+	order           []user.OrderOption
+	inters          []Interceptor
+	predicates      []predicate.User
+	withPlaylists   *PlaylistQuery
+	withSavedTracks *TrackQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -75,6 +77,28 @@ func (uq *UserQuery) QueryPlaylists() *PlaylistQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(playlist.Table, playlist.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.PlaylistsTable, user.PlaylistsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySavedTracks chains the current query on the "savedTracks" edge.
+func (uq *UserQuery) QuerySavedTracks() *TrackQuery {
+	query := (&TrackClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(track.Table, track.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.SavedTracksTable, user.SavedTracksPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -269,12 +293,13 @@ func (uq *UserQuery) Clone() *UserQuery {
 		return nil
 	}
 	return &UserQuery{
-		config:        uq.config,
-		ctx:           uq.ctx.Clone(),
-		order:         append([]user.OrderOption{}, uq.order...),
-		inters:        append([]Interceptor{}, uq.inters...),
-		predicates:    append([]predicate.User{}, uq.predicates...),
-		withPlaylists: uq.withPlaylists.Clone(),
+		config:          uq.config,
+		ctx:             uq.ctx.Clone(),
+		order:           append([]user.OrderOption{}, uq.order...),
+		inters:          append([]Interceptor{}, uq.inters...),
+		predicates:      append([]predicate.User{}, uq.predicates...),
+		withPlaylists:   uq.withPlaylists.Clone(),
+		withSavedTracks: uq.withSavedTracks.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
@@ -289,6 +314,17 @@ func (uq *UserQuery) WithPlaylists(opts ...func(*PlaylistQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withPlaylists = query
+	return uq
+}
+
+// WithSavedTracks tells the query-builder to eager-load the nodes that are connected to
+// the "savedTracks" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithSavedTracks(opts ...func(*TrackQuery)) *UserQuery {
+	query := (&TrackClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withSavedTracks = query
 	return uq
 }
 
@@ -370,8 +406,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			uq.withPlaylists != nil,
+			uq.withSavedTracks != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -396,6 +433,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 		if err := uq.loadPlaylists(ctx, query, nodes,
 			func(n *User) { n.Edges.Playlists = []*Playlist{} },
 			func(n *User, e *Playlist) { n.Edges.Playlists = append(n.Edges.Playlists, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := uq.withSavedTracks; query != nil {
+		if err := uq.loadSavedTracks(ctx, query, nodes,
+			func(n *User) { n.Edges.SavedTracks = []*Track{} },
+			func(n *User, e *Track) { n.Edges.SavedTracks = append(n.Edges.SavedTracks, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -430,6 +474,67 @@ func (uq *UserQuery) loadPlaylists(ctx context.Context, query *PlaylistQuery, no
 			return fmt.Errorf(`unexpected referenced foreign-key "user_playlists" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
+	}
+	return nil
+}
+func (uq *UserQuery) loadSavedTracks(ctx context.Context, query *TrackQuery, nodes []*User, init func(*User), assign func(*User, *Track)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[string]*User)
+	nids := make(map[string]map[*User]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(user.SavedTracksTable)
+		s.Join(joinT).On(s.C(track.FieldID), joinT.C(user.SavedTracksPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(user.SavedTracksPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(user.SavedTracksPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullString)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := values[0].(*sql.NullString).String
+				inValue := values[1].(*sql.NullString).String
+				if nids[inValue] == nil {
+					nids[inValue] = map[*User]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*Track](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "savedTracks" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
 	}
 	return nil
 }

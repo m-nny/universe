@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/m-nny/universe/ent/playlist"
 	"github.com/m-nny/universe/ent/predicate"
+	"github.com/m-nny/universe/ent/track"
 	"github.com/m-nny/universe/ent/user"
 	"golang.org/x/oauth2"
 )
@@ -50,6 +51,21 @@ func (uu *UserUpdate) AddPlaylists(p ...*Playlist) *UserUpdate {
 	return uu.AddPlaylistIDs(ids...)
 }
 
+// AddSavedTrackIDs adds the "savedTracks" edge to the Track entity by IDs.
+func (uu *UserUpdate) AddSavedTrackIDs(ids ...string) *UserUpdate {
+	uu.mutation.AddSavedTrackIDs(ids...)
+	return uu
+}
+
+// AddSavedTracks adds the "savedTracks" edges to the Track entity.
+func (uu *UserUpdate) AddSavedTracks(t ...*Track) *UserUpdate {
+	ids := make([]string, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return uu.AddSavedTrackIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -74,6 +90,27 @@ func (uu *UserUpdate) RemovePlaylists(p ...*Playlist) *UserUpdate {
 		ids[i] = p[i].ID
 	}
 	return uu.RemovePlaylistIDs(ids...)
+}
+
+// ClearSavedTracks clears all "savedTracks" edges to the Track entity.
+func (uu *UserUpdate) ClearSavedTracks() *UserUpdate {
+	uu.mutation.ClearSavedTracks()
+	return uu
+}
+
+// RemoveSavedTrackIDs removes the "savedTracks" edge to Track entities by IDs.
+func (uu *UserUpdate) RemoveSavedTrackIDs(ids ...string) *UserUpdate {
+	uu.mutation.RemoveSavedTrackIDs(ids...)
+	return uu
+}
+
+// RemoveSavedTracks removes "savedTracks" edges to Track entities.
+func (uu *UserUpdate) RemoveSavedTracks(t ...*Track) *UserUpdate {
+	ids := make([]string, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return uu.RemoveSavedTrackIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -160,6 +197,51 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.SavedTracksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.SavedTracksTable,
+			Columns: user.SavedTracksPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedSavedTracksIDs(); len(nodes) > 0 && !uu.mutation.SavedTracksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.SavedTracksTable,
+			Columns: user.SavedTracksPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.SavedTracksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.SavedTracksTable,
+			Columns: user.SavedTracksPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -201,6 +283,21 @@ func (uuo *UserUpdateOne) AddPlaylists(p ...*Playlist) *UserUpdateOne {
 	return uuo.AddPlaylistIDs(ids...)
 }
 
+// AddSavedTrackIDs adds the "savedTracks" edge to the Track entity by IDs.
+func (uuo *UserUpdateOne) AddSavedTrackIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.AddSavedTrackIDs(ids...)
+	return uuo
+}
+
+// AddSavedTracks adds the "savedTracks" edges to the Track entity.
+func (uuo *UserUpdateOne) AddSavedTracks(t ...*Track) *UserUpdateOne {
+	ids := make([]string, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return uuo.AddSavedTrackIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -225,6 +322,27 @@ func (uuo *UserUpdateOne) RemovePlaylists(p ...*Playlist) *UserUpdateOne {
 		ids[i] = p[i].ID
 	}
 	return uuo.RemovePlaylistIDs(ids...)
+}
+
+// ClearSavedTracks clears all "savedTracks" edges to the Track entity.
+func (uuo *UserUpdateOne) ClearSavedTracks() *UserUpdateOne {
+	uuo.mutation.ClearSavedTracks()
+	return uuo
+}
+
+// RemoveSavedTrackIDs removes the "savedTracks" edge to Track entities by IDs.
+func (uuo *UserUpdateOne) RemoveSavedTrackIDs(ids ...string) *UserUpdateOne {
+	uuo.mutation.RemoveSavedTrackIDs(ids...)
+	return uuo
+}
+
+// RemoveSavedTracks removes "savedTracks" edges to Track entities.
+func (uuo *UserUpdateOne) RemoveSavedTracks(t ...*Track) *UserUpdateOne {
+	ids := make([]string, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return uuo.RemoveSavedTrackIDs(ids...)
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -334,6 +452,51 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.SavedTracksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.SavedTracksTable,
+			Columns: user.SavedTracksPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedSavedTracksIDs(); len(nodes) > 0 && !uuo.mutation.SavedTracksCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.SavedTracksTable,
+			Columns: user.SavedTracksPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.SavedTracksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.SavedTracksTable,
+			Columns: user.SavedTracksPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

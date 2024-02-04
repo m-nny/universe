@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/m-nny/universe/ent/playlist"
+	"github.com/m-nny/universe/ent/track"
 	"github.com/m-nny/universe/ent/user"
 	"golang.org/x/oauth2"
 )
@@ -49,6 +50,21 @@ func (uc *UserCreate) AddPlaylists(p ...*Playlist) *UserCreate {
 		ids[i] = p[i].ID
 	}
 	return uc.AddPlaylistIDs(ids...)
+}
+
+// AddSavedTrackIDs adds the "savedTracks" edge to the Track entity by IDs.
+func (uc *UserCreate) AddSavedTrackIDs(ids ...string) *UserCreate {
+	uc.mutation.AddSavedTrackIDs(ids...)
+	return uc
+}
+
+// AddSavedTracks adds the "savedTracks" edges to the Track entity.
+func (uc *UserCreate) AddSavedTracks(t ...*Track) *UserCreate {
+	ids := make([]string, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return uc.AddSavedTrackIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -142,6 +158,22 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.SavedTracksIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.SavedTracksTable,
+			Columns: user.SavedTracksPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

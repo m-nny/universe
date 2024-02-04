@@ -86,6 +86,29 @@ func HasPlaylistsWith(preds ...predicate.Playlist) predicate.User {
 	})
 }
 
+// HasSavedTracks applies the HasEdge predicate on the "savedTracks" edge.
+func HasSavedTracks() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, SavedTracksTable, SavedTracksPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSavedTracksWith applies the HasEdge predicate on the "savedTracks" edge with a given conditions (other predicates).
+func HasSavedTracksWith(preds ...predicate.Track) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := newSavedTracksStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(sql.AndPredicates(predicates...))

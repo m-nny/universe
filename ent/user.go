@@ -30,9 +30,11 @@ type User struct {
 type UserEdges struct {
 	// Playlists holds the value of the playlists edge.
 	Playlists []*Playlist `json:"playlists,omitempty"`
+	// SavedTracks holds the value of the savedTracks edge.
+	SavedTracks []*Track `json:"savedTracks,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // PlaylistsOrErr returns the Playlists value or an error if the edge
@@ -42,6 +44,15 @@ func (e UserEdges) PlaylistsOrErr() ([]*Playlist, error) {
 		return e.Playlists, nil
 	}
 	return nil, &NotLoadedError{edge: "playlists"}
+}
+
+// SavedTracksOrErr returns the SavedTracks value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) SavedTracksOrErr() ([]*Track, error) {
+	if e.loadedTypes[1] {
+		return e.SavedTracks, nil
+	}
+	return nil, &NotLoadedError{edge: "savedTracks"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -98,6 +109,11 @@ func (u *User) Value(name string) (ent.Value, error) {
 // QueryPlaylists queries the "playlists" edge of the User entity.
 func (u *User) QueryPlaylists() *PlaylistQuery {
 	return NewUserClient(u.config).QueryPlaylists(u)
+}
+
+// QuerySavedTracks queries the "savedTracks" edge of the User entity.
+func (u *User) QuerySavedTracks() *TrackQuery {
+	return NewUserClient(u.config).QuerySavedTracks(u)
 }
 
 // Update returns a builder for updating this User.

@@ -9,5 +9,8 @@ import (
 // Playlist is the predicate function for playlist builders.
 type Playlist func(*sql.Selector)
 
+// Track is the predicate function for track builders.
+type Track func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)

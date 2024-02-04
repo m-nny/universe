@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Playlist is the client for interacting with the Playlist builders.
 	Playlist *PlaylistClient
+	// Track is the client for interacting with the Track builders.
+	Track *TrackClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -148,6 +150,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Playlist = NewPlaylistClient(tx.config)
+	tx.Track = NewTrackClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 

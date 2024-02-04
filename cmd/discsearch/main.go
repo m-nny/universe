@@ -7,7 +7,6 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/m-nny/universe/cmd/internal"
 	"github.com/m-nny/universe/lib/spotify"
-	"github.com/m-nny/universe/lib/utils"
 )
 
 func main() {
@@ -34,26 +33,10 @@ func main() {
 	}
 	log.Printf("found total %d playlists", len(playlists))
 
-	// tracks, err := spotifyClient.GetAllTracks(ctx)
-	// if err != nil {
-	// 	log.Fatalf("Error getting all Tracks: %v", err)
-	// }
-	// log.Printf("found total %d Tracks", len(tracks))
-	// GetTopArtistsAndAlbums(tracks)
-}
+	tracks, err := spotifyClient.GetAllTracks(ctx)
+	if err != nil {
+		log.Fatalf("Error getting all tracks: %v", err)
+	}
+	log.Printf("found total %d tracks", len(tracks))
 
-func GetTopArtistsAndAlbums(tracks []*spotify.Track) {
-	albums := make(map[spotify.ID]int)
-	for _, track := range tracks {
-		albums[track.Album.Id]++
-	}
-	topAlbums := utils.TopValuesMap(albums)
-	log.Print("Top albums")
-	for idx, item := range topAlbums {
-		cnt := albums[item]
-		if cnt <= 1 {
-			break
-		}
-		log.Printf("%3d. %s (%d)", idx+1, item, cnt)
-	}
 }

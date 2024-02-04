@@ -7,6 +7,7 @@ import (
 
 	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/ent/user"
+	"github.com/m-nny/universe/lib/utils"
 	"github.com/zmb3/spotify/v2"
 )
 
@@ -26,7 +27,7 @@ func (s *Service) GetAllPlaylists(ctx context.Context) ([]*ent.Playlist, error) 
 }
 func (s *Service) _GetAllPlaylists(ctx context.Context) (playlists []spotify.SimplePlaylist, err error) {
 	for resp, err := s.spotify.CurrentUsersPlaylists(ctx); err == nil; err = s.spotify.NextPage(ctx, resp) {
-		log.Printf("len(resp.Tracks)=%d", len(resp.Playlists))
+		log.Printf("len(resp.Playlists)=%d offest=%d total=%d", len(resp.Playlists), resp.Offset, resp.Total)
 		playlists = append(playlists, resp.Playlists...)
 	}
 	if !errors.Is(err, spotify.ErrNoMorePages) && err != nil {
@@ -45,17 +46,20 @@ func (s *Service) getUserPlaylists(ctx context.Context) ([]*ent.Playlist, error)
 }
 
 func (s *Service) saveUserPlaylists(ctx context.Context, rawPlists []spotify.SimplePlaylist) error {
+	ps := utils.SliceMap(rawPlists, s.toPlaylist)
 	err := s.ent.Playlist.
-		MapCreateBulk(rawPlists, func(pc *ent.PlaylistCreate, i int) {
-			p := rawPlists[i]
-			pc.
-				SetID(string(p.ID)).
-				SetName(p.Name).
-				SetSnaphotID(p.SnapshotID).
-				SetOwnerID(rootUserName)
-		}).
+		CreateBulk(ps...).
 		OnConflict().
 		UpdateNewValues().
 		Exec(ctx)
 	return err
+}
+
+func (s *Service) toPlaylist(p spotify.SimplePlaylist) *ent.PlaylistCreate {
+	return s.ent.Playlist.
+		Create().
+		SetID(string(p.ID)).
+		SetName(p.Name).
+		SetSnaphotID(p.SnapshotID).
+		SetOwnerID(rootUserName)
 }

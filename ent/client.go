@@ -16,6 +16,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/m-nny/universe/ent/playlist"
+	"github.com/m-nny/universe/ent/track"
 	"github.com/m-nny/universe/ent/user"
 )
 
@@ -26,6 +27,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Playlist is the client for interacting with the Playlist builders.
 	Playlist *PlaylistClient
+	// Track is the client for interacting with the Track builders.
+	Track *TrackClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 }
@@ -40,6 +43,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Playlist = NewPlaylistClient(c.config)
+	c.Track = NewTrackClient(c.config)
 	c.User = NewUserClient(c.config)
 }
 
@@ -134,6 +138,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:      ctx,
 		config:   cfg,
 		Playlist: NewPlaylistClient(cfg),
+		Track:    NewTrackClient(cfg),
 		User:     NewUserClient(cfg),
 	}, nil
 }
@@ -155,6 +160,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:      ctx,
 		config:   cfg,
 		Playlist: NewPlaylistClient(cfg),
+		Track:    NewTrackClient(cfg),
 		User:     NewUserClient(cfg),
 	}, nil
 }
@@ -185,6 +191,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Playlist.Use(hooks...)
+	c.Track.Use(hooks...)
 	c.User.Use(hooks...)
 }
 
@@ -192,6 +199,7 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.Playlist.Intercept(interceptors...)
+	c.Track.Intercept(interceptors...)
 	c.User.Intercept(interceptors...)
 }
 
@@ -200,6 +208,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *PlaylistMutation:
 		return c.Playlist.mutate(ctx, m)
+	case *TrackMutation:
+		return c.Track.mutate(ctx, m)
 	case *UserMutation:
 		return c.User.mutate(ctx, m)
 	default:
@@ -356,6 +366,155 @@ func (c *PlaylistClient) mutate(ctx context.Context, m *PlaylistMutation) (Value
 	}
 }
 
+// TrackClient is a client for the Track schema.
+type TrackClient struct {
+	config
+}
+
+// NewTrackClient returns a client for the Track from the given config.
+func NewTrackClient(c config) *TrackClient {
+	return &TrackClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `track.Hooks(f(g(h())))`.
+func (c *TrackClient) Use(hooks ...Hook) {
+	c.hooks.Track = append(c.hooks.Track, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `track.Intercept(f(g(h())))`.
+func (c *TrackClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Track = append(c.inters.Track, interceptors...)
+}
+
+// Create returns a builder for creating a Track entity.
+func (c *TrackClient) Create() *TrackCreate {
+	mutation := newTrackMutation(c.config, OpCreate)
+	return &TrackCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Track entities.
+func (c *TrackClient) CreateBulk(builders ...*TrackCreate) *TrackCreateBulk {
+	return &TrackCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *TrackClient) MapCreateBulk(slice any, setFunc func(*TrackCreate, int)) *TrackCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &TrackCreateBulk{err: fmt.Errorf("calling to TrackClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*TrackCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &TrackCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Track.
+func (c *TrackClient) Update() *TrackUpdate {
+	mutation := newTrackMutation(c.config, OpUpdate)
+	return &TrackUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TrackClient) UpdateOne(t *Track) *TrackUpdateOne {
+	mutation := newTrackMutation(c.config, OpUpdateOne, withTrack(t))
+	return &TrackUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TrackClient) UpdateOneID(id string) *TrackUpdateOne {
+	mutation := newTrackMutation(c.config, OpUpdateOne, withTrackID(id))
+	return &TrackUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Track.
+func (c *TrackClient) Delete() *TrackDelete {
+	mutation := newTrackMutation(c.config, OpDelete)
+	return &TrackDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TrackClient) DeleteOne(t *Track) *TrackDeleteOne {
+	return c.DeleteOneID(t.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TrackClient) DeleteOneID(id string) *TrackDeleteOne {
+	builder := c.Delete().Where(track.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TrackDeleteOne{builder}
+}
+
+// Query returns a query builder for Track.
+func (c *TrackClient) Query() *TrackQuery {
+	return &TrackQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTrack},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Track entity by its id.
+func (c *TrackClient) Get(ctx context.Context, id string) (*Track, error) {
+	return c.Query().Where(track.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TrackClient) GetX(ctx context.Context, id string) *Track {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QuerySavedBy queries the savedBy edge of a Track.
+func (c *TrackClient) QuerySavedBy(t *Track) *UserQuery {
+	query := (&UserClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(track.Table, track.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, track.SavedByTable, track.SavedByPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TrackClient) Hooks() []Hook {
+	return c.hooks.Track
+}
+
+// Interceptors returns the client interceptors.
+func (c *TrackClient) Interceptors() []Interceptor {
+	return c.inters.Track
+}
+
+func (c *TrackClient) mutate(ctx context.Context, m *TrackMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TrackCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TrackUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TrackUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TrackDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Track mutation op: %q", m.Op())
+	}
+}
+
 // UserClient is a client for the User schema.
 type UserClient struct {
 	config
@@ -480,6 +639,22 @@ func (c *UserClient) QueryPlaylists(u *User) *PlaylistQuery {
 	return query
 }
 
+// QuerySavedTracks queries the savedTracks edge of a User.
+func (c *UserClient) QuerySavedTracks(u *User) *TrackQuery {
+	query := (&TrackClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(track.Table, track.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.SavedTracksTable, user.SavedTracksPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *UserClient) Hooks() []Hook {
 	return c.hooks.User
@@ -508,9 +683,9 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Playlist, User []ent.Hook
+		Playlist, Track, User []ent.Hook
 	}
 	inters struct {
-		Playlist, User []ent.Interceptor
+		Playlist, Track, User []ent.Interceptor
 	}
 )

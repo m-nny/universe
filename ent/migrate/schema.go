@@ -29,6 +29,19 @@ var (
 			},
 		},
 	}
+	// TracksColumns holds the columns for the "tracks" table.
+	TracksColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString},
+		{Name: "artist_names", Type: field.TypeJSON},
+		{Name: "artist_ids", Type: field.TypeJSON},
+	}
+	// TracksTable holds the schema information for the "tracks" table.
+	TracksTable = &schema.Table{
+		Name:       "tracks",
+		Columns:    TracksColumns,
+		PrimaryKey: []*schema.Column{TracksColumns[0]},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
@@ -40,13 +53,42 @@ var (
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
 	}
+	// UserSavedTracksColumns holds the columns for the "user_savedTracks" table.
+	UserSavedTracksColumns = []*schema.Column{
+		{Name: "user_id", Type: field.TypeString},
+		{Name: "track_id", Type: field.TypeString},
+	}
+	// UserSavedTracksTable holds the schema information for the "user_savedTracks" table.
+	UserSavedTracksTable = &schema.Table{
+		Name:       "user_savedTracks",
+		Columns:    UserSavedTracksColumns,
+		PrimaryKey: []*schema.Column{UserSavedTracksColumns[0], UserSavedTracksColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "user_savedTracks_user_id",
+				Columns:    []*schema.Column{UserSavedTracksColumns[0]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "user_savedTracks_track_id",
+				Columns:    []*schema.Column{UserSavedTracksColumns[1]},
+				RefColumns: []*schema.Column{TracksColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		PlaylistsTable,
+		TracksTable,
 		UsersTable,
+		UserSavedTracksTable,
 	}
 )
 
 func init() {
 	PlaylistsTable.ForeignKeys[0].RefTable = UsersTable
+	UserSavedTracksTable.ForeignKeys[0].RefTable = UsersTable
+	UserSavedTracksTable.ForeignKeys[1].RefTable = TracksTable
 }
