@@ -2,8 +2,34 @@
 
 package ent
 
+import (
+	"github.com/m-nny/universe/ent/playlist"
+	"github.com/m-nny/universe/ent/schema"
+	"github.com/m-nny/universe/ent/user"
+)
+
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	playlistFields := schema.Playlist{}.Fields()
+	_ = playlistFields
+	// playlistDescName is the schema descriptor for name field.
+	playlistDescName := playlistFields[1].Descriptor()
+	// playlist.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	playlist.NameValidator = playlistDescName.Validators[0].(func(string) error)
+	// playlistDescSnaphotID is the schema descriptor for snaphot_id field.
+	playlistDescSnaphotID := playlistFields[2].Descriptor()
+	// playlist.SnaphotIDValidator is a validator for the "snaphot_id" field. It is called by the builders before save.
+	playlist.SnaphotIDValidator = playlistDescSnaphotID.Validators[0].(func(string) error)
+	// playlistDescID is the schema descriptor for id field.
+	playlistDescID := playlistFields[0].Descriptor()
+	// playlist.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	playlist.IDValidator = playlistDescID.Validators[0].(func(string) error)
+	userFields := schema.User{}.Fields()
+	_ = userFields
+	// userDescID is the schema descriptor for id field.
+	userDescID := userFields[0].Descriptor()
+	// user.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	user.IDValidator = userDescID.Validators[0].(func(string) error)
 }

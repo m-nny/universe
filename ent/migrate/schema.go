@@ -8,10 +8,30 @@ import (
 )
 
 var (
+	// PlaylistsColumns holds the columns for the "playlists" table.
+	PlaylistsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString},
+		{Name: "snaphot_id", Type: field.TypeString},
+		{Name: "user_playlists", Type: field.TypeString, Nullable: true},
+	}
+	// PlaylistsTable holds the schema information for the "playlists" table.
+	PlaylistsTable = &schema.Table{
+		Name:       "playlists",
+		Columns:    PlaylistsColumns,
+		PrimaryKey: []*schema.Column{PlaylistsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "playlists_users_playlists",
+				Columns:    []*schema.Column{PlaylistsColumns[3]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "name", Type: field.TypeString, Nullable: true},
+		{Name: "id", Type: field.TypeString},
 		{Name: "spotify_token", Type: field.TypeJSON},
 	}
 	// UsersTable holds the schema information for the "users" table.
@@ -22,9 +42,11 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		PlaylistsTable,
 		UsersTable,
 	}
 )
 
 func init() {
+	PlaylistsTable.ForeignKeys[0].RefTable = UsersTable
 }

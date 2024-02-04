@@ -68,7 +68,7 @@ func getFreshToken(ctx context.Context, auth *spotifyauth.Authenticator) (*oauth
 func getStoredToken(ctx context.Context, ent *ent.Client) (*oauth2.Token, error) {
 	u, err := ent.User.
 		Query().
-		Where(user.Name(rootUserName)).
+		Where(user.ID(rootUserName)).
 		Only(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed querying root user: %w", err)
@@ -79,6 +79,8 @@ func getStoredToken(ctx context.Context, ent *ent.Client) (*oauth2.Token, error)
 func storeToken(ctx context.Context, ent *ent.Client, token *oauth2.Token) error {
 	return ent.User.
 		Create().
-		SetName(rootUserName).
-		SetSpotifyToken(token).OnConflict().UpdateNewValues().Exec(ctx)
+		SetID(rootUserName).
+		SetSpotifyToken(token).
+		OnConflict().UpdateNewValues().
+		Exec(ctx)
 }
