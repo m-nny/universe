@@ -6,8 +6,13 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/m-nny/universe/cmd/internal"
+	"github.com/m-nny/universe/ent"
+	"github.com/m-nny/universe/ent/track"
+	"github.com/m-nny/universe/ent/user"
 	"github.com/m-nny/universe/lib/spotify"
 )
+
+const username = "m-nny"
 
 func main() {
 	if err := godotenv.Load(); err != nil {
@@ -18,7 +23,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed creating ent Client: %v", err)
 	}
-	spotify, err := spotify.New(ctx, entClient)
+	spotify, err := spotify.New(ctx, entClient, username)
 	if err != nil {
 		log.Fatalf("Error getting spotify client: %v", err)
 	}
@@ -44,4 +49,16 @@ func main() {
 		log.Fatalf("Error getting all tracks: %v", err)
 	}
 	log.Printf("tracks: %+v", savedTracks)
+}
+
+func getTracks(ctx context.Context, ent *ent.Client) error {
+	tracks, err := ent.Track.
+		Query().
+		Where(track.HasSavedByWith(user.ID(username))).
+		All(ctx)
+	if err != nil {
+		return err
+	}
+	log.Printf("tracks: %+v", tracks)
+	return nil
 }

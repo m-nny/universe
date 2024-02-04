@@ -13,8 +13,9 @@ import (
 type ID = spotify.ID
 
 type Service struct {
-	ent     *ent.Client
-	spotify *spotify.Client
+	ent      *ent.Client
+	spotify  *spotify.Client
+	username string
 }
 
 type Config struct {
@@ -41,7 +42,7 @@ func LoadConfig() (*Config, error) {
 	return c, nil
 }
 
-func New(ctx context.Context, ent *ent.Client) (*Service, error) {
+func New(ctx context.Context, ent *ent.Client, username string) (*Service, error) {
 	config, err := LoadConfig()
 	if err != nil {
 		return nil, err
@@ -52,7 +53,7 @@ func New(ctx context.Context, ent *ent.Client) (*Service, error) {
 		spotifyauth.WithRedirectURL(config.RedirectUrl),
 		spotifyauth.WithScopes(spotifyauth.ScopeUserLibraryRead),
 	)
-	token, err := getTokenCached(ctx, auth, ent)
+	token, err := getTokenCached(ctx, auth, ent, username)
 	if err != nil {
 		return nil, err
 	}

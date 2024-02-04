@@ -13,10 +13,8 @@ import (
 	"golang.org/x/oauth2"
 )
 
-const rootUserName = "m-nny"
-
-func getTokenCached(ctx context.Context, auth *spotifyauth.Authenticator, ent *ent.Client) (*oauth2.Token, error) {
-	storedToken, err := getStoredToken(ctx, ent)
+func getTokenCached(ctx context.Context, auth *spotifyauth.Authenticator, ent *ent.Client, username string) (*oauth2.Token, error) {
+	storedToken, err := getStoredToken(ctx, ent, username)
 	if err == nil && storedToken.Valid() {
 		return storedToken, nil
 	}
@@ -24,7 +22,7 @@ func getTokenCached(ctx context.Context, auth *spotifyauth.Authenticator, ent *e
 	if err != nil {
 		return nil, err
 	}
-	if err := storeToken(ctx, ent, freshToken); err != nil {
+	if err := storeToken(ctx, ent, freshToken, username); err != nil {
 		return nil, err
 	}
 	return freshToken, nil
@@ -65,10 +63,10 @@ func getFreshToken(ctx context.Context, auth *spotifyauth.Authenticator) (*oauth
 	}
 }
 
-func getStoredToken(ctx context.Context, ent *ent.Client) (*oauth2.Token, error) {
+func getStoredToken(ctx context.Context, ent *ent.Client, username string) (*oauth2.Token, error) {
 	u, err := ent.User.
 		Query().
-		Where(user.ID(rootUserName)).
+		Where(user.ID(username)).
 		Only(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed querying root user: %w", err)
@@ -76,10 +74,10 @@ func getStoredToken(ctx context.Context, ent *ent.Client) (*oauth2.Token, error)
 	return u.SpotifyToken, nil
 }
 
-func storeToken(ctx context.Context, ent *ent.Client, token *oauth2.Token) error {
+func storeToken(ctx context.Context, ent *ent.Client, token *oauth2.Token, username string) error {
 	return ent.User.
 		Create().
-		SetID(rootUserName).
+		SetID(username).
 		SetSpotifyToken(token).
 		OnConflict().UpdateNewValues().
 		Exec(ctx)

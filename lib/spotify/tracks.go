@@ -48,7 +48,7 @@ func (s *Service) _GetAllTracks(ctx context.Context) ([]spotify.SavedTrack, erro
 func (s *Service) getUserTracks(ctx context.Context) ([]*ent.Track, error) {
 	plists, err := s.ent.User.
 		Query().
-		Where(user.ID(rootUserName)).
+		Where(user.ID(s.username)).
 		QuerySavedTracks().
 		All(ctx)
 	return plists, err
@@ -73,6 +73,6 @@ func (s *Service) toTrack(t spotify.SavedTrack) *ent.TrackCreate {
 		SetName(string(t.Name)).
 		AddArtistIDs(artistIds...).
 		SetAlbumID(string(t.Album.ID)).
-		AddSavedByIDs(rootUserName)
+		AddSavedByIDs(s.username)
 	return track
 }

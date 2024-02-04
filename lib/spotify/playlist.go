@@ -39,7 +39,7 @@ func (s *Service) _GetAllPlaylists(ctx context.Context) (playlists []spotify.Sim
 func (s *Service) getUserPlaylists(ctx context.Context) ([]*ent.Playlist, error) {
 	plists, err := s.ent.User.
 		Query().
-		Where(user.ID(rootUserName)).
+		Where(user.ID(s.username)).
 		QueryPlaylists().
 		All(ctx)
 	return plists, err
@@ -61,5 +61,5 @@ func (s *Service) toPlaylist(p spotify.SimplePlaylist) *ent.PlaylistCreate {
 		SetID(string(p.ID)).
 		SetName(p.Name).
 		SetSnaphotID(p.SnapshotID).
-		SetOwnerID(rootUserName)
+		SetOwnerID(s.username)
 }
