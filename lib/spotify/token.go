@@ -7,18 +7,30 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/m-nny/universe/lib/jsoncache"
+	"github.com/m-nny/universe/ent"
+	"github.com/m-nny/universe/ent/user"
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 	"golang.org/x/oauth2"
 )
 
-func getTokenCached(ctx context.Context, auth *spotifyauth.Authenticator) (*oauth2.Token, error) {
-	return jsoncache.CachedExec("spotify_token", func() (*oauth2.Token, error) {
-		return getToken(ctx, auth)
-	})
+const rootUserName = "m-nny"
+
+func getTokenCached(ctx context.Context, auth *spotifyauth.Authenticator, ent *ent.Client) (*oauth2.Token, error) {
+	storedToken, err := getStoredToken(ctx, ent)
+	if err == nil && storedToken.Valid() {
+		return storedToken, nil
+	}
+	freshToken, err := getFreshToken(ctx, auth)
+	if err != nil {
+		return nil, err
+	}
+	if err := storeToken(ctx, ent, freshToken); err != nil {
+		return nil, err
+	}
+	return freshToken, nil
 }
 
-func getToken(ctx context.Context, auth *spotifyauth.Authenticator) (*oauth2.Token, error) {
+func getFreshToken(ctx context.Context, auth *spotifyauth.Authenticator) (*oauth2.Token, error) {
 	state := "42"
 	url := auth.AuthURL(state)
 	log.Printf("Login using following url:\n%s", url)
@@ -51,4 +63,22 @@ func getToken(ctx context.Context, auth *spotifyauth.Authenticator) (*oauth2.Tok
 	case err := <-errCh:
 		return nil, err
 	}
+}
+
+func getStoredToken(ctx context.Context, ent *ent.Client) (*oauth2.Token, error) {
+	u, err := ent.User.
+		Query().
+		Where(user.Name(rootUserName)).
+		Only(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed querying root user: %w", err)
+	}
+	return u.SpotifyToken, nil
+}
+
+func storeToken(ctx context.Context, ent *ent.Client, token *oauth2.Token) error {
+	return ent.User.
+		Create().
+		SetName(rootUserName).
+		SetSpotifyToken(token).OnConflict().UpdateNewValues().Exec(ctx)
 }

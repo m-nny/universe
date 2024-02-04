@@ -3,6 +3,7 @@ package schema
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
+	"golang.org/x/oauth2"
 )
 
 // User holds the schema definition for the User entity.
@@ -13,10 +14,8 @@ type User struct {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("age").
-			Positive(),
-		field.String("name").
-			Default("unknown"),
+		field.String("name").Optional(),
+		field.JSON("spotifyToken", &oauth2.Token{}),
 	}
 }
 
