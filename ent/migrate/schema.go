@@ -8,6 +8,19 @@ import (
 )
 
 var (
+	// AlbumsColumns holds the columns for the "albums" table.
+	AlbumsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString},
+		{Name: "artist_names", Type: field.TypeJSON},
+		{Name: "artist_ids", Type: field.TypeJSON},
+	}
+	// AlbumsTable holds the schema information for the "albums" table.
+	AlbumsTable = &schema.Table{
+		Name:       "albums",
+		Columns:    AlbumsColumns,
+		PrimaryKey: []*schema.Column{AlbumsColumns[0]},
+	}
 	// PlaylistsColumns holds the columns for the "playlists" table.
 	PlaylistsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
@@ -35,12 +48,21 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "artist_names", Type: field.TypeJSON},
 		{Name: "artist_ids", Type: field.TypeJSON},
+		{Name: "album_tracks", Type: field.TypeString, Nullable: true},
 	}
 	// TracksTable holds the schema information for the "tracks" table.
 	TracksTable = &schema.Table{
 		Name:       "tracks",
 		Columns:    TracksColumns,
 		PrimaryKey: []*schema.Column{TracksColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "tracks_albums_tracks",
+				Columns:    []*schema.Column{TracksColumns[4]},
+				RefColumns: []*schema.Column{AlbumsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
@@ -80,6 +102,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		AlbumsTable,
 		PlaylistsTable,
 		TracksTable,
 		UsersTable,
@@ -89,6 +112,7 @@ var (
 
 func init() {
 	PlaylistsTable.ForeignKeys[0].RefTable = UsersTable
+	TracksTable.ForeignKeys[0].RefTable = AlbumsTable
 	UserSavedTracksTable.ForeignKeys[0].RefTable = UsersTable
 	UserSavedTracksTable.ForeignKeys[1].RefTable = TracksTable
 }

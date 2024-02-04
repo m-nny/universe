@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/m-nny/universe/ent/album"
 	"github.com/m-nny/universe/ent/track"
 	"github.com/m-nny/universe/ent/user"
 )
@@ -60,6 +61,25 @@ func (tc *TrackCreate) AddSavedBy(u ...*User) *TrackCreate {
 		ids[i] = u[i].ID
 	}
 	return tc.AddSavedByIDs(ids...)
+}
+
+// SetAlbumID sets the "album" edge to the Album entity by ID.
+func (tc *TrackCreate) SetAlbumID(id string) *TrackCreate {
+	tc.mutation.SetAlbumID(id)
+	return tc
+}
+
+// SetNillableAlbumID sets the "album" edge to the Album entity by ID if the given value is not nil.
+func (tc *TrackCreate) SetNillableAlbumID(id *string) *TrackCreate {
+	if id != nil {
+		tc = tc.SetAlbumID(*id)
+	}
+	return tc
+}
+
+// SetAlbum sets the "album" edge to the Album entity.
+func (tc *TrackCreate) SetAlbum(a *Album) *TrackCreate {
+	return tc.SetAlbumID(a.ID)
 }
 
 // Mutation returns the TrackMutation object of the builder.
@@ -177,6 +197,23 @@ func (tc *TrackCreate) createSpec() (*Track, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.AlbumIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   track.AlbumTable,
+			Columns: []string{track.AlbumColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(album.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.album_tracks = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

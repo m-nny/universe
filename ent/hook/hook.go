@@ -9,6 +9,18 @@ import (
 	"github.com/m-nny/universe/ent"
 )
 
+// The AlbumFunc type is an adapter to allow the use of ordinary
+// function as Album mutator.
+type AlbumFunc func(context.Context, *ent.AlbumMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AlbumFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AlbumMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AlbumMutation", m)
+}
+
 // The PlaylistFunc type is an adapter to allow the use of ordinary
 // function as Playlist mutator.
 type PlaylistFunc func(context.Context, *ent.PlaylistMutation) (ent.Value, error)

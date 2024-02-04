@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/m-nny/universe/ent/album"
 	"github.com/m-nny/universe/ent/predicate"
 	"github.com/m-nny/universe/ent/track"
 	"github.com/m-nny/universe/ent/user"
@@ -24,6 +25,8 @@ type TrackQuery struct {
 	inters      []Interceptor
 	predicates  []predicate.Track
 	withSavedBy *UserQuery
+	withAlbum   *AlbumQuery
+	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -75,6 +78,28 @@ func (tq *TrackQuery) QuerySavedBy() *UserQuery {
 			sqlgraph.From(track.Table, track.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, track.SavedByTable, track.SavedByPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryAlbum chains the current query on the "album" edge.
+func (tq *TrackQuery) QueryAlbum() *AlbumQuery {
+	query := (&AlbumClient{config: tq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := tq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := tq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(track.Table, track.FieldID, selector),
+			sqlgraph.To(album.Table, album.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, track.AlbumTable, track.AlbumColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -275,6 +300,7 @@ func (tq *TrackQuery) Clone() *TrackQuery {
 		inters:      append([]Interceptor{}, tq.inters...),
 		predicates:  append([]predicate.Track{}, tq.predicates...),
 		withSavedBy: tq.withSavedBy.Clone(),
+		withAlbum:   tq.withAlbum.Clone(),
 		// clone intermediate query.
 		sql:  tq.sql.Clone(),
 		path: tq.path,
@@ -289,6 +315,17 @@ func (tq *TrackQuery) WithSavedBy(opts ...func(*UserQuery)) *TrackQuery {
 		opt(query)
 	}
 	tq.withSavedBy = query
+	return tq
+}
+
+// WithAlbum tells the query-builder to eager-load the nodes that are connected to
+// the "album" edge. The optional arguments are used to configure the query builder of the edge.
+func (tq *TrackQuery) WithAlbum(opts ...func(*AlbumQuery)) *TrackQuery {
+	query := (&AlbumClient{config: tq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	tq.withAlbum = query
 	return tq
 }
 
@@ -369,11 +406,19 @@ func (tq *TrackQuery) prepareQuery(ctx context.Context) error {
 func (tq *TrackQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Track, error) {
 	var (
 		nodes       = []*Track{}
+		withFKs     = tq.withFKs
 		_spec       = tq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			tq.withSavedBy != nil,
+			tq.withAlbum != nil,
 		}
 	)
+	if tq.withAlbum != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, track.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Track).scanValues(nil, columns)
 	}
@@ -396,6 +441,12 @@ func (tq *TrackQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Track,
 		if err := tq.loadSavedBy(ctx, query, nodes,
 			func(n *Track) { n.Edges.SavedBy = []*User{} },
 			func(n *Track, e *User) { n.Edges.SavedBy = append(n.Edges.SavedBy, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := tq.withAlbum; query != nil {
+		if err := tq.loadAlbum(ctx, query, nodes, nil,
+			func(n *Track, e *Album) { n.Edges.Album = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -459,6 +510,38 @@ func (tq *TrackQuery) loadSavedBy(ctx context.Context, query *UserQuery, nodes [
 		}
 		for kn := range nodes {
 			assign(kn, n)
+		}
+	}
+	return nil
+}
+func (tq *TrackQuery) loadAlbum(ctx context.Context, query *AlbumQuery, nodes []*Track, init func(*Track), assign func(*Track, *Album)) error {
+	ids := make([]string, 0, len(nodes))
+	nodeids := make(map[string][]*Track)
+	for i := range nodes {
+		if nodes[i].album_tracks == nil {
+			continue
+		}
+		fk := *nodes[i].album_tracks
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(album.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "album_tracks" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
 	return nil

@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
+	"github.com/m-nny/universe/ent/album"
 	"github.com/m-nny/universe/ent/predicate"
 	"github.com/m-nny/universe/ent/track"
 	"github.com/m-nny/universe/ent/user"
@@ -82,6 +83,25 @@ func (tu *TrackUpdate) AddSavedBy(u ...*User) *TrackUpdate {
 	return tu.AddSavedByIDs(ids...)
 }
 
+// SetAlbumID sets the "album" edge to the Album entity by ID.
+func (tu *TrackUpdate) SetAlbumID(id string) *TrackUpdate {
+	tu.mutation.SetAlbumID(id)
+	return tu
+}
+
+// SetNillableAlbumID sets the "album" edge to the Album entity by ID if the given value is not nil.
+func (tu *TrackUpdate) SetNillableAlbumID(id *string) *TrackUpdate {
+	if id != nil {
+		tu = tu.SetAlbumID(*id)
+	}
+	return tu
+}
+
+// SetAlbum sets the "album" edge to the Album entity.
+func (tu *TrackUpdate) SetAlbum(a *Album) *TrackUpdate {
+	return tu.SetAlbumID(a.ID)
+}
+
 // Mutation returns the TrackMutation object of the builder.
 func (tu *TrackUpdate) Mutation() *TrackMutation {
 	return tu.mutation
@@ -106,6 +126,12 @@ func (tu *TrackUpdate) RemoveSavedBy(u ...*User) *TrackUpdate {
 		ids[i] = u[i].ID
 	}
 	return tu.RemoveSavedByIDs(ids...)
+}
+
+// ClearAlbum clears the "album" edge to the Album entity.
+func (tu *TrackUpdate) ClearAlbum() *TrackUpdate {
+	tu.mutation.ClearAlbum()
+	return tu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -221,6 +247,35 @@ func (tu *TrackUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if tu.mutation.AlbumCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   track.AlbumTable,
+			Columns: []string{track.AlbumColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(album.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.AlbumIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   track.AlbumTable,
+			Columns: []string{track.AlbumColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(album.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{track.Label}
@@ -294,6 +349,25 @@ func (tuo *TrackUpdateOne) AddSavedBy(u ...*User) *TrackUpdateOne {
 	return tuo.AddSavedByIDs(ids...)
 }
 
+// SetAlbumID sets the "album" edge to the Album entity by ID.
+func (tuo *TrackUpdateOne) SetAlbumID(id string) *TrackUpdateOne {
+	tuo.mutation.SetAlbumID(id)
+	return tuo
+}
+
+// SetNillableAlbumID sets the "album" edge to the Album entity by ID if the given value is not nil.
+func (tuo *TrackUpdateOne) SetNillableAlbumID(id *string) *TrackUpdateOne {
+	if id != nil {
+		tuo = tuo.SetAlbumID(*id)
+	}
+	return tuo
+}
+
+// SetAlbum sets the "album" edge to the Album entity.
+func (tuo *TrackUpdateOne) SetAlbum(a *Album) *TrackUpdateOne {
+	return tuo.SetAlbumID(a.ID)
+}
+
 // Mutation returns the TrackMutation object of the builder.
 func (tuo *TrackUpdateOne) Mutation() *TrackMutation {
 	return tuo.mutation
@@ -318,6 +392,12 @@ func (tuo *TrackUpdateOne) RemoveSavedBy(u ...*User) *TrackUpdateOne {
 		ids[i] = u[i].ID
 	}
 	return tuo.RemoveSavedByIDs(ids...)
+}
+
+// ClearAlbum clears the "album" edge to the Album entity.
+func (tuo *TrackUpdateOne) ClearAlbum() *TrackUpdateOne {
+	tuo.mutation.ClearAlbum()
+	return tuo
 }
 
 // Where appends a list predicates to the TrackUpdate builder.
@@ -456,6 +536,35 @@ func (tuo *TrackUpdateOne) sqlSave(ctx context.Context) (_node *Track, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(user.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tuo.mutation.AlbumCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   track.AlbumTable,
+			Columns: []string{track.AlbumColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(album.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.AlbumIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   track.AlbumTable,
+			Columns: []string{track.AlbumColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(album.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

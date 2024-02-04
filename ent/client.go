@@ -15,6 +15,7 @@ import (
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/m-nny/universe/ent/album"
 	"github.com/m-nny/universe/ent/playlist"
 	"github.com/m-nny/universe/ent/track"
 	"github.com/m-nny/universe/ent/user"
@@ -25,6 +26,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// Album is the client for interacting with the Album builders.
+	Album *AlbumClient
 	// Playlist is the client for interacting with the Playlist builders.
 	Playlist *PlaylistClient
 	// Track is the client for interacting with the Track builders.
@@ -42,6 +45,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.Album = NewAlbumClient(c.config)
 	c.Playlist = NewPlaylistClient(c.config)
 	c.Track = NewTrackClient(c.config)
 	c.User = NewUserClient(c.config)
@@ -137,6 +141,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:      ctx,
 		config:   cfg,
+		Album:    NewAlbumClient(cfg),
 		Playlist: NewPlaylistClient(cfg),
 		Track:    NewTrackClient(cfg),
 		User:     NewUserClient(cfg),
@@ -159,6 +164,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:      ctx,
 		config:   cfg,
+		Album:    NewAlbumClient(cfg),
 		Playlist: NewPlaylistClient(cfg),
 		Track:    NewTrackClient(cfg),
 		User:     NewUserClient(cfg),
@@ -168,7 +174,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Playlist.
+//		Album.
 //		Query().
 //		Count(ctx)
 func (c *Client) Debug() *Client {
@@ -190,6 +196,7 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.Album.Use(hooks...)
 	c.Playlist.Use(hooks...)
 	c.Track.Use(hooks...)
 	c.User.Use(hooks...)
@@ -198,6 +205,7 @@ func (c *Client) Use(hooks ...Hook) {
 // Intercept adds the query interceptors to all the entity clients.
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
+	c.Album.Intercept(interceptors...)
 	c.Playlist.Intercept(interceptors...)
 	c.Track.Intercept(interceptors...)
 	c.User.Intercept(interceptors...)
@@ -206,6 +214,8 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 // Mutate implements the ent.Mutator interface.
 func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
+	case *AlbumMutation:
+		return c.Album.mutate(ctx, m)
 	case *PlaylistMutation:
 		return c.Playlist.mutate(ctx, m)
 	case *TrackMutation:
@@ -214,6 +224,155 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.User.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
+	}
+}
+
+// AlbumClient is a client for the Album schema.
+type AlbumClient struct {
+	config
+}
+
+// NewAlbumClient returns a client for the Album from the given config.
+func NewAlbumClient(c config) *AlbumClient {
+	return &AlbumClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `album.Hooks(f(g(h())))`.
+func (c *AlbumClient) Use(hooks ...Hook) {
+	c.hooks.Album = append(c.hooks.Album, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `album.Intercept(f(g(h())))`.
+func (c *AlbumClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Album = append(c.inters.Album, interceptors...)
+}
+
+// Create returns a builder for creating a Album entity.
+func (c *AlbumClient) Create() *AlbumCreate {
+	mutation := newAlbumMutation(c.config, OpCreate)
+	return &AlbumCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Album entities.
+func (c *AlbumClient) CreateBulk(builders ...*AlbumCreate) *AlbumCreateBulk {
+	return &AlbumCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AlbumClient) MapCreateBulk(slice any, setFunc func(*AlbumCreate, int)) *AlbumCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AlbumCreateBulk{err: fmt.Errorf("calling to AlbumClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AlbumCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AlbumCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Album.
+func (c *AlbumClient) Update() *AlbumUpdate {
+	mutation := newAlbumMutation(c.config, OpUpdate)
+	return &AlbumUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AlbumClient) UpdateOne(a *Album) *AlbumUpdateOne {
+	mutation := newAlbumMutation(c.config, OpUpdateOne, withAlbum(a))
+	return &AlbumUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AlbumClient) UpdateOneID(id string) *AlbumUpdateOne {
+	mutation := newAlbumMutation(c.config, OpUpdateOne, withAlbumID(id))
+	return &AlbumUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Album.
+func (c *AlbumClient) Delete() *AlbumDelete {
+	mutation := newAlbumMutation(c.config, OpDelete)
+	return &AlbumDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AlbumClient) DeleteOne(a *Album) *AlbumDeleteOne {
+	return c.DeleteOneID(a.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AlbumClient) DeleteOneID(id string) *AlbumDeleteOne {
+	builder := c.Delete().Where(album.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AlbumDeleteOne{builder}
+}
+
+// Query returns a query builder for Album.
+func (c *AlbumClient) Query() *AlbumQuery {
+	return &AlbumQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAlbum},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Album entity by its id.
+func (c *AlbumClient) Get(ctx context.Context, id string) (*Album, error) {
+	return c.Query().Where(album.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AlbumClient) GetX(ctx context.Context, id string) *Album {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTracks queries the tracks edge of a Album.
+func (c *AlbumClient) QueryTracks(a *Album) *TrackQuery {
+	query := (&TrackClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := a.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(album.Table, album.FieldID, id),
+			sqlgraph.To(track.Table, track.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, album.TracksTable, album.TracksColumn),
+		)
+		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *AlbumClient) Hooks() []Hook {
+	return c.hooks.Album
+}
+
+// Interceptors returns the client interceptors.
+func (c *AlbumClient) Interceptors() []Interceptor {
+	return c.inters.Album
+}
+
+func (c *AlbumClient) mutate(ctx context.Context, m *AlbumMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AlbumCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AlbumUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AlbumUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AlbumDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Album mutation op: %q", m.Op())
 	}
 }
 
@@ -490,6 +649,22 @@ func (c *TrackClient) QuerySavedBy(t *Track) *UserQuery {
 	return query
 }
 
+// QueryAlbum queries the album edge of a Track.
+func (c *TrackClient) QueryAlbum(t *Track) *AlbumQuery {
+	query := (&AlbumClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(track.Table, track.FieldID, id),
+			sqlgraph.To(album.Table, album.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, track.AlbumTable, track.AlbumColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *TrackClient) Hooks() []Hook {
 	return c.hooks.Track
@@ -683,9 +858,9 @@ func (c *UserClient) mutate(ctx context.Context, m *UserMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Playlist, Track, User []ent.Hook
+		Album, Playlist, Track, User []ent.Hook
 	}
 	inters struct {
-		Playlist, Track, User []ent.Interceptor
+		Album, Playlist, Track, User []ent.Interceptor
 	}
 )

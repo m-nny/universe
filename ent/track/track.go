@@ -20,6 +20,8 @@ const (
 	FieldArtistIds = "artist_ids"
 	// EdgeSavedBy holds the string denoting the savedby edge name in mutations.
 	EdgeSavedBy = "savedBy"
+	// EdgeAlbum holds the string denoting the album edge name in mutations.
+	EdgeAlbum = "album"
 	// Table holds the table name of the track in the database.
 	Table = "tracks"
 	// SavedByTable is the table that holds the savedBy relation/edge. The primary key declared below.
@@ -27,6 +29,13 @@ const (
 	// SavedByInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	SavedByInverseTable = "users"
+	// AlbumTable is the table that holds the album relation/edge.
+	AlbumTable = "tracks"
+	// AlbumInverseTable is the table name for the Album entity.
+	// It exists in this package in order to avoid circular dependency with the "album" package.
+	AlbumInverseTable = "albums"
+	// AlbumColumn is the table column denoting the album relation/edge.
+	AlbumColumn = "album_tracks"
 )
 
 // Columns holds all SQL columns for track fields.
@@ -35,6 +44,12 @@ var Columns = []string{
 	FieldName,
 	FieldArtistNames,
 	FieldArtistIds,
+}
+
+// ForeignKeys holds the SQL foreign-keys that are owned by the "tracks"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"album_tracks",
 }
 
 var (
@@ -47,6 +62,11 @@ var (
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -86,10 +106,24 @@ func BySavedBy(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newSavedByStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByAlbumField orders the results by album field.
+func ByAlbumField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newAlbumStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newSavedByStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(SavedByInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, true, SavedByTable, SavedByPrimaryKey...),
+	)
+}
+func newAlbumStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(AlbumInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, AlbumTable, AlbumColumn),
 	)
 }

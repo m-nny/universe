@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/m-nny/universe/ent/album"
 	"github.com/m-nny/universe/ent/playlist"
 	"github.com/m-nny/universe/ent/track"
 	"github.com/m-nny/universe/ent/user"
@@ -75,6 +76,7 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
+			album.Table:    album.ValidColumn,
 			playlist.Table: playlist.ValidColumn,
 			track.Table:    track.ValidColumn,
 			user.Table:     user.ValidColumn,

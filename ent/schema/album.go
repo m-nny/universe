@@ -6,13 +6,13 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// Track holds the schema definition for the Track entity.
-type Track struct {
+// Album holds the schema definition for the Album entity.
+type Album struct {
 	ent.Schema
 }
 
-// Fields of the Track.
-func (Track) Fields() []ent.Field {
+// Fields of the Album.
+func (Album) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").NotEmpty(),
 		field.String("name").NotEmpty(),
@@ -21,10 +21,9 @@ func (Track) Fields() []ent.Field {
 	}
 }
 
-// Edges of the Track.
-func (Track) Edges() []ent.Edge {
+// Edges of the Album.
+func (Album) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("savedBy", User.Type).Ref("savedTracks"),
-		edge.From("album", Album.Type).Ref("tracks").Unique(),
+		edge.To("tracks", Track.Type),
 	}
 }

@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
+	"github.com/m-nny/universe/ent/album"
 	"github.com/m-nny/universe/ent/track"
 )
 
@@ -26,6 +27,7 @@ type Track struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TrackQuery when eager-loading is set.
 	Edges        TrackEdges `json:"edges"`
+	album_tracks *string
 	selectValues sql.SelectValues
 }
 
@@ -33,9 +35,11 @@ type Track struct {
 type TrackEdges struct {
 	// SavedBy holds the value of the savedBy edge.
 	SavedBy []*User `json:"savedBy,omitempty"`
+	// Album holds the value of the album edge.
+	Album *Album `json:"album,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // SavedByOrErr returns the SavedBy value or an error if the edge
@@ -47,6 +51,19 @@ func (e TrackEdges) SavedByOrErr() ([]*User, error) {
 	return nil, &NotLoadedError{edge: "savedBy"}
 }
 
+// AlbumOrErr returns the Album value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TrackEdges) AlbumOrErr() (*Album, error) {
+	if e.loadedTypes[1] {
+		if e.Album == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: album.Label}
+		}
+		return e.Album, nil
+	}
+	return nil, &NotLoadedError{edge: "album"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Track) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -55,6 +72,8 @@ func (*Track) scanValues(columns []string) ([]any, error) {
 		case track.FieldArtistNames, track.FieldArtistIds:
 			values[i] = new([]byte)
 		case track.FieldID, track.FieldName:
+			values[i] = new(sql.NullString)
+		case track.ForeignKeys[0]: // album_tracks
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -99,6 +118,13 @@ func (t *Track) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field artistIds: %w", err)
 				}
 			}
+		case track.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field album_tracks", values[i])
+			} else if value.Valid {
+				t.album_tracks = new(string)
+				*t.album_tracks = value.String
+			}
 		default:
 			t.selectValues.Set(columns[i], values[i])
 		}
@@ -115,6 +141,11 @@ func (t *Track) Value(name string) (ent.Value, error) {
 // QuerySavedBy queries the "savedBy" edge of the Track entity.
 func (t *Track) QuerySavedBy() *UserQuery {
 	return NewTrackClient(t.config).QuerySavedBy(t)
+}
+
+// QueryAlbum queries the "album" edge of the Track entity.
+func (t *Track) QueryAlbum() *AlbumQuery {
+	return NewTrackClient(t.config).QueryAlbum(t)
 }
 
 // Update returns a builder for updating this Track.
