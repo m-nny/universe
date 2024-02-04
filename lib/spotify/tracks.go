@@ -20,6 +20,9 @@ func (s *Service) GetAllTracks(ctx context.Context) ([]*ent.Track, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err := s.saveTrackArtists(ctx, rawTracks); err != nil {
+		return nil, err
+	}
 	if err := s.saveTrackAlbums(ctx, rawTracks); err != nil {
 		return nil, err
 	}
@@ -32,7 +35,7 @@ func (s *Service) GetAllTracks(ctx context.Context) ([]*ent.Track, error) {
 func (s *Service) _GetAllTracks(ctx context.Context) ([]spotify.SavedTrack, error) {
 	var allTracks []spotify.SavedTrack
 	var err error
-	for resp, err := s.spotify.CurrentUsersTracks(ctx, spotify.Limit(50), spotify.Offset(3300)); err == nil; err = s.spotify.NextPage(ctx, resp) {
+	for resp, err := s.spotify.CurrentUsersTracks(ctx, spotify.Limit(50)); err == nil; err = s.spotify.NextPage(ctx, resp) {
 		log.Printf("len(resp.Tracks)=%d offest=%d total=%d", len(resp.Tracks), resp.Offset, resp.Total)
 		allTracks = append(allTracks, resp.Tracks...)
 	}
@@ -64,12 +67,11 @@ func (s *Service) saveUserTracks(ctx context.Context, rawPlists []spotify.SavedT
 }
 
 func (s *Service) toTrack(t spotify.SavedTrack) *ent.TrackCreate {
-	artistNames, artistIds := getArtistNames(t.Artists)
+	artistIds := getArtistNames(t.Artists)
 	track := s.ent.Track.Create().
 		SetID(string(t.ID)).
 		SetName(string(t.Name)).
-		SetArtistNames(artistNames).
-		SetArtistIds(artistIds).
+		AddArtistIDs(artistIds...).
 		SetAlbumID(string(t.Album.ID)).
 		AddSavedByIDs(rootUserName)
 	return track

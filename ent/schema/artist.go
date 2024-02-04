@@ -6,23 +6,23 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// Album holds the schema definition for the Album entity.
-type Album struct {
+// Artist holds the schema definition for the Artist entity.
+type Artist struct {
 	ent.Schema
 }
 
-// Fields of the Album.
-func (Album) Fields() []ent.Field {
+// Fields of the Artist.
+func (Artist) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").NotEmpty(),
 		field.String("name").NotEmpty(),
 	}
 }
 
-// Edges of the Album.
-func (Album) Edges() []ent.Edge {
+// Edges of the Artist.
+func (Artist) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("tracks", Track.Type),
-		edge.From("artists", Artist.Type).Ref("albums"),
+		edge.To("albums", Album.Type),
 	}
 }

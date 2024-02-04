@@ -16,27 +16,27 @@ import (
 	"github.com/m-nny/universe/ent/track"
 )
 
-// AlbumUpdate is the builder for updating Album entities.
-type AlbumUpdate struct {
+// ArtistUpdate is the builder for updating Artist entities.
+type ArtistUpdate struct {
 	config
 	hooks    []Hook
-	mutation *AlbumMutation
+	mutation *ArtistMutation
 }
 
-// Where appends a list predicates to the AlbumUpdate builder.
-func (au *AlbumUpdate) Where(ps ...predicate.Album) *AlbumUpdate {
+// Where appends a list predicates to the ArtistUpdate builder.
+func (au *ArtistUpdate) Where(ps ...predicate.Artist) *ArtistUpdate {
 	au.mutation.Where(ps...)
 	return au
 }
 
 // SetName sets the "name" field.
-func (au *AlbumUpdate) SetName(s string) *AlbumUpdate {
+func (au *ArtistUpdate) SetName(s string) *ArtistUpdate {
 	au.mutation.SetName(s)
 	return au
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (au *AlbumUpdate) SetNillableName(s *string) *AlbumUpdate {
+func (au *ArtistUpdate) SetNillableName(s *string) *ArtistUpdate {
 	if s != nil {
 		au.SetName(*s)
 	}
@@ -44,13 +44,13 @@ func (au *AlbumUpdate) SetNillableName(s *string) *AlbumUpdate {
 }
 
 // AddTrackIDs adds the "tracks" edge to the Track entity by IDs.
-func (au *AlbumUpdate) AddTrackIDs(ids ...string) *AlbumUpdate {
+func (au *ArtistUpdate) AddTrackIDs(ids ...string) *ArtistUpdate {
 	au.mutation.AddTrackIDs(ids...)
 	return au
 }
 
 // AddTracks adds the "tracks" edges to the Track entity.
-func (au *AlbumUpdate) AddTracks(t ...*Track) *AlbumUpdate {
+func (au *ArtistUpdate) AddTracks(t ...*Track) *ArtistUpdate {
 	ids := make([]string, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
@@ -58,40 +58,40 @@ func (au *AlbumUpdate) AddTracks(t ...*Track) *AlbumUpdate {
 	return au.AddTrackIDs(ids...)
 }
 
-// AddArtistIDs adds the "artists" edge to the Artist entity by IDs.
-func (au *AlbumUpdate) AddArtistIDs(ids ...string) *AlbumUpdate {
-	au.mutation.AddArtistIDs(ids...)
+// AddAlbumIDs adds the "albums" edge to the Album entity by IDs.
+func (au *ArtistUpdate) AddAlbumIDs(ids ...string) *ArtistUpdate {
+	au.mutation.AddAlbumIDs(ids...)
 	return au
 }
 
-// AddArtists adds the "artists" edges to the Artist entity.
-func (au *AlbumUpdate) AddArtists(a ...*Artist) *AlbumUpdate {
+// AddAlbums adds the "albums" edges to the Album entity.
+func (au *ArtistUpdate) AddAlbums(a ...*Album) *ArtistUpdate {
 	ids := make([]string, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
-	return au.AddArtistIDs(ids...)
+	return au.AddAlbumIDs(ids...)
 }
 
-// Mutation returns the AlbumMutation object of the builder.
-func (au *AlbumUpdate) Mutation() *AlbumMutation {
+// Mutation returns the ArtistMutation object of the builder.
+func (au *ArtistUpdate) Mutation() *ArtistMutation {
 	return au.mutation
 }
 
 // ClearTracks clears all "tracks" edges to the Track entity.
-func (au *AlbumUpdate) ClearTracks() *AlbumUpdate {
+func (au *ArtistUpdate) ClearTracks() *ArtistUpdate {
 	au.mutation.ClearTracks()
 	return au
 }
 
 // RemoveTrackIDs removes the "tracks" edge to Track entities by IDs.
-func (au *AlbumUpdate) RemoveTrackIDs(ids ...string) *AlbumUpdate {
+func (au *ArtistUpdate) RemoveTrackIDs(ids ...string) *ArtistUpdate {
 	au.mutation.RemoveTrackIDs(ids...)
 	return au
 }
 
 // RemoveTracks removes "tracks" edges to Track entities.
-func (au *AlbumUpdate) RemoveTracks(t ...*Track) *AlbumUpdate {
+func (au *ArtistUpdate) RemoveTracks(t ...*Track) *ArtistUpdate {
 	ids := make([]string, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
@@ -99,34 +99,34 @@ func (au *AlbumUpdate) RemoveTracks(t ...*Track) *AlbumUpdate {
 	return au.RemoveTrackIDs(ids...)
 }
 
-// ClearArtists clears all "artists" edges to the Artist entity.
-func (au *AlbumUpdate) ClearArtists() *AlbumUpdate {
-	au.mutation.ClearArtists()
+// ClearAlbums clears all "albums" edges to the Album entity.
+func (au *ArtistUpdate) ClearAlbums() *ArtistUpdate {
+	au.mutation.ClearAlbums()
 	return au
 }
 
-// RemoveArtistIDs removes the "artists" edge to Artist entities by IDs.
-func (au *AlbumUpdate) RemoveArtistIDs(ids ...string) *AlbumUpdate {
-	au.mutation.RemoveArtistIDs(ids...)
+// RemoveAlbumIDs removes the "albums" edge to Album entities by IDs.
+func (au *ArtistUpdate) RemoveAlbumIDs(ids ...string) *ArtistUpdate {
+	au.mutation.RemoveAlbumIDs(ids...)
 	return au
 }
 
-// RemoveArtists removes "artists" edges to Artist entities.
-func (au *AlbumUpdate) RemoveArtists(a ...*Artist) *AlbumUpdate {
+// RemoveAlbums removes "albums" edges to Album entities.
+func (au *ArtistUpdate) RemoveAlbums(a ...*Album) *ArtistUpdate {
 	ids := make([]string, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
-	return au.RemoveArtistIDs(ids...)
+	return au.RemoveAlbumIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (au *AlbumUpdate) Save(ctx context.Context) (int, error) {
+func (au *ArtistUpdate) Save(ctx context.Context) (int, error) {
 	return withHooks(ctx, au.sqlSave, au.mutation, au.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (au *AlbumUpdate) SaveX(ctx context.Context) int {
+func (au *ArtistUpdate) SaveX(ctx context.Context) int {
 	affected, err := au.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -135,33 +135,33 @@ func (au *AlbumUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (au *AlbumUpdate) Exec(ctx context.Context) error {
+func (au *ArtistUpdate) Exec(ctx context.Context) error {
 	_, err := au.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (au *AlbumUpdate) ExecX(ctx context.Context) {
+func (au *ArtistUpdate) ExecX(ctx context.Context) {
 	if err := au.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (au *AlbumUpdate) check() error {
+func (au *ArtistUpdate) check() error {
 	if v, ok := au.mutation.Name(); ok {
-		if err := album.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Album.name": %w`, err)}
+		if err := artist.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Artist.name": %w`, err)}
 		}
 	}
 	return nil
 }
 
-func (au *AlbumUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (au *ArtistUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := au.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(album.Table, album.Columns, sqlgraph.NewFieldSpec(album.FieldID, field.TypeString))
+	_spec := sqlgraph.NewUpdateSpec(artist.Table, artist.Columns, sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString))
 	if ps := au.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -170,14 +170,14 @@ func (au *AlbumUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 	}
 	if value, ok := au.mutation.Name(); ok {
-		_spec.SetField(album.FieldName, field.TypeString, value)
+		_spec.SetField(artist.FieldName, field.TypeString, value)
 	}
 	if au.mutation.TracksCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   album.TracksTable,
-			Columns: []string{album.TracksColumn},
+			Table:   artist.TracksTable,
+			Columns: artist.TracksPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
@@ -187,10 +187,10 @@ func (au *AlbumUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := au.mutation.RemovedTracksIDs(); len(nodes) > 0 && !au.mutation.TracksCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   album.TracksTable,
-			Columns: []string{album.TracksColumn},
+			Table:   artist.TracksTable,
+			Columns: artist.TracksPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
@@ -203,10 +203,10 @@ func (au *AlbumUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := au.mutation.TracksIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   album.TracksTable,
-			Columns: []string{album.TracksColumn},
+			Table:   artist.TracksTable,
+			Columns: artist.TracksPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
@@ -217,28 +217,28 @@ func (au *AlbumUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if au.mutation.ArtistsCleared() {
+	if au.mutation.AlbumsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   album.ArtistsTable,
-			Columns: album.ArtistsPrimaryKey,
+			Inverse: false,
+			Table:   artist.AlbumsTable,
+			Columns: artist.AlbumsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(album.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.RemovedArtistsIDs(); len(nodes) > 0 && !au.mutation.ArtistsCleared() {
+	if nodes := au.mutation.RemovedAlbumsIDs(); len(nodes) > 0 && !au.mutation.AlbumsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   album.ArtistsTable,
-			Columns: album.ArtistsPrimaryKey,
+			Inverse: false,
+			Table:   artist.AlbumsTable,
+			Columns: artist.AlbumsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(album.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -246,15 +246,15 @@ func (au *AlbumUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.ArtistsIDs(); len(nodes) > 0 {
+	if nodes := au.mutation.AlbumsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   album.ArtistsTable,
-			Columns: album.ArtistsPrimaryKey,
+			Inverse: false,
+			Table:   artist.AlbumsTable,
+			Columns: artist.AlbumsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(album.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -264,7 +264,7 @@ func (au *AlbumUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, au.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{album.Label}
+			err = &NotFoundError{artist.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -274,22 +274,22 @@ func (au *AlbumUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	return n, nil
 }
 
-// AlbumUpdateOne is the builder for updating a single Album entity.
-type AlbumUpdateOne struct {
+// ArtistUpdateOne is the builder for updating a single Artist entity.
+type ArtistUpdateOne struct {
 	config
 	fields   []string
 	hooks    []Hook
-	mutation *AlbumMutation
+	mutation *ArtistMutation
 }
 
 // SetName sets the "name" field.
-func (auo *AlbumUpdateOne) SetName(s string) *AlbumUpdateOne {
+func (auo *ArtistUpdateOne) SetName(s string) *ArtistUpdateOne {
 	auo.mutation.SetName(s)
 	return auo
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (auo *AlbumUpdateOne) SetNillableName(s *string) *AlbumUpdateOne {
+func (auo *ArtistUpdateOne) SetNillableName(s *string) *ArtistUpdateOne {
 	if s != nil {
 		auo.SetName(*s)
 	}
@@ -297,13 +297,13 @@ func (auo *AlbumUpdateOne) SetNillableName(s *string) *AlbumUpdateOne {
 }
 
 // AddTrackIDs adds the "tracks" edge to the Track entity by IDs.
-func (auo *AlbumUpdateOne) AddTrackIDs(ids ...string) *AlbumUpdateOne {
+func (auo *ArtistUpdateOne) AddTrackIDs(ids ...string) *ArtistUpdateOne {
 	auo.mutation.AddTrackIDs(ids...)
 	return auo
 }
 
 // AddTracks adds the "tracks" edges to the Track entity.
-func (auo *AlbumUpdateOne) AddTracks(t ...*Track) *AlbumUpdateOne {
+func (auo *ArtistUpdateOne) AddTracks(t ...*Track) *ArtistUpdateOne {
 	ids := make([]string, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
@@ -311,40 +311,40 @@ func (auo *AlbumUpdateOne) AddTracks(t ...*Track) *AlbumUpdateOne {
 	return auo.AddTrackIDs(ids...)
 }
 
-// AddArtistIDs adds the "artists" edge to the Artist entity by IDs.
-func (auo *AlbumUpdateOne) AddArtistIDs(ids ...string) *AlbumUpdateOne {
-	auo.mutation.AddArtistIDs(ids...)
+// AddAlbumIDs adds the "albums" edge to the Album entity by IDs.
+func (auo *ArtistUpdateOne) AddAlbumIDs(ids ...string) *ArtistUpdateOne {
+	auo.mutation.AddAlbumIDs(ids...)
 	return auo
 }
 
-// AddArtists adds the "artists" edges to the Artist entity.
-func (auo *AlbumUpdateOne) AddArtists(a ...*Artist) *AlbumUpdateOne {
+// AddAlbums adds the "albums" edges to the Album entity.
+func (auo *ArtistUpdateOne) AddAlbums(a ...*Album) *ArtistUpdateOne {
 	ids := make([]string, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
-	return auo.AddArtistIDs(ids...)
+	return auo.AddAlbumIDs(ids...)
 }
 
-// Mutation returns the AlbumMutation object of the builder.
-func (auo *AlbumUpdateOne) Mutation() *AlbumMutation {
+// Mutation returns the ArtistMutation object of the builder.
+func (auo *ArtistUpdateOne) Mutation() *ArtistMutation {
 	return auo.mutation
 }
 
 // ClearTracks clears all "tracks" edges to the Track entity.
-func (auo *AlbumUpdateOne) ClearTracks() *AlbumUpdateOne {
+func (auo *ArtistUpdateOne) ClearTracks() *ArtistUpdateOne {
 	auo.mutation.ClearTracks()
 	return auo
 }
 
 // RemoveTrackIDs removes the "tracks" edge to Track entities by IDs.
-func (auo *AlbumUpdateOne) RemoveTrackIDs(ids ...string) *AlbumUpdateOne {
+func (auo *ArtistUpdateOne) RemoveTrackIDs(ids ...string) *ArtistUpdateOne {
 	auo.mutation.RemoveTrackIDs(ids...)
 	return auo
 }
 
 // RemoveTracks removes "tracks" edges to Track entities.
-func (auo *AlbumUpdateOne) RemoveTracks(t ...*Track) *AlbumUpdateOne {
+func (auo *ArtistUpdateOne) RemoveTracks(t ...*Track) *ArtistUpdateOne {
 	ids := make([]string, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
@@ -352,47 +352,47 @@ func (auo *AlbumUpdateOne) RemoveTracks(t ...*Track) *AlbumUpdateOne {
 	return auo.RemoveTrackIDs(ids...)
 }
 
-// ClearArtists clears all "artists" edges to the Artist entity.
-func (auo *AlbumUpdateOne) ClearArtists() *AlbumUpdateOne {
-	auo.mutation.ClearArtists()
+// ClearAlbums clears all "albums" edges to the Album entity.
+func (auo *ArtistUpdateOne) ClearAlbums() *ArtistUpdateOne {
+	auo.mutation.ClearAlbums()
 	return auo
 }
 
-// RemoveArtistIDs removes the "artists" edge to Artist entities by IDs.
-func (auo *AlbumUpdateOne) RemoveArtistIDs(ids ...string) *AlbumUpdateOne {
-	auo.mutation.RemoveArtistIDs(ids...)
+// RemoveAlbumIDs removes the "albums" edge to Album entities by IDs.
+func (auo *ArtistUpdateOne) RemoveAlbumIDs(ids ...string) *ArtistUpdateOne {
+	auo.mutation.RemoveAlbumIDs(ids...)
 	return auo
 }
 
-// RemoveArtists removes "artists" edges to Artist entities.
-func (auo *AlbumUpdateOne) RemoveArtists(a ...*Artist) *AlbumUpdateOne {
+// RemoveAlbums removes "albums" edges to Album entities.
+func (auo *ArtistUpdateOne) RemoveAlbums(a ...*Album) *ArtistUpdateOne {
 	ids := make([]string, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
-	return auo.RemoveArtistIDs(ids...)
+	return auo.RemoveAlbumIDs(ids...)
 }
 
-// Where appends a list predicates to the AlbumUpdate builder.
-func (auo *AlbumUpdateOne) Where(ps ...predicate.Album) *AlbumUpdateOne {
+// Where appends a list predicates to the ArtistUpdate builder.
+func (auo *ArtistUpdateOne) Where(ps ...predicate.Artist) *ArtistUpdateOne {
 	auo.mutation.Where(ps...)
 	return auo
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (auo *AlbumUpdateOne) Select(field string, fields ...string) *AlbumUpdateOne {
+func (auo *ArtistUpdateOne) Select(field string, fields ...string) *ArtistUpdateOne {
 	auo.fields = append([]string{field}, fields...)
 	return auo
 }
 
-// Save executes the query and returns the updated Album entity.
-func (auo *AlbumUpdateOne) Save(ctx context.Context) (*Album, error) {
+// Save executes the query and returns the updated Artist entity.
+func (auo *ArtistUpdateOne) Save(ctx context.Context) (*Artist, error) {
 	return withHooks(ctx, auo.sqlSave, auo.mutation, auo.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (auo *AlbumUpdateOne) SaveX(ctx context.Context) *Album {
+func (auo *ArtistUpdateOne) SaveX(ctx context.Context) *Artist {
 	node, err := auo.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -401,46 +401,46 @@ func (auo *AlbumUpdateOne) SaveX(ctx context.Context) *Album {
 }
 
 // Exec executes the query on the entity.
-func (auo *AlbumUpdateOne) Exec(ctx context.Context) error {
+func (auo *ArtistUpdateOne) Exec(ctx context.Context) error {
 	_, err := auo.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (auo *AlbumUpdateOne) ExecX(ctx context.Context) {
+func (auo *ArtistUpdateOne) ExecX(ctx context.Context) {
 	if err := auo.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (auo *AlbumUpdateOne) check() error {
+func (auo *ArtistUpdateOne) check() error {
 	if v, ok := auo.mutation.Name(); ok {
-		if err := album.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Album.name": %w`, err)}
+		if err := artist.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Artist.name": %w`, err)}
 		}
 	}
 	return nil
 }
 
-func (auo *AlbumUpdateOne) sqlSave(ctx context.Context) (_node *Album, err error) {
+func (auo *ArtistUpdateOne) sqlSave(ctx context.Context) (_node *Artist, err error) {
 	if err := auo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(album.Table, album.Columns, sqlgraph.NewFieldSpec(album.FieldID, field.TypeString))
+	_spec := sqlgraph.NewUpdateSpec(artist.Table, artist.Columns, sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString))
 	id, ok := auo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Album.id" for update`)}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Artist.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := auo.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, album.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, artist.FieldID)
 		for _, f := range fields {
-			if !album.ValidColumn(f) {
+			if !artist.ValidColumn(f) {
 				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 			}
-			if f != album.FieldID {
+			if f != artist.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, f)
 			}
 		}
@@ -453,14 +453,14 @@ func (auo *AlbumUpdateOne) sqlSave(ctx context.Context) (_node *Album, err error
 		}
 	}
 	if value, ok := auo.mutation.Name(); ok {
-		_spec.SetField(album.FieldName, field.TypeString, value)
+		_spec.SetField(artist.FieldName, field.TypeString, value)
 	}
 	if auo.mutation.TracksCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   album.TracksTable,
-			Columns: []string{album.TracksColumn},
+			Table:   artist.TracksTable,
+			Columns: artist.TracksPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
@@ -470,10 +470,10 @@ func (auo *AlbumUpdateOne) sqlSave(ctx context.Context) (_node *Album, err error
 	}
 	if nodes := auo.mutation.RemovedTracksIDs(); len(nodes) > 0 && !auo.mutation.TracksCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   album.TracksTable,
-			Columns: []string{album.TracksColumn},
+			Table:   artist.TracksTable,
+			Columns: artist.TracksPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
@@ -486,10 +486,10 @@ func (auo *AlbumUpdateOne) sqlSave(ctx context.Context) (_node *Album, err error
 	}
 	if nodes := auo.mutation.TracksIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   album.TracksTable,
-			Columns: []string{album.TracksColumn},
+			Table:   artist.TracksTable,
+			Columns: artist.TracksPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
@@ -500,28 +500,28 @@ func (auo *AlbumUpdateOne) sqlSave(ctx context.Context) (_node *Album, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if auo.mutation.ArtistsCleared() {
+	if auo.mutation.AlbumsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   album.ArtistsTable,
-			Columns: album.ArtistsPrimaryKey,
+			Inverse: false,
+			Table:   artist.AlbumsTable,
+			Columns: artist.AlbumsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(album.FieldID, field.TypeString),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.RemovedArtistsIDs(); len(nodes) > 0 && !auo.mutation.ArtistsCleared() {
+	if nodes := auo.mutation.RemovedAlbumsIDs(); len(nodes) > 0 && !auo.mutation.AlbumsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   album.ArtistsTable,
-			Columns: album.ArtistsPrimaryKey,
+			Inverse: false,
+			Table:   artist.AlbumsTable,
+			Columns: artist.AlbumsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(album.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -529,15 +529,15 @@ func (auo *AlbumUpdateOne) sqlSave(ctx context.Context) (_node *Album, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.ArtistsIDs(); len(nodes) > 0 {
+	if nodes := auo.mutation.AlbumsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   album.ArtistsTable,
-			Columns: album.ArtistsPrimaryKey,
+			Inverse: false,
+			Table:   artist.AlbumsTable,
+			Columns: artist.AlbumsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(album.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -545,12 +545,12 @@ func (auo *AlbumUpdateOne) sqlSave(ctx context.Context) (_node *Album, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Album{config: auo.config}
+	_node = &Artist{config: auo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, auo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{album.Label}
+			err = &NotFoundError{artist.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}

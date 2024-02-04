@@ -9,9 +9,9 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/m-nny/universe/ent/album"
+	"github.com/m-nny/universe/ent/artist"
 	"github.com/m-nny/universe/ent/predicate"
 	"github.com/m-nny/universe/ent/track"
 	"github.com/m-nny/universe/ent/user"
@@ -41,30 +41,6 @@ func (tu *TrackUpdate) SetNillableName(s *string) *TrackUpdate {
 	if s != nil {
 		tu.SetName(*s)
 	}
-	return tu
-}
-
-// SetArtistNames sets the "artistNames" field.
-func (tu *TrackUpdate) SetArtistNames(s []string) *TrackUpdate {
-	tu.mutation.SetArtistNames(s)
-	return tu
-}
-
-// AppendArtistNames appends s to the "artistNames" field.
-func (tu *TrackUpdate) AppendArtistNames(s []string) *TrackUpdate {
-	tu.mutation.AppendArtistNames(s)
-	return tu
-}
-
-// SetArtistIds sets the "artistIds" field.
-func (tu *TrackUpdate) SetArtistIds(s []string) *TrackUpdate {
-	tu.mutation.SetArtistIds(s)
-	return tu
-}
-
-// AppendArtistIds appends s to the "artistIds" field.
-func (tu *TrackUpdate) AppendArtistIds(s []string) *TrackUpdate {
-	tu.mutation.AppendArtistIds(s)
 	return tu
 }
 
@@ -102,6 +78,21 @@ func (tu *TrackUpdate) SetAlbum(a *Album) *TrackUpdate {
 	return tu.SetAlbumID(a.ID)
 }
 
+// AddArtistIDs adds the "artists" edge to the Artist entity by IDs.
+func (tu *TrackUpdate) AddArtistIDs(ids ...string) *TrackUpdate {
+	tu.mutation.AddArtistIDs(ids...)
+	return tu
+}
+
+// AddArtists adds the "artists" edges to the Artist entity.
+func (tu *TrackUpdate) AddArtists(a ...*Artist) *TrackUpdate {
+	ids := make([]string, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return tu.AddArtistIDs(ids...)
+}
+
 // Mutation returns the TrackMutation object of the builder.
 func (tu *TrackUpdate) Mutation() *TrackMutation {
 	return tu.mutation
@@ -132,6 +123,27 @@ func (tu *TrackUpdate) RemoveSavedBy(u ...*User) *TrackUpdate {
 func (tu *TrackUpdate) ClearAlbum() *TrackUpdate {
 	tu.mutation.ClearAlbum()
 	return tu
+}
+
+// ClearArtists clears all "artists" edges to the Artist entity.
+func (tu *TrackUpdate) ClearArtists() *TrackUpdate {
+	tu.mutation.ClearArtists()
+	return tu
+}
+
+// RemoveArtistIDs removes the "artists" edge to Artist entities by IDs.
+func (tu *TrackUpdate) RemoveArtistIDs(ids ...string) *TrackUpdate {
+	tu.mutation.RemoveArtistIDs(ids...)
+	return tu
+}
+
+// RemoveArtists removes "artists" edges to Artist entities.
+func (tu *TrackUpdate) RemoveArtists(a ...*Artist) *TrackUpdate {
+	ids := make([]string, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return tu.RemoveArtistIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -185,22 +197,6 @@ func (tu *TrackUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := tu.mutation.Name(); ok {
 		_spec.SetField(track.FieldName, field.TypeString, value)
-	}
-	if value, ok := tu.mutation.ArtistNames(); ok {
-		_spec.SetField(track.FieldArtistNames, field.TypeJSON, value)
-	}
-	if value, ok := tu.mutation.AppendedArtistNames(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, track.FieldArtistNames, value)
-		})
-	}
-	if value, ok := tu.mutation.ArtistIds(); ok {
-		_spec.SetField(track.FieldArtistIds, field.TypeJSON, value)
-	}
-	if value, ok := tu.mutation.AppendedArtistIds(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, track.FieldArtistIds, value)
-		})
 	}
 	if tu.mutation.SavedByCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -276,6 +272,51 @@ func (tu *TrackUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if tu.mutation.ArtistsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   track.ArtistsTable,
+			Columns: track.ArtistsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.RemovedArtistsIDs(); len(nodes) > 0 && !tu.mutation.ArtistsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   track.ArtistsTable,
+			Columns: track.ArtistsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.ArtistsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   track.ArtistsTable,
+			Columns: track.ArtistsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{track.Label}
@@ -307,30 +348,6 @@ func (tuo *TrackUpdateOne) SetNillableName(s *string) *TrackUpdateOne {
 	if s != nil {
 		tuo.SetName(*s)
 	}
-	return tuo
-}
-
-// SetArtistNames sets the "artistNames" field.
-func (tuo *TrackUpdateOne) SetArtistNames(s []string) *TrackUpdateOne {
-	tuo.mutation.SetArtistNames(s)
-	return tuo
-}
-
-// AppendArtistNames appends s to the "artistNames" field.
-func (tuo *TrackUpdateOne) AppendArtistNames(s []string) *TrackUpdateOne {
-	tuo.mutation.AppendArtistNames(s)
-	return tuo
-}
-
-// SetArtistIds sets the "artistIds" field.
-func (tuo *TrackUpdateOne) SetArtistIds(s []string) *TrackUpdateOne {
-	tuo.mutation.SetArtistIds(s)
-	return tuo
-}
-
-// AppendArtistIds appends s to the "artistIds" field.
-func (tuo *TrackUpdateOne) AppendArtistIds(s []string) *TrackUpdateOne {
-	tuo.mutation.AppendArtistIds(s)
 	return tuo
 }
 
@@ -368,6 +385,21 @@ func (tuo *TrackUpdateOne) SetAlbum(a *Album) *TrackUpdateOne {
 	return tuo.SetAlbumID(a.ID)
 }
 
+// AddArtistIDs adds the "artists" edge to the Artist entity by IDs.
+func (tuo *TrackUpdateOne) AddArtistIDs(ids ...string) *TrackUpdateOne {
+	tuo.mutation.AddArtistIDs(ids...)
+	return tuo
+}
+
+// AddArtists adds the "artists" edges to the Artist entity.
+func (tuo *TrackUpdateOne) AddArtists(a ...*Artist) *TrackUpdateOne {
+	ids := make([]string, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return tuo.AddArtistIDs(ids...)
+}
+
 // Mutation returns the TrackMutation object of the builder.
 func (tuo *TrackUpdateOne) Mutation() *TrackMutation {
 	return tuo.mutation
@@ -398,6 +430,27 @@ func (tuo *TrackUpdateOne) RemoveSavedBy(u ...*User) *TrackUpdateOne {
 func (tuo *TrackUpdateOne) ClearAlbum() *TrackUpdateOne {
 	tuo.mutation.ClearAlbum()
 	return tuo
+}
+
+// ClearArtists clears all "artists" edges to the Artist entity.
+func (tuo *TrackUpdateOne) ClearArtists() *TrackUpdateOne {
+	tuo.mutation.ClearArtists()
+	return tuo
+}
+
+// RemoveArtistIDs removes the "artists" edge to Artist entities by IDs.
+func (tuo *TrackUpdateOne) RemoveArtistIDs(ids ...string) *TrackUpdateOne {
+	tuo.mutation.RemoveArtistIDs(ids...)
+	return tuo
+}
+
+// RemoveArtists removes "artists" edges to Artist entities.
+func (tuo *TrackUpdateOne) RemoveArtists(a ...*Artist) *TrackUpdateOne {
+	ids := make([]string, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return tuo.RemoveArtistIDs(ids...)
 }
 
 // Where appends a list predicates to the TrackUpdate builder.
@@ -482,22 +535,6 @@ func (tuo *TrackUpdateOne) sqlSave(ctx context.Context) (_node *Track, err error
 	if value, ok := tuo.mutation.Name(); ok {
 		_spec.SetField(track.FieldName, field.TypeString, value)
 	}
-	if value, ok := tuo.mutation.ArtistNames(); ok {
-		_spec.SetField(track.FieldArtistNames, field.TypeJSON, value)
-	}
-	if value, ok := tuo.mutation.AppendedArtistNames(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, track.FieldArtistNames, value)
-		})
-	}
-	if value, ok := tuo.mutation.ArtistIds(); ok {
-		_spec.SetField(track.FieldArtistIds, field.TypeJSON, value)
-	}
-	if value, ok := tuo.mutation.AppendedArtistIds(); ok {
-		_spec.AddModifier(func(u *sql.UpdateBuilder) {
-			sqljson.Append(u, track.FieldArtistIds, value)
-		})
-	}
 	if tuo.mutation.SavedByCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -565,6 +602,51 @@ func (tuo *TrackUpdateOne) sqlSave(ctx context.Context) (_node *Track, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(album.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tuo.mutation.ArtistsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   track.ArtistsTable,
+			Columns: track.ArtistsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.RemovedArtistsIDs(); len(nodes) > 0 && !tuo.mutation.ArtistsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   track.ArtistsTable,
+			Columns: track.ArtistsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.ArtistsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   track.ArtistsTable,
+			Columns: track.ArtistsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {

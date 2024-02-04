@@ -16,34 +16,34 @@ import (
 	"github.com/m-nny/universe/ent/track"
 )
 
-// AlbumCreate is the builder for creating a Album entity.
-type AlbumCreate struct {
+// ArtistCreate is the builder for creating a Artist entity.
+type ArtistCreate struct {
 	config
-	mutation *AlbumMutation
+	mutation *ArtistMutation
 	hooks    []Hook
 	conflict []sql.ConflictOption
 }
 
 // SetName sets the "name" field.
-func (ac *AlbumCreate) SetName(s string) *AlbumCreate {
+func (ac *ArtistCreate) SetName(s string) *ArtistCreate {
 	ac.mutation.SetName(s)
 	return ac
 }
 
 // SetID sets the "id" field.
-func (ac *AlbumCreate) SetID(s string) *AlbumCreate {
+func (ac *ArtistCreate) SetID(s string) *ArtistCreate {
 	ac.mutation.SetID(s)
 	return ac
 }
 
 // AddTrackIDs adds the "tracks" edge to the Track entity by IDs.
-func (ac *AlbumCreate) AddTrackIDs(ids ...string) *AlbumCreate {
+func (ac *ArtistCreate) AddTrackIDs(ids ...string) *ArtistCreate {
 	ac.mutation.AddTrackIDs(ids...)
 	return ac
 }
 
 // AddTracks adds the "tracks" edges to the Track entity.
-func (ac *AlbumCreate) AddTracks(t ...*Track) *AlbumCreate {
+func (ac *ArtistCreate) AddTracks(t ...*Track) *ArtistCreate {
 	ids := make([]string, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
@@ -51,33 +51,33 @@ func (ac *AlbumCreate) AddTracks(t ...*Track) *AlbumCreate {
 	return ac.AddTrackIDs(ids...)
 }
 
-// AddArtistIDs adds the "artists" edge to the Artist entity by IDs.
-func (ac *AlbumCreate) AddArtistIDs(ids ...string) *AlbumCreate {
-	ac.mutation.AddArtistIDs(ids...)
+// AddAlbumIDs adds the "albums" edge to the Album entity by IDs.
+func (ac *ArtistCreate) AddAlbumIDs(ids ...string) *ArtistCreate {
+	ac.mutation.AddAlbumIDs(ids...)
 	return ac
 }
 
-// AddArtists adds the "artists" edges to the Artist entity.
-func (ac *AlbumCreate) AddArtists(a ...*Artist) *AlbumCreate {
+// AddAlbums adds the "albums" edges to the Album entity.
+func (ac *ArtistCreate) AddAlbums(a ...*Album) *ArtistCreate {
 	ids := make([]string, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
-	return ac.AddArtistIDs(ids...)
+	return ac.AddAlbumIDs(ids...)
 }
 
-// Mutation returns the AlbumMutation object of the builder.
-func (ac *AlbumCreate) Mutation() *AlbumMutation {
+// Mutation returns the ArtistMutation object of the builder.
+func (ac *ArtistCreate) Mutation() *ArtistMutation {
 	return ac.mutation
 }
 
-// Save creates the Album in the database.
-func (ac *AlbumCreate) Save(ctx context.Context) (*Album, error) {
+// Save creates the Artist in the database.
+func (ac *ArtistCreate) Save(ctx context.Context) (*Artist, error) {
 	return withHooks(ctx, ac.sqlSave, ac.mutation, ac.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (ac *AlbumCreate) SaveX(ctx context.Context) *Album {
+func (ac *ArtistCreate) SaveX(ctx context.Context) *Artist {
 	v, err := ac.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -86,37 +86,37 @@ func (ac *AlbumCreate) SaveX(ctx context.Context) *Album {
 }
 
 // Exec executes the query.
-func (ac *AlbumCreate) Exec(ctx context.Context) error {
+func (ac *ArtistCreate) Exec(ctx context.Context) error {
 	_, err := ac.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ac *AlbumCreate) ExecX(ctx context.Context) {
+func (ac *ArtistCreate) ExecX(ctx context.Context) {
 	if err := ac.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ac *AlbumCreate) check() error {
+func (ac *ArtistCreate) check() error {
 	if _, ok := ac.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Album.name"`)}
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Artist.name"`)}
 	}
 	if v, ok := ac.mutation.Name(); ok {
-		if err := album.NameValidator(v); err != nil {
-			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Album.name": %w`, err)}
+		if err := artist.NameValidator(v); err != nil {
+			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Artist.name": %w`, err)}
 		}
 	}
 	if v, ok := ac.mutation.ID(); ok {
-		if err := album.IDValidator(v); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Album.id": %w`, err)}
+		if err := artist.IDValidator(v); err != nil {
+			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Artist.id": %w`, err)}
 		}
 	}
 	return nil
 }
 
-func (ac *AlbumCreate) sqlSave(ctx context.Context) (*Album, error) {
+func (ac *ArtistCreate) sqlSave(ctx context.Context) (*Artist, error) {
 	if err := ac.check(); err != nil {
 		return nil, err
 	}
@@ -131,7 +131,7 @@ func (ac *AlbumCreate) sqlSave(ctx context.Context) (*Album, error) {
 		if id, ok := _spec.ID.Value.(string); ok {
 			_node.ID = id
 		} else {
-			return nil, fmt.Errorf("unexpected Album.ID type: %T", _spec.ID.Value)
+			return nil, fmt.Errorf("unexpected Artist.ID type: %T", _spec.ID.Value)
 		}
 	}
 	ac.mutation.id = &_node.ID
@@ -139,10 +139,10 @@ func (ac *AlbumCreate) sqlSave(ctx context.Context) (*Album, error) {
 	return _node, nil
 }
 
-func (ac *AlbumCreate) createSpec() (*Album, *sqlgraph.CreateSpec) {
+func (ac *ArtistCreate) createSpec() (*Artist, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Album{config: ac.config}
-		_spec = sqlgraph.NewCreateSpec(album.Table, sqlgraph.NewFieldSpec(album.FieldID, field.TypeString))
+		_node = &Artist{config: ac.config}
+		_spec = sqlgraph.NewCreateSpec(artist.Table, sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString))
 	)
 	_spec.OnConflict = ac.conflict
 	if id, ok := ac.mutation.ID(); ok {
@@ -150,15 +150,15 @@ func (ac *AlbumCreate) createSpec() (*Album, *sqlgraph.CreateSpec) {
 		_spec.ID.Value = id
 	}
 	if value, ok := ac.mutation.Name(); ok {
-		_spec.SetField(album.FieldName, field.TypeString, value)
+		_spec.SetField(artist.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
 	if nodes := ac.mutation.TracksIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   album.TracksTable,
-			Columns: []string{album.TracksColumn},
+			Table:   artist.TracksTable,
+			Columns: artist.TracksPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
@@ -169,15 +169,15 @@ func (ac *AlbumCreate) createSpec() (*Album, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := ac.mutation.ArtistsIDs(); len(nodes) > 0 {
+	if nodes := ac.mutation.AlbumsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   album.ArtistsTable,
-			Columns: album.ArtistsPrimaryKey,
+			Inverse: false,
+			Table:   artist.AlbumsTable,
+			Columns: artist.AlbumsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(album.FieldID, field.TypeString),
 			},
 		}
 		for _, k := range nodes {
@@ -191,7 +191,7 @@ func (ac *AlbumCreate) createSpec() (*Album, *sqlgraph.CreateSpec) {
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
-//	client.Album.Create().
+//	client.Artist.Create().
 //		SetName(v).
 //		OnConflict(
 //			// Update the row with the new values
@@ -200,13 +200,13 @@ func (ac *AlbumCreate) createSpec() (*Album, *sqlgraph.CreateSpec) {
 //		).
 //		// Override some of the fields with custom
 //		// update values.
-//		Update(func(u *ent.AlbumUpsert) {
+//		Update(func(u *ent.ArtistUpsert) {
 //			SetName(v+v).
 //		}).
 //		Exec(ctx)
-func (ac *AlbumCreate) OnConflict(opts ...sql.ConflictOption) *AlbumUpsertOne {
+func (ac *ArtistCreate) OnConflict(opts ...sql.ConflictOption) *ArtistUpsertOne {
 	ac.conflict = opts
-	return &AlbumUpsertOne{
+	return &ArtistUpsertOne{
 		create: ac,
 	}
 }
@@ -214,57 +214,57 @@ func (ac *AlbumCreate) OnConflict(opts ...sql.ConflictOption) *AlbumUpsertOne {
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//	client.Album.Create().
+//	client.Artist.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (ac *AlbumCreate) OnConflictColumns(columns ...string) *AlbumUpsertOne {
+func (ac *ArtistCreate) OnConflictColumns(columns ...string) *ArtistUpsertOne {
 	ac.conflict = append(ac.conflict, sql.ConflictColumns(columns...))
-	return &AlbumUpsertOne{
+	return &ArtistUpsertOne{
 		create: ac,
 	}
 }
 
 type (
-	// AlbumUpsertOne is the builder for "upsert"-ing
-	//  one Album node.
-	AlbumUpsertOne struct {
-		create *AlbumCreate
+	// ArtistUpsertOne is the builder for "upsert"-ing
+	//  one Artist node.
+	ArtistUpsertOne struct {
+		create *ArtistCreate
 	}
 
-	// AlbumUpsert is the "OnConflict" setter.
-	AlbumUpsert struct {
+	// ArtistUpsert is the "OnConflict" setter.
+	ArtistUpsert struct {
 		*sql.UpdateSet
 	}
 )
 
 // SetName sets the "name" field.
-func (u *AlbumUpsert) SetName(v string) *AlbumUpsert {
-	u.Set(album.FieldName, v)
+func (u *ArtistUpsert) SetName(v string) *ArtistUpsert {
+	u.Set(artist.FieldName, v)
 	return u
 }
 
 // UpdateName sets the "name" field to the value that was provided on create.
-func (u *AlbumUpsert) UpdateName() *AlbumUpsert {
-	u.SetExcluded(album.FieldName)
+func (u *ArtistUpsert) UpdateName() *ArtistUpsert {
+	u.SetExcluded(artist.FieldName)
 	return u
 }
 
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
-//	client.Album.Create().
+//	client.Artist.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
 //			sql.ResolveWith(func(u *sql.UpdateSet) {
-//				u.SetIgnore(album.FieldID)
+//				u.SetIgnore(artist.FieldID)
 //			}),
 //		).
 //		Exec(ctx)
-func (u *AlbumUpsertOne) UpdateNewValues() *AlbumUpsertOne {
+func (u *ArtistUpsertOne) UpdateNewValues() *ArtistUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		if _, exists := u.create.mutation.ID(); exists {
-			s.SetIgnore(album.FieldID)
+			s.SetIgnore(artist.FieldID)
 		}
 	}))
 	return u
@@ -273,65 +273,65 @@ func (u *AlbumUpsertOne) UpdateNewValues() *AlbumUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.Album.Create().
+//	client.Artist.Create().
 //	    OnConflict(sql.ResolveWithIgnore()).
 //	    Exec(ctx)
-func (u *AlbumUpsertOne) Ignore() *AlbumUpsertOne {
+func (u *ArtistUpsertOne) Ignore() *ArtistUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
 }
 
 // DoNothing configures the conflict_action to `DO NOTHING`.
 // Supported only by SQLite and PostgreSQL.
-func (u *AlbumUpsertOne) DoNothing() *AlbumUpsertOne {
+func (u *ArtistUpsertOne) DoNothing() *ArtistUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.DoNothing())
 	return u
 }
 
-// Update allows overriding fields `UPDATE` values. See the AlbumCreate.OnConflict
+// Update allows overriding fields `UPDATE` values. See the ArtistCreate.OnConflict
 // documentation for more info.
-func (u *AlbumUpsertOne) Update(set func(*AlbumUpsert)) *AlbumUpsertOne {
+func (u *ArtistUpsertOne) Update(set func(*ArtistUpsert)) *ArtistUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&AlbumUpsert{UpdateSet: update})
+		set(&ArtistUpsert{UpdateSet: update})
 	}))
 	return u
 }
 
 // SetName sets the "name" field.
-func (u *AlbumUpsertOne) SetName(v string) *AlbumUpsertOne {
-	return u.Update(func(s *AlbumUpsert) {
+func (u *ArtistUpsertOne) SetName(v string) *ArtistUpsertOne {
+	return u.Update(func(s *ArtistUpsert) {
 		s.SetName(v)
 	})
 }
 
 // UpdateName sets the "name" field to the value that was provided on create.
-func (u *AlbumUpsertOne) UpdateName() *AlbumUpsertOne {
-	return u.Update(func(s *AlbumUpsert) {
+func (u *ArtistUpsertOne) UpdateName() *ArtistUpsertOne {
+	return u.Update(func(s *ArtistUpsert) {
 		s.UpdateName()
 	})
 }
 
 // Exec executes the query.
-func (u *AlbumUpsertOne) Exec(ctx context.Context) error {
+func (u *ArtistUpsertOne) Exec(ctx context.Context) error {
 	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for AlbumCreate.OnConflict")
+		return errors.New("ent: missing options for ArtistCreate.OnConflict")
 	}
 	return u.create.Exec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (u *AlbumUpsertOne) ExecX(ctx context.Context) {
+func (u *ArtistUpsertOne) ExecX(ctx context.Context) {
 	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *AlbumUpsertOne) ID(ctx context.Context) (id string, err error) {
+func (u *ArtistUpsertOne) ID(ctx context.Context) (id string, err error) {
 	if u.create.driver.Dialect() == dialect.MySQL {
 		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
 		// fields from the database since MySQL does not support the RETURNING clause.
-		return id, errors.New("ent: AlbumUpsertOne.ID is not supported by MySQL driver. Use AlbumUpsertOne.Exec instead")
+		return id, errors.New("ent: ArtistUpsertOne.ID is not supported by MySQL driver. Use ArtistUpsertOne.Exec instead")
 	}
 	node, err := u.create.Save(ctx)
 	if err != nil {
@@ -341,7 +341,7 @@ func (u *AlbumUpsertOne) ID(ctx context.Context) (id string, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *AlbumUpsertOne) IDX(ctx context.Context) string {
+func (u *ArtistUpsertOne) IDX(ctx context.Context) string {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -349,27 +349,27 @@ func (u *AlbumUpsertOne) IDX(ctx context.Context) string {
 	return id
 }
 
-// AlbumCreateBulk is the builder for creating many Album entities in bulk.
-type AlbumCreateBulk struct {
+// ArtistCreateBulk is the builder for creating many Artist entities in bulk.
+type ArtistCreateBulk struct {
 	config
 	err      error
-	builders []*AlbumCreate
+	builders []*ArtistCreate
 	conflict []sql.ConflictOption
 }
 
-// Save creates the Album entities in the database.
-func (acb *AlbumCreateBulk) Save(ctx context.Context) ([]*Album, error) {
+// Save creates the Artist entities in the database.
+func (acb *ArtistCreateBulk) Save(ctx context.Context) ([]*Artist, error) {
 	if acb.err != nil {
 		return nil, acb.err
 	}
 	specs := make([]*sqlgraph.CreateSpec, len(acb.builders))
-	nodes := make([]*Album, len(acb.builders))
+	nodes := make([]*Artist, len(acb.builders))
 	mutators := make([]Mutator, len(acb.builders))
 	for i := range acb.builders {
 		func(i int, root context.Context) {
 			builder := acb.builders[i]
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				mutation, ok := m.(*AlbumMutation)
+				mutation, ok := m.(*ArtistMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
@@ -413,7 +413,7 @@ func (acb *AlbumCreateBulk) Save(ctx context.Context) ([]*Album, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (acb *AlbumCreateBulk) SaveX(ctx context.Context) []*Album {
+func (acb *ArtistCreateBulk) SaveX(ctx context.Context) []*Artist {
 	v, err := acb.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -422,13 +422,13 @@ func (acb *AlbumCreateBulk) SaveX(ctx context.Context) []*Album {
 }
 
 // Exec executes the query.
-func (acb *AlbumCreateBulk) Exec(ctx context.Context) error {
+func (acb *ArtistCreateBulk) Exec(ctx context.Context) error {
 	_, err := acb.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (acb *AlbumCreateBulk) ExecX(ctx context.Context) {
+func (acb *ArtistCreateBulk) ExecX(ctx context.Context) {
 	if err := acb.Exec(ctx); err != nil {
 		panic(err)
 	}
@@ -437,7 +437,7 @@ func (acb *AlbumCreateBulk) ExecX(ctx context.Context) {
 // OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
 // of the `INSERT` statement. For example:
 //
-//	client.Album.CreateBulk(builders...).
+//	client.Artist.CreateBulk(builders...).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -445,13 +445,13 @@ func (acb *AlbumCreateBulk) ExecX(ctx context.Context) {
 //		).
 //		// Override some of the fields with custom
 //		// update values.
-//		Update(func(u *ent.AlbumUpsert) {
+//		Update(func(u *ent.ArtistUpsert) {
 //			SetName(v+v).
 //		}).
 //		Exec(ctx)
-func (acb *AlbumCreateBulk) OnConflict(opts ...sql.ConflictOption) *AlbumUpsertBulk {
+func (acb *ArtistCreateBulk) OnConflict(opts ...sql.ConflictOption) *ArtistUpsertBulk {
 	acb.conflict = opts
-	return &AlbumUpsertBulk{
+	return &ArtistUpsertBulk{
 		create: acb,
 	}
 }
@@ -459,39 +459,39 @@ func (acb *AlbumCreateBulk) OnConflict(opts ...sql.ConflictOption) *AlbumUpsertB
 // OnConflictColumns calls `OnConflict` and configures the columns
 // as conflict target. Using this option is equivalent to using:
 //
-//	client.Album.Create().
+//	client.Artist.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (acb *AlbumCreateBulk) OnConflictColumns(columns ...string) *AlbumUpsertBulk {
+func (acb *ArtistCreateBulk) OnConflictColumns(columns ...string) *ArtistUpsertBulk {
 	acb.conflict = append(acb.conflict, sql.ConflictColumns(columns...))
-	return &AlbumUpsertBulk{
+	return &ArtistUpsertBulk{
 		create: acb,
 	}
 }
 
-// AlbumUpsertBulk is the builder for "upsert"-ing
-// a bulk of Album nodes.
-type AlbumUpsertBulk struct {
-	create *AlbumCreateBulk
+// ArtistUpsertBulk is the builder for "upsert"-ing
+// a bulk of Artist nodes.
+type ArtistUpsertBulk struct {
+	create *ArtistCreateBulk
 }
 
 // UpdateNewValues updates the mutable fields using the new values that
 // were set on create. Using this option is equivalent to using:
 //
-//	client.Album.Create().
+//	client.Artist.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
 //			sql.ResolveWith(func(u *sql.UpdateSet) {
-//				u.SetIgnore(album.FieldID)
+//				u.SetIgnore(artist.FieldID)
 //			}),
 //		).
 //		Exec(ctx)
-func (u *AlbumUpsertBulk) UpdateNewValues() *AlbumUpsertBulk {
+func (u *ArtistUpsertBulk) UpdateNewValues() *ArtistUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
 		for _, b := range u.create.builders {
 			if _, exists := b.mutation.ID(); exists {
-				s.SetIgnore(album.FieldID)
+				s.SetIgnore(artist.FieldID)
 			}
 		}
 	}))
@@ -501,62 +501,62 @@ func (u *AlbumUpsertBulk) UpdateNewValues() *AlbumUpsertBulk {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.Album.Create().
+//	client.Artist.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-func (u *AlbumUpsertBulk) Ignore() *AlbumUpsertBulk {
+func (u *ArtistUpsertBulk) Ignore() *ArtistUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
 }
 
 // DoNothing configures the conflict_action to `DO NOTHING`.
 // Supported only by SQLite and PostgreSQL.
-func (u *AlbumUpsertBulk) DoNothing() *AlbumUpsertBulk {
+func (u *ArtistUpsertBulk) DoNothing() *ArtistUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.DoNothing())
 	return u
 }
 
-// Update allows overriding fields `UPDATE` values. See the AlbumCreateBulk.OnConflict
+// Update allows overriding fields `UPDATE` values. See the ArtistCreateBulk.OnConflict
 // documentation for more info.
-func (u *AlbumUpsertBulk) Update(set func(*AlbumUpsert)) *AlbumUpsertBulk {
+func (u *ArtistUpsertBulk) Update(set func(*ArtistUpsert)) *ArtistUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
-		set(&AlbumUpsert{UpdateSet: update})
+		set(&ArtistUpsert{UpdateSet: update})
 	}))
 	return u
 }
 
 // SetName sets the "name" field.
-func (u *AlbumUpsertBulk) SetName(v string) *AlbumUpsertBulk {
-	return u.Update(func(s *AlbumUpsert) {
+func (u *ArtistUpsertBulk) SetName(v string) *ArtistUpsertBulk {
+	return u.Update(func(s *ArtistUpsert) {
 		s.SetName(v)
 	})
 }
 
 // UpdateName sets the "name" field to the value that was provided on create.
-func (u *AlbumUpsertBulk) UpdateName() *AlbumUpsertBulk {
-	return u.Update(func(s *AlbumUpsert) {
+func (u *ArtistUpsertBulk) UpdateName() *ArtistUpsertBulk {
+	return u.Update(func(s *ArtistUpsert) {
 		s.UpdateName()
 	})
 }
 
 // Exec executes the query.
-func (u *AlbumUpsertBulk) Exec(ctx context.Context) error {
+func (u *ArtistUpsertBulk) Exec(ctx context.Context) error {
 	if u.create.err != nil {
 		return u.create.err
 	}
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {
-			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the AlbumCreateBulk instead", i)
+			return fmt.Errorf("ent: OnConflict was set for builder %d. Set it on the ArtistCreateBulk instead", i)
 		}
 	}
 	if len(u.create.conflict) == 0 {
-		return errors.New("ent: missing options for AlbumCreateBulk.OnConflict")
+		return errors.New("ent: missing options for ArtistCreateBulk.OnConflict")
 	}
 	return u.create.Exec(ctx)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (u *AlbumUpsertBulk) ExecX(ctx context.Context) {
+func (u *ArtistUpsertBulk) ExecX(ctx context.Context) {
 	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
 	}

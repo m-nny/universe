@@ -18,25 +18,30 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed creating ent Client: %v", err)
 	}
-	spotifyConfig, err := spotify.LoadConfig()
-	if err != nil {
-		log.Fatalf("Error getting spotify config: %v", err)
-	}
-	spotifyClient, err := spotify.New(ctx, spotifyConfig, entClient)
+	spotify, err := spotify.New(ctx, entClient)
 	if err != nil {
 		log.Fatalf("Error getting spotify client: %v", err)
 	}
 
-	playlists, err := spotifyClient.GetAllPlaylists(ctx)
+	playlists, err := spotify.GetAllPlaylists(ctx)
 	if err != nil {
 		log.Fatalf("Error getting all playlists: %v", err)
 	}
 	log.Printf("found total %d playlists", len(playlists))
 
-	tracks, err := spotifyClient.GetAllTracks(ctx)
+	tracks, err := spotify.GetAllTracks(ctx)
 	if err != nil {
 		log.Fatalf("Error getting all tracks: %v", err)
 	}
 	log.Printf("found total %d tracks", len(tracks))
 
+	savedTracks, err := entClient.Track.
+		Query().
+		WithAlbum().
+		WithArtists().
+		First(ctx)
+	if err != nil {
+		log.Fatalf("Error getting all tracks: %v", err)
+	}
+	log.Printf("tracks: %+v", savedTracks)
 }

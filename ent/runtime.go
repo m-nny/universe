@@ -4,6 +4,7 @@ package ent
 
 import (
 	"github.com/m-nny/universe/ent/album"
+	"github.com/m-nny/universe/ent/artist"
 	"github.com/m-nny/universe/ent/playlist"
 	"github.com/m-nny/universe/ent/schema"
 	"github.com/m-nny/universe/ent/track"
@@ -24,6 +25,16 @@ func init() {
 	albumDescID := albumFields[0].Descriptor()
 	// album.IDValidator is a validator for the "id" field. It is called by the builders before save.
 	album.IDValidator = albumDescID.Validators[0].(func(string) error)
+	artistFields := schema.Artist{}.Fields()
+	_ = artistFields
+	// artistDescName is the schema descriptor for name field.
+	artistDescName := artistFields[1].Descriptor()
+	// artist.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	artist.NameValidator = artistDescName.Validators[0].(func(string) error)
+	// artistDescID is the schema descriptor for id field.
+	artistDescID := artistFields[0].Descriptor()
+	// artist.IDValidator is a validator for the "id" field. It is called by the builders before save.
+	artist.IDValidator = artistDescID.Validators[0].(func(string) error)
 	playlistFields := schema.Playlist{}.Fields()
 	_ = playlistFields
 	// playlistDescName is the schema descriptor for name field.

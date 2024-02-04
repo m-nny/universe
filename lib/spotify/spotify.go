@@ -41,7 +41,11 @@ func LoadConfig() (*Config, error) {
 	return c, nil
 }
 
-func New(ctx context.Context, config *Config, ent *ent.Client) (*Service, error) {
+func New(ctx context.Context, ent *ent.Client) (*Service, error) {
+	config, err := LoadConfig()
+	if err != nil {
+		return nil, err
+	}
 	auth := spotifyauth.New(
 		spotifyauth.WithClientID(config.ClientId),
 		spotifyauth.WithClientSecret(config.ClientSecret),

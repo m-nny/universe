@@ -16,8 +16,8 @@ func (Track) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").NotEmpty(),
 		field.String("name").NotEmpty(),
-		field.JSON("artistNames", []string{}),
-		field.JSON("artistIds", []string{}),
+		// field.JSON("artistNames", []string{}),
+		// field.JSON("artistIds", []string{}),
 	}
 }
 
@@ -26,5 +26,6 @@ func (Track) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("savedBy", User.Type).Ref("savedTracks"),
 		edge.From("album", Album.Type).Ref("tracks").Unique(),
+		edge.From("artists", Artist.Type).Ref("tracks"),
 	}
 }

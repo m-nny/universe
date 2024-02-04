@@ -8,6 +8,14 @@ func SliceMap[T, D any](arr []T, fn func(item T) D) []D {
 	return res
 }
 
+func SliceFlatMap[T, D any](arr []T, fn func(item T) []D) []D {
+	var res []D
+	for _, item := range arr {
+		res = append(res, fn(item)...)
+	}
+	return res
+}
+
 func SliceUniqe[T any](arr []T, fn func(item T) string) []T {
 	var result []T
 	has := make(map[string]bool)

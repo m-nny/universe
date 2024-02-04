@@ -21,6 +21,18 @@ func (f AlbumFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AlbumMutation", m)
 }
 
+// The ArtistFunc type is an adapter to allow the use of ordinary
+// function as Artist mutator.
+type ArtistFunc func(context.Context, *ent.ArtistMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ArtistFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ArtistMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ArtistMutation", m)
+}
+
 // The PlaylistFunc type is an adapter to allow the use of ordinary
 // function as Playlist mutator.
 type PlaylistFunc func(context.Context, *ent.PlaylistMutation) (ent.Value, error)

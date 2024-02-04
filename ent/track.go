@@ -3,7 +3,6 @@
 package ent
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -20,10 +19,6 @@ type Track struct {
 	ID string `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
-	// ArtistNames holds the value of the "artistNames" field.
-	ArtistNames []string `json:"artistNames,omitempty"`
-	// ArtistIds holds the value of the "artistIds" field.
-	ArtistIds []string `json:"artistIds,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TrackQuery when eager-loading is set.
 	Edges        TrackEdges `json:"edges"`
@@ -37,9 +32,11 @@ type TrackEdges struct {
 	SavedBy []*User `json:"savedBy,omitempty"`
 	// Album holds the value of the album edge.
 	Album *Album `json:"album,omitempty"`
+	// Artists holds the value of the artists edge.
+	Artists []*Artist `json:"artists,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // SavedByOrErr returns the SavedBy value or an error if the edge
@@ -64,13 +61,20 @@ func (e TrackEdges) AlbumOrErr() (*Album, error) {
 	return nil, &NotLoadedError{edge: "album"}
 }
 
+// ArtistsOrErr returns the Artists value or an error if the edge
+// was not loaded in eager-loading.
+func (e TrackEdges) ArtistsOrErr() ([]*Artist, error) {
+	if e.loadedTypes[2] {
+		return e.Artists, nil
+	}
+	return nil, &NotLoadedError{edge: "artists"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Track) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case track.FieldArtistNames, track.FieldArtistIds:
-			values[i] = new([]byte)
 		case track.FieldID, track.FieldName:
 			values[i] = new(sql.NullString)
 		case track.ForeignKeys[0]: // album_tracks
@@ -102,22 +106,6 @@ func (t *Track) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				t.Name = value.String
 			}
-		case track.FieldArtistNames:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field artistNames", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &t.ArtistNames); err != nil {
-					return fmt.Errorf("unmarshal field artistNames: %w", err)
-				}
-			}
-		case track.FieldArtistIds:
-			if value, ok := values[i].(*[]byte); !ok {
-				return fmt.Errorf("unexpected type %T for field artistIds", values[i])
-			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &t.ArtistIds); err != nil {
-					return fmt.Errorf("unmarshal field artistIds: %w", err)
-				}
-			}
 		case track.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field album_tracks", values[i])
@@ -148,6 +136,11 @@ func (t *Track) QueryAlbum() *AlbumQuery {
 	return NewTrackClient(t.config).QueryAlbum(t)
 }
 
+// QueryArtists queries the "artists" edge of the Track entity.
+func (t *Track) QueryArtists() *ArtistQuery {
+	return NewTrackClient(t.config).QueryArtists(t)
+}
+
 // Update returns a builder for updating this Track.
 // Note that you need to call Track.Unwrap() before calling this method if this Track
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -173,12 +166,6 @@ func (t *Track) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
 	builder.WriteString("name=")
 	builder.WriteString(t.Name)
-	builder.WriteString(", ")
-	builder.WriteString("artistNames=")
-	builder.WriteString(fmt.Sprintf("%v", t.ArtistNames))
-	builder.WriteString(", ")
-	builder.WriteString("artistIds=")
-	builder.WriteString(fmt.Sprintf("%v", t.ArtistIds))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -14,14 +14,12 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldArtistNames holds the string denoting the artistnames field in the database.
-	FieldArtistNames = "artist_names"
-	// FieldArtistIds holds the string denoting the artistids field in the database.
-	FieldArtistIds = "artist_ids"
 	// EdgeSavedBy holds the string denoting the savedby edge name in mutations.
 	EdgeSavedBy = "savedBy"
 	// EdgeAlbum holds the string denoting the album edge name in mutations.
 	EdgeAlbum = "album"
+	// EdgeArtists holds the string denoting the artists edge name in mutations.
+	EdgeArtists = "artists"
 	// Table holds the table name of the track in the database.
 	Table = "tracks"
 	// SavedByTable is the table that holds the savedBy relation/edge. The primary key declared below.
@@ -36,14 +34,17 @@ const (
 	AlbumInverseTable = "albums"
 	// AlbumColumn is the table column denoting the album relation/edge.
 	AlbumColumn = "album_tracks"
+	// ArtistsTable is the table that holds the artists relation/edge. The primary key declared below.
+	ArtistsTable = "artist_tracks"
+	// ArtistsInverseTable is the table name for the Artist entity.
+	// It exists in this package in order to avoid circular dependency with the "artist" package.
+	ArtistsInverseTable = "artists"
 )
 
 // Columns holds all SQL columns for track fields.
 var Columns = []string{
 	FieldID,
 	FieldName,
-	FieldArtistNames,
-	FieldArtistIds,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "tracks"
@@ -56,6 +57,9 @@ var (
 	// SavedByPrimaryKey and SavedByColumn2 are the table columns denoting the
 	// primary key for the savedBy relation (M2M).
 	SavedByPrimaryKey = []string{"user_id", "track_id"}
+	// ArtistsPrimaryKey and ArtistsColumn2 are the table columns denoting the
+	// primary key for the artists relation (M2M).
+	ArtistsPrimaryKey = []string{"artist_id", "track_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -113,6 +117,20 @@ func ByAlbumField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newAlbumStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByArtistsCount orders the results by artists count.
+func ByArtistsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newArtistsStep(), opts...)
+	}
+}
+
+// ByArtists orders the results by artists terms.
+func ByArtists(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newArtistsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newSavedByStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -125,5 +143,12 @@ func newAlbumStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(AlbumInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, AlbumTable, AlbumColumn),
+	)
+}
+func newArtistsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ArtistsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, ArtistsTable, ArtistsPrimaryKey...),
 	)
 }

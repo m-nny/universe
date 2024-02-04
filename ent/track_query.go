@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/m-nny/universe/ent/album"
+	"github.com/m-nny/universe/ent/artist"
 	"github.com/m-nny/universe/ent/predicate"
 	"github.com/m-nny/universe/ent/track"
 	"github.com/m-nny/universe/ent/user"
@@ -26,6 +27,7 @@ type TrackQuery struct {
 	predicates  []predicate.Track
 	withSavedBy *UserQuery
 	withAlbum   *AlbumQuery
+	withArtists *ArtistQuery
 	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -100,6 +102,28 @@ func (tq *TrackQuery) QueryAlbum() *AlbumQuery {
 			sqlgraph.From(track.Table, track.FieldID, selector),
 			sqlgraph.To(album.Table, album.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, track.AlbumTable, track.AlbumColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryArtists chains the current query on the "artists" edge.
+func (tq *TrackQuery) QueryArtists() *ArtistQuery {
+	query := (&ArtistClient{config: tq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := tq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := tq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(track.Table, track.FieldID, selector),
+			sqlgraph.To(artist.Table, artist.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, track.ArtistsTable, track.ArtistsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -301,6 +325,7 @@ func (tq *TrackQuery) Clone() *TrackQuery {
 		predicates:  append([]predicate.Track{}, tq.predicates...),
 		withSavedBy: tq.withSavedBy.Clone(),
 		withAlbum:   tq.withAlbum.Clone(),
+		withArtists: tq.withArtists.Clone(),
 		// clone intermediate query.
 		sql:  tq.sql.Clone(),
 		path: tq.path,
@@ -326,6 +351,17 @@ func (tq *TrackQuery) WithAlbum(opts ...func(*AlbumQuery)) *TrackQuery {
 		opt(query)
 	}
 	tq.withAlbum = query
+	return tq
+}
+
+// WithArtists tells the query-builder to eager-load the nodes that are connected to
+// the "artists" edge. The optional arguments are used to configure the query builder of the edge.
+func (tq *TrackQuery) WithArtists(opts ...func(*ArtistQuery)) *TrackQuery {
+	query := (&ArtistClient{config: tq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	tq.withArtists = query
 	return tq
 }
 
@@ -408,9 +444,10 @@ func (tq *TrackQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Track,
 		nodes       = []*Track{}
 		withFKs     = tq.withFKs
 		_spec       = tq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			tq.withSavedBy != nil,
 			tq.withAlbum != nil,
+			tq.withArtists != nil,
 		}
 	)
 	if tq.withAlbum != nil {
@@ -447,6 +484,13 @@ func (tq *TrackQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Track,
 	if query := tq.withAlbum; query != nil {
 		if err := tq.loadAlbum(ctx, query, nodes, nil,
 			func(n *Track, e *Album) { n.Edges.Album = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := tq.withArtists; query != nil {
+		if err := tq.loadArtists(ctx, query, nodes,
+			func(n *Track) { n.Edges.Artists = []*Artist{} },
+			func(n *Track, e *Artist) { n.Edges.Artists = append(n.Edges.Artists, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -542,6 +586,67 @@ func (tq *TrackQuery) loadAlbum(ctx context.Context, query *AlbumQuery, nodes []
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (tq *TrackQuery) loadArtists(ctx context.Context, query *ArtistQuery, nodes []*Track, init func(*Track), assign func(*Track, *Artist)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[string]*Track)
+	nids := make(map[string]map[*Track]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(track.ArtistsTable)
+		s.Join(joinT).On(s.C(artist.FieldID), joinT.C(track.ArtistsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(track.ArtistsPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(track.ArtistsPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullString)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := values[0].(*sql.NullString).String
+				inValue := values[1].(*sql.NullString).String
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Track]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*Artist](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "artists" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
 		}
 	}
 	return nil

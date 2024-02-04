@@ -12,14 +12,23 @@ var (
 	AlbumsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString},
-		{Name: "artist_names", Type: field.TypeJSON},
-		{Name: "artist_ids", Type: field.TypeJSON},
 	}
 	// AlbumsTable holds the schema information for the "albums" table.
 	AlbumsTable = &schema.Table{
 		Name:       "albums",
 		Columns:    AlbumsColumns,
 		PrimaryKey: []*schema.Column{AlbumsColumns[0]},
+	}
+	// ArtistsColumns holds the columns for the "artists" table.
+	ArtistsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString},
+	}
+	// ArtistsTable holds the schema information for the "artists" table.
+	ArtistsTable = &schema.Table{
+		Name:       "artists",
+		Columns:    ArtistsColumns,
+		PrimaryKey: []*schema.Column{ArtistsColumns[0]},
 	}
 	// PlaylistsColumns holds the columns for the "playlists" table.
 	PlaylistsColumns = []*schema.Column{
@@ -46,8 +55,6 @@ var (
 	TracksColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString},
-		{Name: "artist_names", Type: field.TypeJSON},
-		{Name: "artist_ids", Type: field.TypeJSON},
 		{Name: "album_tracks", Type: field.TypeString, Nullable: true},
 	}
 	// TracksTable holds the schema information for the "tracks" table.
@@ -58,7 +65,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "tracks_albums_tracks",
-				Columns:    []*schema.Column{TracksColumns[4]},
+				Columns:    []*schema.Column{TracksColumns[2]},
 				RefColumns: []*schema.Column{AlbumsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -74,6 +81,56 @@ var (
 		Name:       "users",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
+	}
+	// ArtistTracksColumns holds the columns for the "artist_tracks" table.
+	ArtistTracksColumns = []*schema.Column{
+		{Name: "artist_id", Type: field.TypeString},
+		{Name: "track_id", Type: field.TypeString},
+	}
+	// ArtistTracksTable holds the schema information for the "artist_tracks" table.
+	ArtistTracksTable = &schema.Table{
+		Name:       "artist_tracks",
+		Columns:    ArtistTracksColumns,
+		PrimaryKey: []*schema.Column{ArtistTracksColumns[0], ArtistTracksColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "artist_tracks_artist_id",
+				Columns:    []*schema.Column{ArtistTracksColumns[0]},
+				RefColumns: []*schema.Column{ArtistsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "artist_tracks_track_id",
+				Columns:    []*schema.Column{ArtistTracksColumns[1]},
+				RefColumns: []*schema.Column{TracksColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
+	// ArtistAlbumsColumns holds the columns for the "artist_albums" table.
+	ArtistAlbumsColumns = []*schema.Column{
+		{Name: "artist_id", Type: field.TypeString},
+		{Name: "album_id", Type: field.TypeString},
+	}
+	// ArtistAlbumsTable holds the schema information for the "artist_albums" table.
+	ArtistAlbumsTable = &schema.Table{
+		Name:       "artist_albums",
+		Columns:    ArtistAlbumsColumns,
+		PrimaryKey: []*schema.Column{ArtistAlbumsColumns[0], ArtistAlbumsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "artist_albums_artist_id",
+				Columns:    []*schema.Column{ArtistAlbumsColumns[0]},
+				RefColumns: []*schema.Column{ArtistsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "artist_albums_album_id",
+				Columns:    []*schema.Column{ArtistAlbumsColumns[1]},
+				RefColumns: []*schema.Column{AlbumsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
 	}
 	// UserSavedTracksColumns holds the columns for the "user_savedTracks" table.
 	UserSavedTracksColumns = []*schema.Column{
@@ -103,9 +160,12 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AlbumsTable,
+		ArtistsTable,
 		PlaylistsTable,
 		TracksTable,
 		UsersTable,
+		ArtistTracksTable,
+		ArtistAlbumsTable,
 		UserSavedTracksTable,
 	}
 )
@@ -113,6 +173,10 @@ var (
 func init() {
 	PlaylistsTable.ForeignKeys[0].RefTable = UsersTable
 	TracksTable.ForeignKeys[0].RefTable = AlbumsTable
+	ArtistTracksTable.ForeignKeys[0].RefTable = ArtistsTable
+	ArtistTracksTable.ForeignKeys[1].RefTable = TracksTable
+	ArtistAlbumsTable.ForeignKeys[0].RefTable = ArtistsTable
+	ArtistAlbumsTable.ForeignKeys[1].RefTable = AlbumsTable
 	UserSavedTracksTable.ForeignKeys[0].RefTable = UsersTable
 	UserSavedTracksTable.ForeignKeys[1].RefTable = TracksTable
 }

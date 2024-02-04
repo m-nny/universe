@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/m-nny/universe/ent/album"
+	"github.com/m-nny/universe/ent/artist"
 	"github.com/m-nny/universe/ent/track"
 	"github.com/m-nny/universe/ent/user"
 )
@@ -27,18 +28,6 @@ type TrackCreate struct {
 // SetName sets the "name" field.
 func (tc *TrackCreate) SetName(s string) *TrackCreate {
 	tc.mutation.SetName(s)
-	return tc
-}
-
-// SetArtistNames sets the "artistNames" field.
-func (tc *TrackCreate) SetArtistNames(s []string) *TrackCreate {
-	tc.mutation.SetArtistNames(s)
-	return tc
-}
-
-// SetArtistIds sets the "artistIds" field.
-func (tc *TrackCreate) SetArtistIds(s []string) *TrackCreate {
-	tc.mutation.SetArtistIds(s)
 	return tc
 }
 
@@ -82,6 +71,21 @@ func (tc *TrackCreate) SetAlbum(a *Album) *TrackCreate {
 	return tc.SetAlbumID(a.ID)
 }
 
+// AddArtistIDs adds the "artists" edge to the Artist entity by IDs.
+func (tc *TrackCreate) AddArtistIDs(ids ...string) *TrackCreate {
+	tc.mutation.AddArtistIDs(ids...)
+	return tc
+}
+
+// AddArtists adds the "artists" edges to the Artist entity.
+func (tc *TrackCreate) AddArtists(a ...*Artist) *TrackCreate {
+	ids := make([]string, len(a))
+	for i := range a {
+		ids[i] = a[i].ID
+	}
+	return tc.AddArtistIDs(ids...)
+}
+
 // Mutation returns the TrackMutation object of the builder.
 func (tc *TrackCreate) Mutation() *TrackMutation {
 	return tc.mutation
@@ -123,12 +127,6 @@ func (tc *TrackCreate) check() error {
 		if err := track.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Track.name": %w`, err)}
 		}
-	}
-	if _, ok := tc.mutation.ArtistNames(); !ok {
-		return &ValidationError{Name: "artistNames", err: errors.New(`ent: missing required field "Track.artistNames"`)}
-	}
-	if _, ok := tc.mutation.ArtistIds(); !ok {
-		return &ValidationError{Name: "artistIds", err: errors.New(`ent: missing required field "Track.artistIds"`)}
 	}
 	if v, ok := tc.mutation.ID(); ok {
 		if err := track.IDValidator(v); err != nil {
@@ -175,14 +173,6 @@ func (tc *TrackCreate) createSpec() (*Track, *sqlgraph.CreateSpec) {
 		_spec.SetField(track.FieldName, field.TypeString, value)
 		_node.Name = value
 	}
-	if value, ok := tc.mutation.ArtistNames(); ok {
-		_spec.SetField(track.FieldArtistNames, field.TypeJSON, value)
-		_node.ArtistNames = value
-	}
-	if value, ok := tc.mutation.ArtistIds(); ok {
-		_spec.SetField(track.FieldArtistIds, field.TypeJSON, value)
-		_node.ArtistIds = value
-	}
 	if nodes := tc.mutation.SavedByIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -214,6 +204,22 @@ func (tc *TrackCreate) createSpec() (*Track, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.album_tracks = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.ArtistsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   track.ArtistsTable,
+			Columns: track.ArtistsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -280,30 +286,6 @@ func (u *TrackUpsert) UpdateName() *TrackUpsert {
 	return u
 }
 
-// SetArtistNames sets the "artistNames" field.
-func (u *TrackUpsert) SetArtistNames(v []string) *TrackUpsert {
-	u.Set(track.FieldArtistNames, v)
-	return u
-}
-
-// UpdateArtistNames sets the "artistNames" field to the value that was provided on create.
-func (u *TrackUpsert) UpdateArtistNames() *TrackUpsert {
-	u.SetExcluded(track.FieldArtistNames)
-	return u
-}
-
-// SetArtistIds sets the "artistIds" field.
-func (u *TrackUpsert) SetArtistIds(v []string) *TrackUpsert {
-	u.Set(track.FieldArtistIds, v)
-	return u
-}
-
-// UpdateArtistIds sets the "artistIds" field to the value that was provided on create.
-func (u *TrackUpsert) UpdateArtistIds() *TrackUpsert {
-	u.SetExcluded(track.FieldArtistIds)
-	return u
-}
-
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -363,34 +345,6 @@ func (u *TrackUpsertOne) SetName(v string) *TrackUpsertOne {
 func (u *TrackUpsertOne) UpdateName() *TrackUpsertOne {
 	return u.Update(func(s *TrackUpsert) {
 		s.UpdateName()
-	})
-}
-
-// SetArtistNames sets the "artistNames" field.
-func (u *TrackUpsertOne) SetArtistNames(v []string) *TrackUpsertOne {
-	return u.Update(func(s *TrackUpsert) {
-		s.SetArtistNames(v)
-	})
-}
-
-// UpdateArtistNames sets the "artistNames" field to the value that was provided on create.
-func (u *TrackUpsertOne) UpdateArtistNames() *TrackUpsertOne {
-	return u.Update(func(s *TrackUpsert) {
-		s.UpdateArtistNames()
-	})
-}
-
-// SetArtistIds sets the "artistIds" field.
-func (u *TrackUpsertOne) SetArtistIds(v []string) *TrackUpsertOne {
-	return u.Update(func(s *TrackUpsert) {
-		s.SetArtistIds(v)
-	})
-}
-
-// UpdateArtistIds sets the "artistIds" field to the value that was provided on create.
-func (u *TrackUpsertOne) UpdateArtistIds() *TrackUpsertOne {
-	return u.Update(func(s *TrackUpsert) {
-		s.UpdateArtistIds()
 	})
 }
 
@@ -619,34 +573,6 @@ func (u *TrackUpsertBulk) SetName(v string) *TrackUpsertBulk {
 func (u *TrackUpsertBulk) UpdateName() *TrackUpsertBulk {
 	return u.Update(func(s *TrackUpsert) {
 		s.UpdateName()
-	})
-}
-
-// SetArtistNames sets the "artistNames" field.
-func (u *TrackUpsertBulk) SetArtistNames(v []string) *TrackUpsertBulk {
-	return u.Update(func(s *TrackUpsert) {
-		s.SetArtistNames(v)
-	})
-}
-
-// UpdateArtistNames sets the "artistNames" field to the value that was provided on create.
-func (u *TrackUpsertBulk) UpdateArtistNames() *TrackUpsertBulk {
-	return u.Update(func(s *TrackUpsert) {
-		s.UpdateArtistNames()
-	})
-}
-
-// SetArtistIds sets the "artistIds" field.
-func (u *TrackUpsertBulk) SetArtistIds(v []string) *TrackUpsertBulk {
-	return u.Update(func(s *TrackUpsert) {
-		s.SetArtistIds(v)
-	})
-}
-
-// UpdateArtistIds sets the "artistIds" field to the value that was provided on create.
-func (u *TrackUpsertBulk) UpdateArtistIds() *TrackUpsertBulk {
-	return u.Update(func(s *TrackUpsert) {
-		s.UpdateArtistIds()
 	})
 }
 
