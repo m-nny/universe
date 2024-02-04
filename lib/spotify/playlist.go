@@ -10,7 +10,7 @@ import (
 	"github.com/zmb3/spotify/v2"
 )
 
-func (s *SpotfyClient) GetAllPlaylists(ctx context.Context) ([]*ent.Playlist, error) {
+func (s *Service) GetAllPlaylists(ctx context.Context) ([]*ent.Playlist, error) {
 	plists, err := s.getUserPlaylists(ctx)
 	if err == nil && len(plists) > 0 {
 		return plists, nil
@@ -24,8 +24,8 @@ func (s *SpotfyClient) GetAllPlaylists(ctx context.Context) ([]*ent.Playlist, er
 	}
 	return s.getUserPlaylists(ctx)
 }
-func (s *SpotfyClient) _GetAllPlaylists(ctx context.Context) (playlists []spotify.SimplePlaylist, err error) {
-	for resp, err := s.client.CurrentUsersPlaylists(ctx); err == nil; err = s.client.NextPage(ctx, resp) {
+func (s *Service) _GetAllPlaylists(ctx context.Context) (playlists []spotify.SimplePlaylist, err error) {
+	for resp, err := s.spotify.CurrentUsersPlaylists(ctx); err == nil; err = s.spotify.NextPage(ctx, resp) {
 		log.Printf("len(resp.Tracks)=%d", len(resp.Playlists))
 		playlists = append(playlists, resp.Playlists...)
 	}
@@ -35,7 +35,7 @@ func (s *SpotfyClient) _GetAllPlaylists(ctx context.Context) (playlists []spotif
 	return playlists, nil
 }
 
-func (s *SpotfyClient) getUserPlaylists(ctx context.Context) ([]*ent.Playlist, error) {
+func (s *Service) getUserPlaylists(ctx context.Context) ([]*ent.Playlist, error) {
 	plists, err := s.ent.User.
 		Query().
 		Where(user.ID(rootUserName)).
@@ -44,7 +44,7 @@ func (s *SpotfyClient) getUserPlaylists(ctx context.Context) ([]*ent.Playlist, e
 	return plists, err
 }
 
-func (s *SpotfyClient) saveUserPlaylists(ctx context.Context, rawPlists []spotify.SimplePlaylist) error {
+func (s *Service) saveUserPlaylists(ctx context.Context, rawPlists []spotify.SimplePlaylist) error {
 	err := s.ent.Playlist.
 		MapCreateBulk(rawPlists, func(pc *ent.PlaylistCreate, i int) {
 			p := rawPlists[i]

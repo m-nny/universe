@@ -12,9 +12,9 @@ import (
 
 type ID = spotify.ID
 
-type SpotfyClient struct {
-	ent    *ent.Client
-	client *spotify.Client
+type Service struct {
+	ent     *ent.Client
+	spotify *spotify.Client
 }
 
 type Config struct {
@@ -41,7 +41,7 @@ func LoadConfig() (*Config, error) {
 	return c, nil
 }
 
-func New(ctx context.Context, config *Config, ent *ent.Client) (*SpotfyClient, error) {
+func New(ctx context.Context, config *Config, ent *ent.Client) (*Service, error) {
 	auth := spotifyauth.New(
 		spotifyauth.WithClientID(config.ClientId),
 		spotifyauth.WithClientSecret(config.ClientSecret),
@@ -53,8 +53,8 @@ func New(ctx context.Context, config *Config, ent *ent.Client) (*SpotfyClient, e
 		return nil, err
 	}
 	client := spotify.New(auth.Client(ctx, token))
-	return &SpotfyClient{
-		ent:    ent,
-		client: client,
+	return &Service{
+		ent:     ent,
+		spotify: client,
 	}, nil
 }

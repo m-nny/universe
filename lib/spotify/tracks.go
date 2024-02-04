@@ -37,15 +37,15 @@ func getTrack(savedTrack spotify.SavedTrack) *Track {
 	return track
 }
 
-func (s *SpotfyClient) GetAllTracks(ctx context.Context) ([]*Track, error) {
+func (s *Service) GetAllTracks(ctx context.Context) ([]*Track, error) {
 	return jsoncache.CachedExec("spotify_savedTracks", func() ([]*Track, error) {
 		return s._GetAllTracks(ctx)
 	})
 }
-func (s *SpotfyClient) _GetAllTracks(ctx context.Context) ([]*Track, error) {
+func (s *Service) _GetAllTracks(ctx context.Context) ([]*Track, error) {
 	var allTracks []*Track
 	var err error
-	for resp, err := s.client.CurrentUsersTracks(ctx, spotify.Limit(50)); err == nil; err = s.client.NextPage(ctx, resp) {
+	for resp, err := s.spotify.CurrentUsersTracks(ctx, spotify.Limit(50)); err == nil; err = s.spotify.NextPage(ctx, resp) {
 		log.Printf("len(resp.Tracks)=%d", len(resp.Tracks))
 		allTracks = append(allTracks, utils.SliceMap(resp.Tracks, getTrack)...)
 	}
