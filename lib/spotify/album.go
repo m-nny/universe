@@ -3,23 +3,36 @@ package spotify
 import (
 	"context"
 
+	"github.com/m-nny/universe/ent"
+	"github.com/m-nny/universe/ent/album"
 	"github.com/zmb3/spotify/v2"
 )
 
-func (s *Service) toAlbum(ctx context.Context, t spotify.SimpleAlbum) (string, error) {
-	artistIds, err := s.toArtists(ctx, t.Artists)
-	if err != nil {
-		return "", err
-	}
-	return s.ent.Album.Create().
-		SetID(string(t.ID)).
-		SetName(string(t.Name)).
-		AddArtistIDs(artistIds...).
-		OnConflict().
-		UpdateNewValues().
-		ID(ctx)
+func (s *Service) getAlbumFromSpotify(ctx context.Context, t spotify.SimpleAlbum) (*ent.Album, error) {
+	return s.ent.Album.
+		Query().
+		Where(album.SpotifyIdContains(string(t.ID))).
+		Only(ctx)
 }
 
-// func (s *Service) toAlbums(ctx context.Context, rawAlbums []spotify.SimpleAlbum) ([]string, error) {
-// 	return utils.SliceMapCtxErr(ctx, rawAlbums, s.toAlbum)
-// }
+func (s *Service) toAlbum(ctx context.Context, a spotify.SimpleAlbum) (int, error) {
+	// Check if already have it
+	if album, err := s.getAlbumFromSpotify(ctx, a); err == nil {
+		return album.ID, nil
+	}
+
+	artistIds, err := s.toArtists(ctx, a.Artists)
+	if err != nil {
+		return 0, err
+	}
+	spotifyIds := []string{string(a.ID)}
+	album, err := s.ent.Album.Create().
+		SetSpotifyIds(spotifyIds).
+		SetName(string(a.Name)).
+		AddArtistIDs(artistIds...).
+		Save(ctx)
+	if err != nil {
+		return 0, err
+	}
+	return album.ID, nil
+}

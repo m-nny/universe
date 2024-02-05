@@ -9,58 +9,48 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id string) predicate.Album {
+func ID(id int) predicate.Album {
 	return predicate.Album(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id string) predicate.Album {
+func IDEQ(id int) predicate.Album {
 	return predicate.Album(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id string) predicate.Album {
+func IDNEQ(id int) predicate.Album {
 	return predicate.Album(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...string) predicate.Album {
+func IDIn(ids ...int) predicate.Album {
 	return predicate.Album(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...string) predicate.Album {
+func IDNotIn(ids ...int) predicate.Album {
 	return predicate.Album(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id string) predicate.Album {
+func IDGT(id int) predicate.Album {
 	return predicate.Album(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id string) predicate.Album {
+func IDGTE(id int) predicate.Album {
 	return predicate.Album(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id string) predicate.Album {
+func IDLT(id int) predicate.Album {
 	return predicate.Album(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id string) predicate.Album {
+func IDLTE(id int) predicate.Album {
 	return predicate.Album(sql.FieldLTE(FieldID, id))
-}
-
-// IDEqualFold applies the EqualFold predicate on the ID field.
-func IDEqualFold(id string) predicate.Album {
-	return predicate.Album(sql.FieldEqualFold(FieldID, id))
-}
-
-// IDContainsFold applies the ContainsFold predicate on the ID field.
-func IDContainsFold(id string) predicate.Album {
-	return predicate.Album(sql.FieldContainsFold(FieldID, id))
 }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.

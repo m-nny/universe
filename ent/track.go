@@ -22,7 +22,7 @@ type Track struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TrackQuery when eager-loading is set.
 	Edges        TrackEdges `json:"edges"`
-	album_tracks *string
+	album_tracks *int
 	selectValues sql.SelectValues
 }
 
@@ -78,7 +78,7 @@ func (*Track) scanValues(columns []string) ([]any, error) {
 		case track.FieldID, track.FieldName:
 			values[i] = new(sql.NullString)
 		case track.ForeignKeys[0]: // album_tracks
-			values[i] = new(sql.NullString)
+			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -107,11 +107,11 @@ func (t *Track) assignValues(columns []string, values []any) error {
 				t.Name = value.String
 			}
 		case track.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field album_tracks", values[i])
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field album_tracks", value)
 			} else if value.Valid {
-				t.album_tracks = new(string)
-				*t.album_tracks = value.String
+				t.album_tracks = new(int)
+				*t.album_tracks = int(value.Int64)
 			}
 		default:
 			t.selectValues.Set(columns[i], values[i])

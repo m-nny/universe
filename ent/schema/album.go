@@ -14,7 +14,7 @@ type Album struct {
 // Fields of the Album.
 func (Album) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("id").NotEmpty(),
+		field.Strings("spotifyIds"),
 		field.String("name").NotEmpty(),
 	}
 }

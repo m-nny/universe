@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -24,15 +23,15 @@ type AlbumCreate struct {
 	conflict []sql.ConflictOption
 }
 
-// SetName sets the "name" field.
-func (ac *AlbumCreate) SetName(s string) *AlbumCreate {
-	ac.mutation.SetName(s)
+// SetSpotifyIds sets the "spotifyIds" field.
+func (ac *AlbumCreate) SetSpotifyIds(s []string) *AlbumCreate {
+	ac.mutation.SetSpotifyIds(s)
 	return ac
 }
 
-// SetID sets the "id" field.
-func (ac *AlbumCreate) SetID(s string) *AlbumCreate {
-	ac.mutation.SetID(s)
+// SetName sets the "name" field.
+func (ac *AlbumCreate) SetName(s string) *AlbumCreate {
+	ac.mutation.SetName(s)
 	return ac
 }
 
@@ -100,17 +99,15 @@ func (ac *AlbumCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (ac *AlbumCreate) check() error {
+	if _, ok := ac.mutation.SpotifyIds(); !ok {
+		return &ValidationError{Name: "spotifyIds", err: errors.New(`ent: missing required field "Album.spotifyIds"`)}
+	}
 	if _, ok := ac.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Album.name"`)}
 	}
 	if v, ok := ac.mutation.Name(); ok {
 		if err := album.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Album.name": %w`, err)}
-		}
-	}
-	if v, ok := ac.mutation.ID(); ok {
-		if err := album.IDValidator(v); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Album.id": %w`, err)}
 		}
 	}
 	return nil
@@ -127,13 +124,8 @@ func (ac *AlbumCreate) sqlSave(ctx context.Context) (*Album, error) {
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(string); ok {
-			_node.ID = id
-		} else {
-			return nil, fmt.Errorf("unexpected Album.ID type: %T", _spec.ID.Value)
-		}
-	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
 	ac.mutation.id = &_node.ID
 	ac.mutation.done = true
 	return _node, nil
@@ -142,12 +134,12 @@ func (ac *AlbumCreate) sqlSave(ctx context.Context) (*Album, error) {
 func (ac *AlbumCreate) createSpec() (*Album, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Album{config: ac.config}
-		_spec = sqlgraph.NewCreateSpec(album.Table, sqlgraph.NewFieldSpec(album.FieldID, field.TypeString))
+		_spec = sqlgraph.NewCreateSpec(album.Table, sqlgraph.NewFieldSpec(album.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = ac.conflict
-	if id, ok := ac.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
+	if value, ok := ac.mutation.SpotifyIds(); ok {
+		_spec.SetField(album.FieldSpotifyIds, field.TypeJSON, value)
+		_node.SpotifyIds = value
 	}
 	if value, ok := ac.mutation.Name(); ok {
 		_spec.SetField(album.FieldName, field.TypeString, value)
@@ -192,7 +184,7 @@ func (ac *AlbumCreate) createSpec() (*Album, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.Album.Create().
-//		SetName(v).
+//		SetSpotifyIds(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -201,7 +193,7 @@ func (ac *AlbumCreate) createSpec() (*Album, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.AlbumUpsert) {
-//			SetName(v+v).
+//			SetSpotifyIds(v+v).
 //		}).
 //		Exec(ctx)
 func (ac *AlbumCreate) OnConflict(opts ...sql.ConflictOption) *AlbumUpsertOne {
@@ -237,6 +229,18 @@ type (
 	}
 )
 
+// SetSpotifyIds sets the "spotifyIds" field.
+func (u *AlbumUpsert) SetSpotifyIds(v []string) *AlbumUpsert {
+	u.Set(album.FieldSpotifyIds, v)
+	return u
+}
+
+// UpdateSpotifyIds sets the "spotifyIds" field to the value that was provided on create.
+func (u *AlbumUpsert) UpdateSpotifyIds() *AlbumUpsert {
+	u.SetExcluded(album.FieldSpotifyIds)
+	return u
+}
+
 // SetName sets the "name" field.
 func (u *AlbumUpsert) SetName(v string) *AlbumUpsert {
 	u.Set(album.FieldName, v)
@@ -249,24 +253,16 @@ func (u *AlbumUpsert) UpdateName() *AlbumUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
 //	client.Album.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
-//			sql.ResolveWith(func(u *sql.UpdateSet) {
-//				u.SetIgnore(album.FieldID)
-//			}),
 //		).
 //		Exec(ctx)
 func (u *AlbumUpsertOne) UpdateNewValues() *AlbumUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
-		if _, exists := u.create.mutation.ID(); exists {
-			s.SetIgnore(album.FieldID)
-		}
-	}))
 	return u
 }
 
@@ -295,6 +291,20 @@ func (u *AlbumUpsertOne) Update(set func(*AlbumUpsert)) *AlbumUpsertOne {
 		set(&AlbumUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetSpotifyIds sets the "spotifyIds" field.
+func (u *AlbumUpsertOne) SetSpotifyIds(v []string) *AlbumUpsertOne {
+	return u.Update(func(s *AlbumUpsert) {
+		s.SetSpotifyIds(v)
+	})
+}
+
+// UpdateSpotifyIds sets the "spotifyIds" field to the value that was provided on create.
+func (u *AlbumUpsertOne) UpdateSpotifyIds() *AlbumUpsertOne {
+	return u.Update(func(s *AlbumUpsert) {
+		s.UpdateSpotifyIds()
+	})
 }
 
 // SetName sets the "name" field.
@@ -327,12 +337,7 @@ func (u *AlbumUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *AlbumUpsertOne) ID(ctx context.Context) (id string, err error) {
-	if u.create.driver.Dialect() == dialect.MySQL {
-		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
-		// fields from the database since MySQL does not support the RETURNING clause.
-		return id, errors.New("ent: AlbumUpsertOne.ID is not supported by MySQL driver. Use AlbumUpsertOne.Exec instead")
-	}
+func (u *AlbumUpsertOne) ID(ctx context.Context) (id int, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -341,7 +346,7 @@ func (u *AlbumUpsertOne) ID(ctx context.Context) (id string, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *AlbumUpsertOne) IDX(ctx context.Context) string {
+func (u *AlbumUpsertOne) IDX(ctx context.Context) int {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -395,6 +400,10 @@ func (acb *AlbumCreateBulk) Save(ctx context.Context) ([]*Album, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
+				if specs[i].ID.Value != nil {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = int(id)
+				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -446,7 +455,7 @@ func (acb *AlbumCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.AlbumUpsert) {
-//			SetName(v+v).
+//			SetSpotifyIds(v+v).
 //		}).
 //		Exec(ctx)
 func (acb *AlbumCreateBulk) OnConflict(opts ...sql.ConflictOption) *AlbumUpsertBulk {
@@ -481,20 +490,10 @@ type AlbumUpsertBulk struct {
 //	client.Album.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
-//			sql.ResolveWith(func(u *sql.UpdateSet) {
-//				u.SetIgnore(album.FieldID)
-//			}),
 //		).
 //		Exec(ctx)
 func (u *AlbumUpsertBulk) UpdateNewValues() *AlbumUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
-		for _, b := range u.create.builders {
-			if _, exists := b.mutation.ID(); exists {
-				s.SetIgnore(album.FieldID)
-			}
-		}
-	}))
 	return u
 }
 
@@ -523,6 +522,20 @@ func (u *AlbumUpsertBulk) Update(set func(*AlbumUpsert)) *AlbumUpsertBulk {
 		set(&AlbumUpsert{UpdateSet: update})
 	}))
 	return u
+}
+
+// SetSpotifyIds sets the "spotifyIds" field.
+func (u *AlbumUpsertBulk) SetSpotifyIds(v []string) *AlbumUpsertBulk {
+	return u.Update(func(s *AlbumUpsert) {
+		s.SetSpotifyIds(v)
+	})
+}
+
+// UpdateSpotifyIds sets the "spotifyIds" field to the value that was provided on create.
+func (u *AlbumUpsertBulk) UpdateSpotifyIds() *AlbumUpsertBulk {
+	return u.Update(func(s *AlbumUpsert) {
+		s.UpdateSpotifyIds()
+	})
 }
 
 // SetName sets the "name" field.

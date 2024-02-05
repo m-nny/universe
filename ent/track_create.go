@@ -53,13 +53,13 @@ func (tc *TrackCreate) AddSavedBy(u ...*User) *TrackCreate {
 }
 
 // SetAlbumID sets the "album" edge to the Album entity by ID.
-func (tc *TrackCreate) SetAlbumID(id string) *TrackCreate {
+func (tc *TrackCreate) SetAlbumID(id int) *TrackCreate {
 	tc.mutation.SetAlbumID(id)
 	return tc
 }
 
 // SetNillableAlbumID sets the "album" edge to the Album entity by ID if the given value is not nil.
-func (tc *TrackCreate) SetNillableAlbumID(id *string) *TrackCreate {
+func (tc *TrackCreate) SetNillableAlbumID(id *int) *TrackCreate {
 	if id != nil {
 		tc = tc.SetAlbumID(*id)
 	}
@@ -197,7 +197,7 @@ func (tc *TrackCreate) createSpec() (*Track, *sqlgraph.CreateSpec) {
 			Columns: []string{track.AlbumColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(album.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(album.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

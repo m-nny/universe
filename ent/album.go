@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -15,7 +16,9 @@ import (
 type Album struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
+	// SpotifyIds holds the value of the "spotifyIds" field.
+	SpotifyIds []string `json:"spotifyIds,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -58,7 +61,11 @@ func (*Album) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case album.FieldID, album.FieldName:
+		case album.FieldSpotifyIds:
+			values[i] = new([]byte)
+		case album.FieldID:
+			values[i] = new(sql.NullInt64)
+		case album.FieldName:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -76,10 +83,18 @@ func (a *Album) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case album.FieldID:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value.Valid {
-				a.ID = value.String
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			a.ID = int(value.Int64)
+		case album.FieldSpotifyIds:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field spotifyIds", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &a.SpotifyIds); err != nil {
+					return fmt.Errorf("unmarshal field spotifyIds: %w", err)
+				}
 			}
 		case album.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -133,6 +148,9 @@ func (a *Album) String() string {
 	var builder strings.Builder
 	builder.WriteString("Album(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", a.ID))
+	builder.WriteString("spotifyIds=")
+	builder.WriteString(fmt.Sprintf("%v", a.SpotifyIds))
+	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(a.Name)
 	builder.WriteByte(')')

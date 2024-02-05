@@ -298,7 +298,7 @@ func (c *AlbumClient) UpdateOne(a *Album) *AlbumUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *AlbumClient) UpdateOneID(id string) *AlbumUpdateOne {
+func (c *AlbumClient) UpdateOneID(id int) *AlbumUpdateOne {
 	mutation := newAlbumMutation(c.config, OpUpdateOne, withAlbumID(id))
 	return &AlbumUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -315,7 +315,7 @@ func (c *AlbumClient) DeleteOne(a *Album) *AlbumDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *AlbumClient) DeleteOneID(id string) *AlbumDeleteOne {
+func (c *AlbumClient) DeleteOneID(id int) *AlbumDeleteOne {
 	builder := c.Delete().Where(album.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -332,12 +332,12 @@ func (c *AlbumClient) Query() *AlbumQuery {
 }
 
 // Get returns a Album entity by its id.
-func (c *AlbumClient) Get(ctx context.Context, id string) (*Album, error) {
+func (c *AlbumClient) Get(ctx context.Context, id int) (*Album, error) {
 	return c.Query().Where(album.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *AlbumClient) GetX(ctx context.Context, id string) *Album {
+func (c *AlbumClient) GetX(ctx context.Context, id int) *Album {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)

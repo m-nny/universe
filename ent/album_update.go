@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/m-nny/universe/ent/album"
 	"github.com/m-nny/universe/ent/artist"
@@ -26,6 +27,18 @@ type AlbumUpdate struct {
 // Where appends a list predicates to the AlbumUpdate builder.
 func (au *AlbumUpdate) Where(ps ...predicate.Album) *AlbumUpdate {
 	au.mutation.Where(ps...)
+	return au
+}
+
+// SetSpotifyIds sets the "spotifyIds" field.
+func (au *AlbumUpdate) SetSpotifyIds(s []string) *AlbumUpdate {
+	au.mutation.SetSpotifyIds(s)
+	return au
+}
+
+// AppendSpotifyIds appends s to the "spotifyIds" field.
+func (au *AlbumUpdate) AppendSpotifyIds(s []string) *AlbumUpdate {
+	au.mutation.AppendSpotifyIds(s)
 	return au
 }
 
@@ -161,13 +174,21 @@ func (au *AlbumUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := au.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(album.Table, album.Columns, sqlgraph.NewFieldSpec(album.FieldID, field.TypeString))
+	_spec := sqlgraph.NewUpdateSpec(album.Table, album.Columns, sqlgraph.NewFieldSpec(album.FieldID, field.TypeInt))
 	if ps := au.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := au.mutation.SpotifyIds(); ok {
+		_spec.SetField(album.FieldSpotifyIds, field.TypeJSON, value)
+	}
+	if value, ok := au.mutation.AppendedSpotifyIds(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, album.FieldSpotifyIds, value)
+		})
 	}
 	if value, ok := au.mutation.Name(); ok {
 		_spec.SetField(album.FieldName, field.TypeString, value)
@@ -280,6 +301,18 @@ type AlbumUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *AlbumMutation
+}
+
+// SetSpotifyIds sets the "spotifyIds" field.
+func (auo *AlbumUpdateOne) SetSpotifyIds(s []string) *AlbumUpdateOne {
+	auo.mutation.SetSpotifyIds(s)
+	return auo
+}
+
+// AppendSpotifyIds appends s to the "spotifyIds" field.
+func (auo *AlbumUpdateOne) AppendSpotifyIds(s []string) *AlbumUpdateOne {
+	auo.mutation.AppendSpotifyIds(s)
+	return auo
 }
 
 // SetName sets the "name" field.
@@ -427,7 +460,7 @@ func (auo *AlbumUpdateOne) sqlSave(ctx context.Context) (_node *Album, err error
 	if err := auo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(album.Table, album.Columns, sqlgraph.NewFieldSpec(album.FieldID, field.TypeString))
+	_spec := sqlgraph.NewUpdateSpec(album.Table, album.Columns, sqlgraph.NewFieldSpec(album.FieldID, field.TypeInt))
 	id, ok := auo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Album.id" for update`)}
@@ -451,6 +484,14 @@ func (auo *AlbumUpdateOne) sqlSave(ctx context.Context) (_node *Album, err error
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := auo.mutation.SpotifyIds(); ok {
+		_spec.SetField(album.FieldSpotifyIds, field.TypeJSON, value)
+	}
+	if value, ok := auo.mutation.AppendedSpotifyIds(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, album.FieldSpotifyIds, value)
+		})
 	}
 	if value, ok := auo.mutation.Name(); ok {
 		_spec.SetField(album.FieldName, field.TypeString, value)

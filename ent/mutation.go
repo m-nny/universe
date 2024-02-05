@@ -38,20 +38,22 @@ const (
 // AlbumMutation represents an operation that mutates the Album nodes in the graph.
 type AlbumMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *string
-	name           *string
-	clearedFields  map[string]struct{}
-	tracks         map[string]struct{}
-	removedtracks  map[string]struct{}
-	clearedtracks  bool
-	artists        map[int]struct{}
-	removedartists map[int]struct{}
-	clearedartists bool
-	done           bool
-	oldValue       func(context.Context) (*Album, error)
-	predicates     []predicate.Album
+	op               Op
+	typ              string
+	id               *int
+	spotifyIds       *[]string
+	appendspotifyIds []string
+	name             *string
+	clearedFields    map[string]struct{}
+	tracks           map[string]struct{}
+	removedtracks    map[string]struct{}
+	clearedtracks    bool
+	artists          map[int]struct{}
+	removedartists   map[int]struct{}
+	clearedartists   bool
+	done             bool
+	oldValue         func(context.Context) (*Album, error)
+	predicates       []predicate.Album
 }
 
 var _ ent.Mutation = (*AlbumMutation)(nil)
@@ -74,7 +76,7 @@ func newAlbumMutation(c config, op Op, opts ...albumOption) *AlbumMutation {
 }
 
 // withAlbumID sets the ID field of the mutation.
-func withAlbumID(id string) albumOption {
+func withAlbumID(id int) albumOption {
 	return func(m *AlbumMutation) {
 		var (
 			err   error
@@ -124,15 +126,9 @@ func (m AlbumMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of Album entities.
-func (m *AlbumMutation) SetID(id string) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *AlbumMutation) ID() (id string, exists bool) {
+func (m *AlbumMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -143,12 +139,12 @@ func (m *AlbumMutation) ID() (id string, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *AlbumMutation) IDs(ctx context.Context) ([]string, error) {
+func (m *AlbumMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []string{id}, nil
+			return []int{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -156,6 +152,57 @@ func (m *AlbumMutation) IDs(ctx context.Context) ([]string, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetSpotifyIds sets the "spotifyIds" field.
+func (m *AlbumMutation) SetSpotifyIds(s []string) {
+	m.spotifyIds = &s
+	m.appendspotifyIds = nil
+}
+
+// SpotifyIds returns the value of the "spotifyIds" field in the mutation.
+func (m *AlbumMutation) SpotifyIds() (r []string, exists bool) {
+	v := m.spotifyIds
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSpotifyIds returns the old "spotifyIds" field's value of the Album entity.
+// If the Album object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AlbumMutation) OldSpotifyIds(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSpotifyIds is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSpotifyIds requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSpotifyIds: %w", err)
+	}
+	return oldValue.SpotifyIds, nil
+}
+
+// AppendSpotifyIds adds s to the "spotifyIds" field.
+func (m *AlbumMutation) AppendSpotifyIds(s []string) {
+	m.appendspotifyIds = append(m.appendspotifyIds, s...)
+}
+
+// AppendedSpotifyIds returns the list of values that were appended to the "spotifyIds" field in this mutation.
+func (m *AlbumMutation) AppendedSpotifyIds() ([]string, bool) {
+	if len(m.appendspotifyIds) == 0 {
+		return nil, false
+	}
+	return m.appendspotifyIds, true
+}
+
+// ResetSpotifyIds resets all changes to the "spotifyIds" field.
+func (m *AlbumMutation) ResetSpotifyIds() {
+	m.spotifyIds = nil
+	m.appendspotifyIds = nil
 }
 
 // SetName sets the "name" field.
@@ -336,7 +383,10 @@ func (m *AlbumMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AlbumMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 2)
+	if m.spotifyIds != nil {
+		fields = append(fields, album.FieldSpotifyIds)
+	}
 	if m.name != nil {
 		fields = append(fields, album.FieldName)
 	}
@@ -348,6 +398,8 @@ func (m *AlbumMutation) Fields() []string {
 // schema.
 func (m *AlbumMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case album.FieldSpotifyIds:
+		return m.SpotifyIds()
 	case album.FieldName:
 		return m.Name()
 	}
@@ -359,6 +411,8 @@ func (m *AlbumMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *AlbumMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case album.FieldSpotifyIds:
+		return m.OldSpotifyIds(ctx)
 	case album.FieldName:
 		return m.OldName(ctx)
 	}
@@ -370,6 +424,13 @@ func (m *AlbumMutation) OldField(ctx context.Context, name string) (ent.Value, e
 // type.
 func (m *AlbumMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case album.FieldSpotifyIds:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSpotifyIds(v)
+		return nil
 	case album.FieldName:
 		v, ok := value.(string)
 		if !ok {
@@ -426,6 +487,9 @@ func (m *AlbumMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *AlbumMutation) ResetField(name string) error {
 	switch name {
+	case album.FieldSpotifyIds:
+		m.ResetSpotifyIds()
+		return nil
 	case album.FieldName:
 		m.ResetName()
 		return nil
@@ -555,8 +619,8 @@ type ArtistMutation struct {
 	tracks        map[string]struct{}
 	removedtracks map[string]struct{}
 	clearedtracks bool
-	albums        map[string]struct{}
-	removedalbums map[string]struct{}
+	albums        map[int]struct{}
+	removedalbums map[int]struct{}
 	clearedalbums bool
 	done          bool
 	oldValue      func(context.Context) (*Artist, error)
@@ -788,9 +852,9 @@ func (m *ArtistMutation) ResetTracks() {
 }
 
 // AddAlbumIDs adds the "albums" edge to the Album entity by ids.
-func (m *ArtistMutation) AddAlbumIDs(ids ...string) {
+func (m *ArtistMutation) AddAlbumIDs(ids ...int) {
 	if m.albums == nil {
-		m.albums = make(map[string]struct{})
+		m.albums = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.albums[ids[i]] = struct{}{}
@@ -808,9 +872,9 @@ func (m *ArtistMutation) AlbumsCleared() bool {
 }
 
 // RemoveAlbumIDs removes the "albums" edge to the Album entity by IDs.
-func (m *ArtistMutation) RemoveAlbumIDs(ids ...string) {
+func (m *ArtistMutation) RemoveAlbumIDs(ids ...int) {
 	if m.removedalbums == nil {
-		m.removedalbums = make(map[string]struct{})
+		m.removedalbums = make(map[int]struct{})
 	}
 	for i := range ids {
 		delete(m.albums, ids[i])
@@ -819,7 +883,7 @@ func (m *ArtistMutation) RemoveAlbumIDs(ids ...string) {
 }
 
 // RemovedAlbums returns the removed IDs of the "albums" edge to the Album entity.
-func (m *ArtistMutation) RemovedAlbumsIDs() (ids []string) {
+func (m *ArtistMutation) RemovedAlbumsIDs() (ids []int) {
 	for id := range m.removedalbums {
 		ids = append(ids, id)
 	}
@@ -827,7 +891,7 @@ func (m *ArtistMutation) RemovedAlbumsIDs() (ids []string) {
 }
 
 // AlbumsIDs returns the "albums" edge IDs in the mutation.
-func (m *ArtistMutation) AlbumsIDs() (ids []string) {
+func (m *ArtistMutation) AlbumsIDs() (ids []int) {
 	for id := range m.albums {
 		ids = append(ids, id)
 	}
@@ -1563,7 +1627,7 @@ type TrackMutation struct {
 	savedBy        map[string]struct{}
 	removedsavedBy map[string]struct{}
 	clearedsavedBy bool
-	album          *string
+	album          *int
 	clearedalbum   bool
 	artists        map[int]struct{}
 	removedartists map[int]struct{}
@@ -1768,7 +1832,7 @@ func (m *TrackMutation) ResetSavedBy() {
 }
 
 // SetAlbumID sets the "album" edge to the Album entity by id.
-func (m *TrackMutation) SetAlbumID(id string) {
+func (m *TrackMutation) SetAlbumID(id int) {
 	m.album = &id
 }
 
@@ -1783,7 +1847,7 @@ func (m *TrackMutation) AlbumCleared() bool {
 }
 
 // AlbumID returns the "album" edge ID in the mutation.
-func (m *TrackMutation) AlbumID() (id string, exists bool) {
+func (m *TrackMutation) AlbumID() (id int, exists bool) {
 	if m.album != nil {
 		return *m.album, true
 	}
@@ -1793,7 +1857,7 @@ func (m *TrackMutation) AlbumID() (id string, exists bool) {
 // AlbumIDs returns the "album" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // AlbumID instead. It exists only for internal usage by the builders.
-func (m *TrackMutation) AlbumIDs() (ids []string) {
+func (m *TrackMutation) AlbumIDs() (ids []int) {
 	if id := m.album; id != nil {
 		ids = append(ids, *id)
 	}

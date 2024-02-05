@@ -12,6 +12,8 @@ const (
 	Label = "album"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldSpotifyIds holds the string denoting the spotifyids field in the database.
+	FieldSpotifyIds = "spotify_ids"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// EdgeTracks holds the string denoting the tracks edge name in mutations.
@@ -37,6 +39,7 @@ const (
 // Columns holds all SQL columns for album fields.
 var Columns = []string{
 	FieldID,
+	FieldSpotifyIds,
 	FieldName,
 }
 
@@ -59,8 +62,6 @@ func ValidColumn(column string) bool {
 var (
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
-	// IDValidator is a validator for the "id" field. It is called by the builders before save.
-	IDValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the Album queries.

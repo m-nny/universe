@@ -559,8 +559,8 @@ func (tq *TrackQuery) loadSavedBy(ctx context.Context, query *UserQuery, nodes [
 	return nil
 }
 func (tq *TrackQuery) loadAlbum(ctx context.Context, query *AlbumQuery, nodes []*Track, init func(*Track), assign func(*Track, *Album)) error {
-	ids := make([]string, 0, len(nodes))
-	nodeids := make(map[string][]*Track)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Track)
 	for i := range nodes {
 		if nodes[i].album_tracks == nil {
 			continue

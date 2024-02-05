@@ -510,7 +510,7 @@ func (aq *ArtistQuery) loadTracks(ctx context.Context, query *TrackQuery, nodes 
 func (aq *ArtistQuery) loadAlbums(ctx context.Context, query *AlbumQuery, nodes []*Artist, init func(*Artist), assign func(*Artist, *Album)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[int]*Artist)
-	nids := make(map[string]map[*Artist]struct{})
+	nids := make(map[int]map[*Artist]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -543,7 +543,7 @@ func (aq *ArtistQuery) loadAlbums(ctx context.Context, query *AlbumQuery, nodes 
 			}
 			spec.Assign = func(columns []string, values []any) error {
 				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := values[1].(*sql.NullString).String
+				inValue := int(values[1].(*sql.NullInt64).Int64)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*Artist]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
