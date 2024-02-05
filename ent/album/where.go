@@ -58,6 +58,11 @@ func Name(v string) predicate.Album {
 	return predicate.Album(sql.FieldEQ(FieldName, v))
 }
 
+// SimplifiedName applies equality check predicate on the "simplifiedName" field. It's identical to SimplifiedNameEQ.
+func SimplifiedName(v string) predicate.Album {
+	return predicate.Album(sql.FieldEQ(FieldSimplifiedName, v))
+}
+
 // NameEQ applies the EQ predicate on the "name" field.
 func NameEQ(v string) predicate.Album {
 	return predicate.Album(sql.FieldEQ(FieldName, v))
@@ -121,6 +126,71 @@ func NameEqualFold(v string) predicate.Album {
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.Album {
 	return predicate.Album(sql.FieldContainsFold(FieldName, v))
+}
+
+// SimplifiedNameEQ applies the EQ predicate on the "simplifiedName" field.
+func SimplifiedNameEQ(v string) predicate.Album {
+	return predicate.Album(sql.FieldEQ(FieldSimplifiedName, v))
+}
+
+// SimplifiedNameNEQ applies the NEQ predicate on the "simplifiedName" field.
+func SimplifiedNameNEQ(v string) predicate.Album {
+	return predicate.Album(sql.FieldNEQ(FieldSimplifiedName, v))
+}
+
+// SimplifiedNameIn applies the In predicate on the "simplifiedName" field.
+func SimplifiedNameIn(vs ...string) predicate.Album {
+	return predicate.Album(sql.FieldIn(FieldSimplifiedName, vs...))
+}
+
+// SimplifiedNameNotIn applies the NotIn predicate on the "simplifiedName" field.
+func SimplifiedNameNotIn(vs ...string) predicate.Album {
+	return predicate.Album(sql.FieldNotIn(FieldSimplifiedName, vs...))
+}
+
+// SimplifiedNameGT applies the GT predicate on the "simplifiedName" field.
+func SimplifiedNameGT(v string) predicate.Album {
+	return predicate.Album(sql.FieldGT(FieldSimplifiedName, v))
+}
+
+// SimplifiedNameGTE applies the GTE predicate on the "simplifiedName" field.
+func SimplifiedNameGTE(v string) predicate.Album {
+	return predicate.Album(sql.FieldGTE(FieldSimplifiedName, v))
+}
+
+// SimplifiedNameLT applies the LT predicate on the "simplifiedName" field.
+func SimplifiedNameLT(v string) predicate.Album {
+	return predicate.Album(sql.FieldLT(FieldSimplifiedName, v))
+}
+
+// SimplifiedNameLTE applies the LTE predicate on the "simplifiedName" field.
+func SimplifiedNameLTE(v string) predicate.Album {
+	return predicate.Album(sql.FieldLTE(FieldSimplifiedName, v))
+}
+
+// SimplifiedNameContains applies the Contains predicate on the "simplifiedName" field.
+func SimplifiedNameContains(v string) predicate.Album {
+	return predicate.Album(sql.FieldContains(FieldSimplifiedName, v))
+}
+
+// SimplifiedNameHasPrefix applies the HasPrefix predicate on the "simplifiedName" field.
+func SimplifiedNameHasPrefix(v string) predicate.Album {
+	return predicate.Album(sql.FieldHasPrefix(FieldSimplifiedName, v))
+}
+
+// SimplifiedNameHasSuffix applies the HasSuffix predicate on the "simplifiedName" field.
+func SimplifiedNameHasSuffix(v string) predicate.Album {
+	return predicate.Album(sql.FieldHasSuffix(FieldSimplifiedName, v))
+}
+
+// SimplifiedNameEqualFold applies the EqualFold predicate on the "simplifiedName" field.
+func SimplifiedNameEqualFold(v string) predicate.Album {
+	return predicate.Album(sql.FieldEqualFold(FieldSimplifiedName, v))
+}
+
+// SimplifiedNameContainsFold applies the ContainsFold predicate on the "simplifiedName" field.
+func SimplifiedNameContainsFold(v string) predicate.Album {
+	return predicate.Album(sql.FieldContainsFold(FieldSimplifiedName, v))
 }
 
 // HasTracks applies the HasEdge predicate on the "tracks" edge.

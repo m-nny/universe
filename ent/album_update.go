@@ -56,6 +56,20 @@ func (au *AlbumUpdate) SetNillableName(s *string) *AlbumUpdate {
 	return au
 }
 
+// SetSimplifiedName sets the "simplifiedName" field.
+func (au *AlbumUpdate) SetSimplifiedName(s string) *AlbumUpdate {
+	au.mutation.SetSimplifiedName(s)
+	return au
+}
+
+// SetNillableSimplifiedName sets the "simplifiedName" field if the given value is not nil.
+func (au *AlbumUpdate) SetNillableSimplifiedName(s *string) *AlbumUpdate {
+	if s != nil {
+		au.SetSimplifiedName(*s)
+	}
+	return au
+}
+
 // AddTrackIDs adds the "tracks" edge to the Track entity by IDs.
 func (au *AlbumUpdate) AddTrackIDs(ids ...string) *AlbumUpdate {
 	au.mutation.AddTrackIDs(ids...)
@@ -167,6 +181,11 @@ func (au *AlbumUpdate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Album.name": %w`, err)}
 		}
 	}
+	if v, ok := au.mutation.SimplifiedName(); ok {
+		if err := album.SimplifiedNameValidator(v); err != nil {
+			return &ValidationError{Name: "simplifiedName", err: fmt.Errorf(`ent: validator failed for field "Album.simplifiedName": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -192,6 +211,9 @@ func (au *AlbumUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := au.mutation.Name(); ok {
 		_spec.SetField(album.FieldName, field.TypeString, value)
+	}
+	if value, ok := au.mutation.SimplifiedName(); ok {
+		_spec.SetField(album.FieldSimplifiedName, field.TypeString, value)
 	}
 	if au.mutation.TracksCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -329,6 +351,20 @@ func (auo *AlbumUpdateOne) SetNillableName(s *string) *AlbumUpdateOne {
 	return auo
 }
 
+// SetSimplifiedName sets the "simplifiedName" field.
+func (auo *AlbumUpdateOne) SetSimplifiedName(s string) *AlbumUpdateOne {
+	auo.mutation.SetSimplifiedName(s)
+	return auo
+}
+
+// SetNillableSimplifiedName sets the "simplifiedName" field if the given value is not nil.
+func (auo *AlbumUpdateOne) SetNillableSimplifiedName(s *string) *AlbumUpdateOne {
+	if s != nil {
+		auo.SetSimplifiedName(*s)
+	}
+	return auo
+}
+
 // AddTrackIDs adds the "tracks" edge to the Track entity by IDs.
 func (auo *AlbumUpdateOne) AddTrackIDs(ids ...string) *AlbumUpdateOne {
 	auo.mutation.AddTrackIDs(ids...)
@@ -453,6 +489,11 @@ func (auo *AlbumUpdateOne) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Album.name": %w`, err)}
 		}
 	}
+	if v, ok := auo.mutation.SimplifiedName(); ok {
+		if err := album.SimplifiedNameValidator(v); err != nil {
+			return &ValidationError{Name: "simplifiedName", err: fmt.Errorf(`ent: validator failed for field "Album.simplifiedName": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -495,6 +536,9 @@ func (auo *AlbumUpdateOne) sqlSave(ctx context.Context) (_node *Album, err error
 	}
 	if value, ok := auo.mutation.Name(); ok {
 		_spec.SetField(album.FieldName, field.TypeString, value)
+	}
+	if value, ok := auo.mutation.SimplifiedName(); ok {
+		_spec.SetField(album.FieldSimplifiedName, field.TypeString, value)
 	}
 	if auo.mutation.TracksCleared() {
 		edge := &sqlgraph.EdgeSpec{

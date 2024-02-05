@@ -44,6 +44,7 @@ type AlbumMutation struct {
 	spotifyIds       *[]string
 	appendspotifyIds []string
 	name             *string
+	simplifiedName   *string
 	clearedFields    map[string]struct{}
 	tracks           map[string]struct{}
 	removedtracks    map[string]struct{}
@@ -241,6 +242,42 @@ func (m *AlbumMutation) ResetName() {
 	m.name = nil
 }
 
+// SetSimplifiedName sets the "simplifiedName" field.
+func (m *AlbumMutation) SetSimplifiedName(s string) {
+	m.simplifiedName = &s
+}
+
+// SimplifiedName returns the value of the "simplifiedName" field in the mutation.
+func (m *AlbumMutation) SimplifiedName() (r string, exists bool) {
+	v := m.simplifiedName
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSimplifiedName returns the old "simplifiedName" field's value of the Album entity.
+// If the Album object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AlbumMutation) OldSimplifiedName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSimplifiedName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSimplifiedName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSimplifiedName: %w", err)
+	}
+	return oldValue.SimplifiedName, nil
+}
+
+// ResetSimplifiedName resets all changes to the "simplifiedName" field.
+func (m *AlbumMutation) ResetSimplifiedName() {
+	m.simplifiedName = nil
+}
+
 // AddTrackIDs adds the "tracks" edge to the Track entity by ids.
 func (m *AlbumMutation) AddTrackIDs(ids ...string) {
 	if m.tracks == nil {
@@ -383,12 +420,15 @@ func (m *AlbumMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AlbumMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
 	if m.spotifyIds != nil {
 		fields = append(fields, album.FieldSpotifyIds)
 	}
 	if m.name != nil {
 		fields = append(fields, album.FieldName)
+	}
+	if m.simplifiedName != nil {
+		fields = append(fields, album.FieldSimplifiedName)
 	}
 	return fields
 }
@@ -402,6 +442,8 @@ func (m *AlbumMutation) Field(name string) (ent.Value, bool) {
 		return m.SpotifyIds()
 	case album.FieldName:
 		return m.Name()
+	case album.FieldSimplifiedName:
+		return m.SimplifiedName()
 	}
 	return nil, false
 }
@@ -415,6 +457,8 @@ func (m *AlbumMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldSpotifyIds(ctx)
 	case album.FieldName:
 		return m.OldName(ctx)
+	case album.FieldSimplifiedName:
+		return m.OldSimplifiedName(ctx)
 	}
 	return nil, fmt.Errorf("unknown Album field %s", name)
 }
@@ -437,6 +481,13 @@ func (m *AlbumMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
+		return nil
+	case album.FieldSimplifiedName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSimplifiedName(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Album field %s", name)
@@ -492,6 +543,9 @@ func (m *AlbumMutation) ResetField(name string) error {
 		return nil
 	case album.FieldName:
 		m.ResetName()
+		return nil
+	case album.FieldSimplifiedName:
+		m.ResetSimplifiedName()
 		return nil
 	}
 	return fmt.Errorf("unknown Album field %s", name)

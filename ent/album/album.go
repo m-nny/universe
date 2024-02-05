@@ -16,6 +16,8 @@ const (
 	FieldSpotifyIds = "spotify_ids"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldSimplifiedName holds the string denoting the simplifiedname field in the database.
+	FieldSimplifiedName = "simplified_name"
 	// EdgeTracks holds the string denoting the tracks edge name in mutations.
 	EdgeTracks = "tracks"
 	// EdgeArtists holds the string denoting the artists edge name in mutations.
@@ -41,6 +43,7 @@ var Columns = []string{
 	FieldID,
 	FieldSpotifyIds,
 	FieldName,
+	FieldSimplifiedName,
 }
 
 var (
@@ -62,6 +65,8 @@ func ValidColumn(column string) bool {
 var (
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
+	// SimplifiedNameValidator is a validator for the "simplifiedName" field. It is called by the builders before save.
+	SimplifiedNameValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the Album queries.
@@ -75,6 +80,11 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// BySimplifiedName orders the results by the simplifiedName field.
+func BySimplifiedName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSimplifiedName, opts...).ToFunc()
 }
 
 // ByTracksCount orders the results by tracks count.

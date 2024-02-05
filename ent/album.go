@@ -21,6 +21,8 @@ type Album struct {
 	SpotifyIds []string `json:"spotifyIds,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// SimplifiedName holds the value of the "simplifiedName" field.
+	SimplifiedName string `json:"simplifiedName,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AlbumQuery when eager-loading is set.
 	Edges        AlbumEdges `json:"edges"`
@@ -65,7 +67,7 @@ func (*Album) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case album.FieldID:
 			values[i] = new(sql.NullInt64)
-		case album.FieldName:
+		case album.FieldName, album.FieldSimplifiedName:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -101,6 +103,12 @@ func (a *Album) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				a.Name = value.String
+			}
+		case album.FieldSimplifiedName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field simplifiedName", values[i])
+			} else if value.Valid {
+				a.SimplifiedName = value.String
 			}
 		default:
 			a.selectValues.Set(columns[i], values[i])
@@ -153,6 +161,9 @@ func (a *Album) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(a.Name)
+	builder.WriteString(", ")
+	builder.WriteString("simplifiedName=")
+	builder.WriteString(a.SimplifiedName)
 	builder.WriteByte(')')
 	return builder.String()
 }

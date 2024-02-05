@@ -35,6 +35,12 @@ func (ac *AlbumCreate) SetName(s string) *AlbumCreate {
 	return ac
 }
 
+// SetSimplifiedName sets the "simplifiedName" field.
+func (ac *AlbumCreate) SetSimplifiedName(s string) *AlbumCreate {
+	ac.mutation.SetSimplifiedName(s)
+	return ac
+}
+
 // AddTrackIDs adds the "tracks" edge to the Track entity by IDs.
 func (ac *AlbumCreate) AddTrackIDs(ids ...string) *AlbumCreate {
 	ac.mutation.AddTrackIDs(ids...)
@@ -110,6 +116,14 @@ func (ac *AlbumCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Album.name": %w`, err)}
 		}
 	}
+	if _, ok := ac.mutation.SimplifiedName(); !ok {
+		return &ValidationError{Name: "simplifiedName", err: errors.New(`ent: missing required field "Album.simplifiedName"`)}
+	}
+	if v, ok := ac.mutation.SimplifiedName(); ok {
+		if err := album.SimplifiedNameValidator(v); err != nil {
+			return &ValidationError{Name: "simplifiedName", err: fmt.Errorf(`ent: validator failed for field "Album.simplifiedName": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -144,6 +158,10 @@ func (ac *AlbumCreate) createSpec() (*Album, *sqlgraph.CreateSpec) {
 	if value, ok := ac.mutation.Name(); ok {
 		_spec.SetField(album.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := ac.mutation.SimplifiedName(); ok {
+		_spec.SetField(album.FieldSimplifiedName, field.TypeString, value)
+		_node.SimplifiedName = value
 	}
 	if nodes := ac.mutation.TracksIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -253,6 +271,18 @@ func (u *AlbumUpsert) UpdateName() *AlbumUpsert {
 	return u
 }
 
+// SetSimplifiedName sets the "simplifiedName" field.
+func (u *AlbumUpsert) SetSimplifiedName(v string) *AlbumUpsert {
+	u.Set(album.FieldSimplifiedName, v)
+	return u
+}
+
+// UpdateSimplifiedName sets the "simplifiedName" field to the value that was provided on create.
+func (u *AlbumUpsert) UpdateSimplifiedName() *AlbumUpsert {
+	u.SetExcluded(album.FieldSimplifiedName)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
@@ -318,6 +348,20 @@ func (u *AlbumUpsertOne) SetName(v string) *AlbumUpsertOne {
 func (u *AlbumUpsertOne) UpdateName() *AlbumUpsertOne {
 	return u.Update(func(s *AlbumUpsert) {
 		s.UpdateName()
+	})
+}
+
+// SetSimplifiedName sets the "simplifiedName" field.
+func (u *AlbumUpsertOne) SetSimplifiedName(v string) *AlbumUpsertOne {
+	return u.Update(func(s *AlbumUpsert) {
+		s.SetSimplifiedName(v)
+	})
+}
+
+// UpdateSimplifiedName sets the "simplifiedName" field to the value that was provided on create.
+func (u *AlbumUpsertOne) UpdateSimplifiedName() *AlbumUpsertOne {
+	return u.Update(func(s *AlbumUpsert) {
+		s.UpdateSimplifiedName()
 	})
 }
 
@@ -549,6 +593,20 @@ func (u *AlbumUpsertBulk) SetName(v string) *AlbumUpsertBulk {
 func (u *AlbumUpsertBulk) UpdateName() *AlbumUpsertBulk {
 	return u.Update(func(s *AlbumUpsert) {
 		s.UpdateName()
+	})
+}
+
+// SetSimplifiedName sets the "simplifiedName" field.
+func (u *AlbumUpsertBulk) SetSimplifiedName(v string) *AlbumUpsertBulk {
+	return u.Update(func(s *AlbumUpsert) {
+		s.SetSimplifiedName(v)
+	})
+}
+
+// UpdateSimplifiedName sets the "simplifiedName" field to the value that was provided on create.
+func (u *AlbumUpsertBulk) UpdateSimplifiedName() *AlbumUpsertBulk {
+	return u.Update(func(s *AlbumUpsert) {
+		s.UpdateSimplifiedName()
 	})
 }
 

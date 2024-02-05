@@ -21,6 +21,10 @@ func init() {
 	albumDescName := albumFields[1].Descriptor()
 	// album.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	album.NameValidator = albumDescName.Validators[0].(func(string) error)
+	// albumDescSimplifiedName is the schema descriptor for simplifiedName field.
+	albumDescSimplifiedName := albumFields[2].Descriptor()
+	// album.SimplifiedNameValidator is a validator for the "simplifiedName" field. It is called by the builders before save.
+	album.SimplifiedNameValidator = albumDescSimplifiedName.Validators[0].(func(string) error)
 	artistFields := schema.Artist{}.Fields()
 	_ = artistFields
 	// artistDescSpotifyId is the schema descriptor for spotifyId field.

@@ -60,7 +60,7 @@ func (s *Service) toTrack(ctx context.Context, t spotify.SavedTrack) (string, er
 	if err != nil {
 		return "", err
 	}
-	albumId, err := s.toAlbum(ctx, t.Album)
+	album, err := s.toAlbum(ctx, t.Album)
 	if err != nil {
 		return "", err
 	}
@@ -69,7 +69,7 @@ func (s *Service) toTrack(ctx context.Context, t spotify.SavedTrack) (string, er
 		SetID(string(t.ID)).
 		SetName(string(t.Name)).
 		AddArtistIDs(artistIds...).
-		SetAlbumID(albumId).
+		SetAlbum(album).
 		AddSavedByIDs(s.username).
 		OnConflict().
 		UpdateNewValues().

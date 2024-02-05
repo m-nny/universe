@@ -13,6 +13,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "spotify_ids", Type: field.TypeJSON},
 		{Name: "name", Type: field.TypeString},
+		{Name: "simplified_name", Type: field.TypeString},
 	}
 	// AlbumsTable holds the schema information for the "albums" table.
 	AlbumsTable = &schema.Table{
