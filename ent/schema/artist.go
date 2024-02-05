@@ -14,7 +14,7 @@ type Artist struct {
 // Fields of the Artist.
 func (Artist) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("id").NotEmpty(),
+		field.String("spotifyId").NotEmpty().Unique(),
 		field.String("name").NotEmpty(),
 	}
 }

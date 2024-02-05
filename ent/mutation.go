@@ -46,8 +46,8 @@ type AlbumMutation struct {
 	tracks         map[string]struct{}
 	removedtracks  map[string]struct{}
 	clearedtracks  bool
-	artists        map[string]struct{}
-	removedartists map[string]struct{}
+	artists        map[int]struct{}
+	removedartists map[int]struct{}
 	clearedartists bool
 	done           bool
 	oldValue       func(context.Context) (*Album, error)
@@ -249,9 +249,9 @@ func (m *AlbumMutation) ResetTracks() {
 }
 
 // AddArtistIDs adds the "artists" edge to the Artist entity by ids.
-func (m *AlbumMutation) AddArtistIDs(ids ...string) {
+func (m *AlbumMutation) AddArtistIDs(ids ...int) {
 	if m.artists == nil {
-		m.artists = make(map[string]struct{})
+		m.artists = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.artists[ids[i]] = struct{}{}
@@ -269,9 +269,9 @@ func (m *AlbumMutation) ArtistsCleared() bool {
 }
 
 // RemoveArtistIDs removes the "artists" edge to the Artist entity by IDs.
-func (m *AlbumMutation) RemoveArtistIDs(ids ...string) {
+func (m *AlbumMutation) RemoveArtistIDs(ids ...int) {
 	if m.removedartists == nil {
-		m.removedartists = make(map[string]struct{})
+		m.removedartists = make(map[int]struct{})
 	}
 	for i := range ids {
 		delete(m.artists, ids[i])
@@ -280,7 +280,7 @@ func (m *AlbumMutation) RemoveArtistIDs(ids ...string) {
 }
 
 // RemovedArtists returns the removed IDs of the "artists" edge to the Artist entity.
-func (m *AlbumMutation) RemovedArtistsIDs() (ids []string) {
+func (m *AlbumMutation) RemovedArtistsIDs() (ids []int) {
 	for id := range m.removedartists {
 		ids = append(ids, id)
 	}
@@ -288,7 +288,7 @@ func (m *AlbumMutation) RemovedArtistsIDs() (ids []string) {
 }
 
 // ArtistsIDs returns the "artists" edge IDs in the mutation.
-func (m *AlbumMutation) ArtistsIDs() (ids []string) {
+func (m *AlbumMutation) ArtistsIDs() (ids []int) {
 	for id := range m.artists {
 		ids = append(ids, id)
 	}
@@ -548,7 +548,8 @@ type ArtistMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *string
+	id            *int
+	spotifyId     *string
 	name          *string
 	clearedFields map[string]struct{}
 	tracks        map[string]struct{}
@@ -582,7 +583,7 @@ func newArtistMutation(c config, op Op, opts ...artistOption) *ArtistMutation {
 }
 
 // withArtistID sets the ID field of the mutation.
-func withArtistID(id string) artistOption {
+func withArtistID(id int) artistOption {
 	return func(m *ArtistMutation) {
 		var (
 			err   error
@@ -632,15 +633,9 @@ func (m ArtistMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of Artist entities.
-func (m *ArtistMutation) SetID(id string) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *ArtistMutation) ID() (id string, exists bool) {
+func (m *ArtistMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -651,12 +646,12 @@ func (m *ArtistMutation) ID() (id string, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *ArtistMutation) IDs(ctx context.Context) ([]string, error) {
+func (m *ArtistMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []string{id}, nil
+			return []int{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -664,6 +659,42 @@ func (m *ArtistMutation) IDs(ctx context.Context) ([]string, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetSpotifyId sets the "spotifyId" field.
+func (m *ArtistMutation) SetSpotifyId(s string) {
+	m.spotifyId = &s
+}
+
+// SpotifyId returns the value of the "spotifyId" field in the mutation.
+func (m *ArtistMutation) SpotifyId() (r string, exists bool) {
+	v := m.spotifyId
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSpotifyId returns the old "spotifyId" field's value of the Artist entity.
+// If the Artist object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *ArtistMutation) OldSpotifyId(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSpotifyId is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSpotifyId requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSpotifyId: %w", err)
+	}
+	return oldValue.SpotifyId, nil
+}
+
+// ResetSpotifyId resets all changes to the "spotifyId" field.
+func (m *ArtistMutation) ResetSpotifyId() {
+	m.spotifyId = nil
 }
 
 // SetName sets the "name" field.
@@ -844,7 +875,10 @@ func (m *ArtistMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ArtistMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 2)
+	if m.spotifyId != nil {
+		fields = append(fields, artist.FieldSpotifyId)
+	}
 	if m.name != nil {
 		fields = append(fields, artist.FieldName)
 	}
@@ -856,6 +890,8 @@ func (m *ArtistMutation) Fields() []string {
 // schema.
 func (m *ArtistMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case artist.FieldSpotifyId:
+		return m.SpotifyId()
 	case artist.FieldName:
 		return m.Name()
 	}
@@ -867,6 +903,8 @@ func (m *ArtistMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *ArtistMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case artist.FieldSpotifyId:
+		return m.OldSpotifyId(ctx)
 	case artist.FieldName:
 		return m.OldName(ctx)
 	}
@@ -878,6 +916,13 @@ func (m *ArtistMutation) OldField(ctx context.Context, name string) (ent.Value, 
 // type.
 func (m *ArtistMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case artist.FieldSpotifyId:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSpotifyId(v)
+		return nil
 	case artist.FieldName:
 		v, ok := value.(string)
 		if !ok {
@@ -934,6 +979,9 @@ func (m *ArtistMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *ArtistMutation) ResetField(name string) error {
 	switch name {
+	case artist.FieldSpotifyId:
+		m.ResetSpotifyId()
+		return nil
 	case artist.FieldName:
 		m.ResetName()
 		return nil
@@ -1517,8 +1565,8 @@ type TrackMutation struct {
 	clearedsavedBy bool
 	album          *string
 	clearedalbum   bool
-	artists        map[string]struct{}
-	removedartists map[string]struct{}
+	artists        map[int]struct{}
+	removedartists map[int]struct{}
 	clearedartists bool
 	done           bool
 	oldValue       func(context.Context) (*Track, error)
@@ -1759,9 +1807,9 @@ func (m *TrackMutation) ResetAlbum() {
 }
 
 // AddArtistIDs adds the "artists" edge to the Artist entity by ids.
-func (m *TrackMutation) AddArtistIDs(ids ...string) {
+func (m *TrackMutation) AddArtistIDs(ids ...int) {
 	if m.artists == nil {
-		m.artists = make(map[string]struct{})
+		m.artists = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.artists[ids[i]] = struct{}{}
@@ -1779,9 +1827,9 @@ func (m *TrackMutation) ArtistsCleared() bool {
 }
 
 // RemoveArtistIDs removes the "artists" edge to the Artist entity by IDs.
-func (m *TrackMutation) RemoveArtistIDs(ids ...string) {
+func (m *TrackMutation) RemoveArtistIDs(ids ...int) {
 	if m.removedartists == nil {
-		m.removedartists = make(map[string]struct{})
+		m.removedartists = make(map[int]struct{})
 	}
 	for i := range ids {
 		delete(m.artists, ids[i])
@@ -1790,7 +1838,7 @@ func (m *TrackMutation) RemoveArtistIDs(ids ...string) {
 }
 
 // RemovedArtists returns the removed IDs of the "artists" edge to the Artist entity.
-func (m *TrackMutation) RemovedArtistsIDs() (ids []string) {
+func (m *TrackMutation) RemovedArtistsIDs() (ids []int) {
 	for id := range m.removedartists {
 		ids = append(ids, id)
 	}
@@ -1798,7 +1846,7 @@ func (m *TrackMutation) RemovedArtistsIDs() (ids []string) {
 }
 
 // ArtistsIDs returns the "artists" edge IDs in the mutation.
-func (m *TrackMutation) ArtistsIDs() (ids []string) {
+func (m *TrackMutation) ArtistsIDs() (ids []int) {
 	for id := range m.artists {
 		ids = append(ids, id)
 	}

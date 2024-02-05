@@ -463,7 +463,7 @@ func (c *ArtistClient) UpdateOne(a *Artist) *ArtistUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *ArtistClient) UpdateOneID(id string) *ArtistUpdateOne {
+func (c *ArtistClient) UpdateOneID(id int) *ArtistUpdateOne {
 	mutation := newArtistMutation(c.config, OpUpdateOne, withArtistID(id))
 	return &ArtistUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -480,7 +480,7 @@ func (c *ArtistClient) DeleteOne(a *Artist) *ArtistDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *ArtistClient) DeleteOneID(id string) *ArtistDeleteOne {
+func (c *ArtistClient) DeleteOneID(id int) *ArtistDeleteOne {
 	builder := c.Delete().Where(artist.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -497,12 +497,12 @@ func (c *ArtistClient) Query() *ArtistQuery {
 }
 
 // Get returns a Artist entity by its id.
-func (c *ArtistClient) Get(ctx context.Context, id string) (*Artist, error) {
+func (c *ArtistClient) Get(ctx context.Context, id int) (*Artist, error) {
 	return c.Query().Where(artist.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *ArtistClient) GetX(ctx context.Context, id string) *Artist {
+func (c *ArtistClient) GetX(ctx context.Context, id int) *Artist {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)

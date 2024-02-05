@@ -52,14 +52,14 @@ func (ac *AlbumCreate) AddTracks(t ...*Track) *AlbumCreate {
 }
 
 // AddArtistIDs adds the "artists" edge to the Artist entity by IDs.
-func (ac *AlbumCreate) AddArtistIDs(ids ...string) *AlbumCreate {
+func (ac *AlbumCreate) AddArtistIDs(ids ...int) *AlbumCreate {
 	ac.mutation.AddArtistIDs(ids...)
 	return ac
 }
 
 // AddArtists adds the "artists" edges to the Artist entity.
 func (ac *AlbumCreate) AddArtists(a ...*Artist) *AlbumCreate {
-	ids := make([]string, len(a))
+	ids := make([]int, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -177,7 +177,7 @@ func (ac *AlbumCreate) createSpec() (*Album, *sqlgraph.CreateSpec) {
 			Columns: album.ArtistsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -15,7 +15,9 @@ import (
 type Artist struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
+	// SpotifyId holds the value of the "spotifyId" field.
+	SpotifyId string `json:"spotifyId,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -58,7 +60,9 @@ func (*Artist) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case artist.FieldID, artist.FieldName:
+		case artist.FieldID:
+			values[i] = new(sql.NullInt64)
+		case artist.FieldSpotifyId, artist.FieldName:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -76,10 +80,16 @@ func (a *Artist) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case artist.FieldID:
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			a.ID = int(value.Int64)
+		case artist.FieldSpotifyId:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[i])
+				return fmt.Errorf("unexpected type %T for field spotifyId", values[i])
 			} else if value.Valid {
-				a.ID = value.String
+				a.SpotifyId = value.String
 			}
 		case artist.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -133,6 +143,9 @@ func (a *Artist) String() string {
 	var builder strings.Builder
 	builder.WriteString("Artist(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", a.ID))
+	builder.WriteString("spotifyId=")
+	builder.WriteString(a.SpotifyId)
+	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(a.Name)
 	builder.WriteByte(')')

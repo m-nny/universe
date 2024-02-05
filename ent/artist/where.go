@@ -9,63 +9,123 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id string) predicate.Artist {
+func ID(id int) predicate.Artist {
 	return predicate.Artist(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id string) predicate.Artist {
+func IDEQ(id int) predicate.Artist {
 	return predicate.Artist(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id string) predicate.Artist {
+func IDNEQ(id int) predicate.Artist {
 	return predicate.Artist(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...string) predicate.Artist {
+func IDIn(ids ...int) predicate.Artist {
 	return predicate.Artist(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...string) predicate.Artist {
+func IDNotIn(ids ...int) predicate.Artist {
 	return predicate.Artist(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id string) predicate.Artist {
+func IDGT(id int) predicate.Artist {
 	return predicate.Artist(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id string) predicate.Artist {
+func IDGTE(id int) predicate.Artist {
 	return predicate.Artist(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id string) predicate.Artist {
+func IDLT(id int) predicate.Artist {
 	return predicate.Artist(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id string) predicate.Artist {
+func IDLTE(id int) predicate.Artist {
 	return predicate.Artist(sql.FieldLTE(FieldID, id))
 }
 
-// IDEqualFold applies the EqualFold predicate on the ID field.
-func IDEqualFold(id string) predicate.Artist {
-	return predicate.Artist(sql.FieldEqualFold(FieldID, id))
-}
-
-// IDContainsFold applies the ContainsFold predicate on the ID field.
-func IDContainsFold(id string) predicate.Artist {
-	return predicate.Artist(sql.FieldContainsFold(FieldID, id))
+// SpotifyId applies equality check predicate on the "spotifyId" field. It's identical to SpotifyIdEQ.
+func SpotifyId(v string) predicate.Artist {
+	return predicate.Artist(sql.FieldEQ(FieldSpotifyId, v))
 }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.Artist {
 	return predicate.Artist(sql.FieldEQ(FieldName, v))
+}
+
+// SpotifyIdEQ applies the EQ predicate on the "spotifyId" field.
+func SpotifyIdEQ(v string) predicate.Artist {
+	return predicate.Artist(sql.FieldEQ(FieldSpotifyId, v))
+}
+
+// SpotifyIdNEQ applies the NEQ predicate on the "spotifyId" field.
+func SpotifyIdNEQ(v string) predicate.Artist {
+	return predicate.Artist(sql.FieldNEQ(FieldSpotifyId, v))
+}
+
+// SpotifyIdIn applies the In predicate on the "spotifyId" field.
+func SpotifyIdIn(vs ...string) predicate.Artist {
+	return predicate.Artist(sql.FieldIn(FieldSpotifyId, vs...))
+}
+
+// SpotifyIdNotIn applies the NotIn predicate on the "spotifyId" field.
+func SpotifyIdNotIn(vs ...string) predicate.Artist {
+	return predicate.Artist(sql.FieldNotIn(FieldSpotifyId, vs...))
+}
+
+// SpotifyIdGT applies the GT predicate on the "spotifyId" field.
+func SpotifyIdGT(v string) predicate.Artist {
+	return predicate.Artist(sql.FieldGT(FieldSpotifyId, v))
+}
+
+// SpotifyIdGTE applies the GTE predicate on the "spotifyId" field.
+func SpotifyIdGTE(v string) predicate.Artist {
+	return predicate.Artist(sql.FieldGTE(FieldSpotifyId, v))
+}
+
+// SpotifyIdLT applies the LT predicate on the "spotifyId" field.
+func SpotifyIdLT(v string) predicate.Artist {
+	return predicate.Artist(sql.FieldLT(FieldSpotifyId, v))
+}
+
+// SpotifyIdLTE applies the LTE predicate on the "spotifyId" field.
+func SpotifyIdLTE(v string) predicate.Artist {
+	return predicate.Artist(sql.FieldLTE(FieldSpotifyId, v))
+}
+
+// SpotifyIdContains applies the Contains predicate on the "spotifyId" field.
+func SpotifyIdContains(v string) predicate.Artist {
+	return predicate.Artist(sql.FieldContains(FieldSpotifyId, v))
+}
+
+// SpotifyIdHasPrefix applies the HasPrefix predicate on the "spotifyId" field.
+func SpotifyIdHasPrefix(v string) predicate.Artist {
+	return predicate.Artist(sql.FieldHasPrefix(FieldSpotifyId, v))
+}
+
+// SpotifyIdHasSuffix applies the HasSuffix predicate on the "spotifyId" field.
+func SpotifyIdHasSuffix(v string) predicate.Artist {
+	return predicate.Artist(sql.FieldHasSuffix(FieldSpotifyId, v))
+}
+
+// SpotifyIdEqualFold applies the EqualFold predicate on the "spotifyId" field.
+func SpotifyIdEqualFold(v string) predicate.Artist {
+	return predicate.Artist(sql.FieldEqualFold(FieldSpotifyId, v))
+}
+
+// SpotifyIdContainsFold applies the ContainsFold predicate on the "spotifyId" field.
+func SpotifyIdContainsFold(v string) predicate.Artist {
+	return predicate.Artist(sql.FieldContainsFold(FieldSpotifyId, v))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.

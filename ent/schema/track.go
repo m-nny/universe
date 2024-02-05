@@ -16,8 +16,6 @@ func (Track) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").NotEmpty(),
 		field.String("name").NotEmpty(),
-		// field.JSON("artistNames", []string{}),
-		// field.JSON("artistIds", []string{}),
 	}
 }
 

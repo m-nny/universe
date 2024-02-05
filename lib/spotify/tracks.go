@@ -30,7 +30,7 @@ func (s *Service) _GetUserTracks(ctx context.Context) ([]spotify.SavedTrack, err
 	var allTracks []spotify.SavedTrack
 	resp, err := s.spotify.CurrentUsersTracks(ctx,
 		spotify.Limit(50),
-		spotify.Offset(3300),
+		// spotify.Offset(3300),
 	)
 	for ; err == nil; err = s.spotify.NextPage(ctx, resp) {
 		log.Printf("len(resp.Tracks)=%d offest=%d total=%d", len(resp.Tracks), resp.Offset, resp.Total)

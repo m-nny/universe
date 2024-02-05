@@ -21,7 +21,8 @@ var (
 	}
 	// ArtistsColumns holds the columns for the "artists" table.
 	ArtistsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeString},
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "spotify_id", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString},
 	}
 	// ArtistsTable holds the schema information for the "artists" table.
@@ -84,7 +85,7 @@ var (
 	}
 	// ArtistTracksColumns holds the columns for the "artist_tracks" table.
 	ArtistTracksColumns = []*schema.Column{
-		{Name: "artist_id", Type: field.TypeString},
+		{Name: "artist_id", Type: field.TypeInt},
 		{Name: "track_id", Type: field.TypeString},
 	}
 	// ArtistTracksTable holds the schema information for the "artist_tracks" table.
@@ -109,7 +110,7 @@ var (
 	}
 	// ArtistAlbumsColumns holds the columns for the "artist_albums" table.
 	ArtistAlbumsColumns = []*schema.Column{
-		{Name: "artist_id", Type: field.TypeString},
+		{Name: "artist_id", Type: field.TypeInt},
 		{Name: "album_id", Type: field.TypeString},
 	}
 	// ArtistAlbumsTable holds the schema information for the "artist_albums" table.

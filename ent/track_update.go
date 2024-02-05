@@ -79,14 +79,14 @@ func (tu *TrackUpdate) SetAlbum(a *Album) *TrackUpdate {
 }
 
 // AddArtistIDs adds the "artists" edge to the Artist entity by IDs.
-func (tu *TrackUpdate) AddArtistIDs(ids ...string) *TrackUpdate {
+func (tu *TrackUpdate) AddArtistIDs(ids ...int) *TrackUpdate {
 	tu.mutation.AddArtistIDs(ids...)
 	return tu
 }
 
 // AddArtists adds the "artists" edges to the Artist entity.
 func (tu *TrackUpdate) AddArtists(a ...*Artist) *TrackUpdate {
-	ids := make([]string, len(a))
+	ids := make([]int, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -132,14 +132,14 @@ func (tu *TrackUpdate) ClearArtists() *TrackUpdate {
 }
 
 // RemoveArtistIDs removes the "artists" edge to Artist entities by IDs.
-func (tu *TrackUpdate) RemoveArtistIDs(ids ...string) *TrackUpdate {
+func (tu *TrackUpdate) RemoveArtistIDs(ids ...int) *TrackUpdate {
 	tu.mutation.RemoveArtistIDs(ids...)
 	return tu
 }
 
 // RemoveArtists removes "artists" edges to Artist entities.
 func (tu *TrackUpdate) RemoveArtists(a ...*Artist) *TrackUpdate {
-	ids := make([]string, len(a))
+	ids := make([]int, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -280,7 +280,7 @@ func (tu *TrackUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: track.ArtistsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -293,7 +293,7 @@ func (tu *TrackUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: track.ArtistsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -309,7 +309,7 @@ func (tu *TrackUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: track.ArtistsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -386,14 +386,14 @@ func (tuo *TrackUpdateOne) SetAlbum(a *Album) *TrackUpdateOne {
 }
 
 // AddArtistIDs adds the "artists" edge to the Artist entity by IDs.
-func (tuo *TrackUpdateOne) AddArtistIDs(ids ...string) *TrackUpdateOne {
+func (tuo *TrackUpdateOne) AddArtistIDs(ids ...int) *TrackUpdateOne {
 	tuo.mutation.AddArtistIDs(ids...)
 	return tuo
 }
 
 // AddArtists adds the "artists" edges to the Artist entity.
 func (tuo *TrackUpdateOne) AddArtists(a ...*Artist) *TrackUpdateOne {
-	ids := make([]string, len(a))
+	ids := make([]int, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -439,14 +439,14 @@ func (tuo *TrackUpdateOne) ClearArtists() *TrackUpdateOne {
 }
 
 // RemoveArtistIDs removes the "artists" edge to Artist entities by IDs.
-func (tuo *TrackUpdateOne) RemoveArtistIDs(ids ...string) *TrackUpdateOne {
+func (tuo *TrackUpdateOne) RemoveArtistIDs(ids ...int) *TrackUpdateOne {
 	tuo.mutation.RemoveArtistIDs(ids...)
 	return tuo
 }
 
 // RemoveArtists removes "artists" edges to Artist entities.
 func (tuo *TrackUpdateOne) RemoveArtists(a ...*Artist) *TrackUpdateOne {
-	ids := make([]string, len(a))
+	ids := make([]int, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -617,7 +617,7 @@ func (tuo *TrackUpdateOne) sqlSave(ctx context.Context) (_node *Track, err error
 			Columns: track.ArtistsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -630,7 +630,7 @@ func (tuo *TrackUpdateOne) sqlSave(ctx context.Context) (_node *Track, err error
 			Columns: track.ArtistsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -646,7 +646,7 @@ func (tuo *TrackUpdateOne) sqlSave(ctx context.Context) (_node *Track, err error
 			Columns: track.ArtistsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(artist.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -130,8 +130,8 @@ func (aq *ArtistQuery) FirstX(ctx context.Context) *Artist {
 
 // FirstID returns the first Artist ID from the query.
 // Returns a *NotFoundError when no Artist ID was found.
-func (aq *ArtistQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (aq *ArtistQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = aq.Limit(1).IDs(setContextOp(ctx, aq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -143,7 +143,7 @@ func (aq *ArtistQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (aq *ArtistQuery) FirstIDX(ctx context.Context) string {
+func (aq *ArtistQuery) FirstIDX(ctx context.Context) int {
 	id, err := aq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -181,8 +181,8 @@ func (aq *ArtistQuery) OnlyX(ctx context.Context) *Artist {
 // OnlyID is like Only, but returns the only Artist ID in the query.
 // Returns a *NotSingularError when more than one Artist ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (aq *ArtistQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (aq *ArtistQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = aq.Limit(2).IDs(setContextOp(ctx, aq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -198,7 +198,7 @@ func (aq *ArtistQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (aq *ArtistQuery) OnlyIDX(ctx context.Context) string {
+func (aq *ArtistQuery) OnlyIDX(ctx context.Context) int {
 	id, err := aq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -226,7 +226,7 @@ func (aq *ArtistQuery) AllX(ctx context.Context) []*Artist {
 }
 
 // IDs executes the query and returns a list of Artist IDs.
-func (aq *ArtistQuery) IDs(ctx context.Context) (ids []string, err error) {
+func (aq *ArtistQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if aq.ctx.Unique == nil && aq.path != nil {
 		aq.Unique(true)
 	}
@@ -238,7 +238,7 @@ func (aq *ArtistQuery) IDs(ctx context.Context) (ids []string, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (aq *ArtistQuery) IDsX(ctx context.Context) []string {
+func (aq *ArtistQuery) IDsX(ctx context.Context) []int {
 	ids, err := aq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -334,12 +334,12 @@ func (aq *ArtistQuery) WithAlbums(opts ...func(*AlbumQuery)) *ArtistQuery {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		SpotifyId string `json:"spotifyId,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Artist.Query().
-//		GroupBy(artist.FieldName).
+//		GroupBy(artist.FieldSpotifyId).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (aq *ArtistQuery) GroupBy(field string, fields ...string) *ArtistGroupBy {
@@ -357,11 +357,11 @@ func (aq *ArtistQuery) GroupBy(field string, fields ...string) *ArtistGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		SpotifyId string `json:"spotifyId,omitempty"`
 //	}
 //
 //	client.Artist.Query().
-//		Select(artist.FieldName).
+//		Select(artist.FieldSpotifyId).
 //		Scan(ctx, &v)
 func (aq *ArtistQuery) Select(fields ...string) *ArtistSelect {
 	aq.ctx.Fields = append(aq.ctx.Fields, fields...)
@@ -448,7 +448,7 @@ func (aq *ArtistQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Artis
 
 func (aq *ArtistQuery) loadTracks(ctx context.Context, query *TrackQuery, nodes []*Artist, init func(*Artist), assign func(*Artist, *Track)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[string]*Artist)
+	byID := make(map[int]*Artist)
 	nids := make(map[string]map[*Artist]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
@@ -478,10 +478,10 @@ func (aq *ArtistQuery) loadTracks(ctx context.Context, query *TrackQuery, nodes 
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullString)}, values...), nil
+				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := values[0].(*sql.NullString).String
+				outValue := int(values[0].(*sql.NullInt64).Int64)
 				inValue := values[1].(*sql.NullString).String
 				if nids[inValue] == nil {
 					nids[inValue] = map[*Artist]struct{}{byID[outValue]: {}}
@@ -509,7 +509,7 @@ func (aq *ArtistQuery) loadTracks(ctx context.Context, query *TrackQuery, nodes 
 }
 func (aq *ArtistQuery) loadAlbums(ctx context.Context, query *AlbumQuery, nodes []*Artist, init func(*Artist), assign func(*Artist, *Album)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[string]*Artist)
+	byID := make(map[int]*Artist)
 	nids := make(map[string]map[*Artist]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
@@ -539,10 +539,10 @@ func (aq *ArtistQuery) loadAlbums(ctx context.Context, query *AlbumQuery, nodes 
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullString)}, values...), nil
+				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := values[0].(*sql.NullString).String
+				outValue := int(values[0].(*sql.NullInt64).Int64)
 				inValue := values[1].(*sql.NullString).String
 				if nids[inValue] == nil {
 					nids[inValue] = map[*Artist]struct{}{byID[outValue]: {}}
@@ -579,7 +579,7 @@ func (aq *ArtistQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (aq *ArtistQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(artist.Table, artist.Columns, sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString))
+	_spec := sqlgraph.NewQuerySpec(artist.Table, artist.Columns, sqlgraph.NewFieldSpec(artist.FieldID, field.TypeInt))
 	_spec.From = aq.sql
 	if unique := aq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

@@ -27,14 +27,14 @@ func init() {
 	album.IDValidator = albumDescID.Validators[0].(func(string) error)
 	artistFields := schema.Artist{}.Fields()
 	_ = artistFields
+	// artistDescSpotifyId is the schema descriptor for spotifyId field.
+	artistDescSpotifyId := artistFields[0].Descriptor()
+	// artist.SpotifyIdValidator is a validator for the "spotifyId" field. It is called by the builders before save.
+	artist.SpotifyIdValidator = artistDescSpotifyId.Validators[0].(func(string) error)
 	// artistDescName is the schema descriptor for name field.
 	artistDescName := artistFields[1].Descriptor()
 	// artist.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	artist.NameValidator = artistDescName.Validators[0].(func(string) error)
-	// artistDescID is the schema descriptor for id field.
-	artistDescID := artistFields[0].Descriptor()
-	// artist.IDValidator is a validator for the "id" field. It is called by the builders before save.
-	artist.IDValidator = artistDescID.Validators[0].(func(string) error)
 	playlistFields := schema.Playlist{}.Fields()
 	_ = playlistFields
 	// playlistDescName is the schema descriptor for name field.

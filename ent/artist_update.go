@@ -29,6 +29,20 @@ func (au *ArtistUpdate) Where(ps ...predicate.Artist) *ArtistUpdate {
 	return au
 }
 
+// SetSpotifyId sets the "spotifyId" field.
+func (au *ArtistUpdate) SetSpotifyId(s string) *ArtistUpdate {
+	au.mutation.SetSpotifyId(s)
+	return au
+}
+
+// SetNillableSpotifyId sets the "spotifyId" field if the given value is not nil.
+func (au *ArtistUpdate) SetNillableSpotifyId(s *string) *ArtistUpdate {
+	if s != nil {
+		au.SetSpotifyId(*s)
+	}
+	return au
+}
+
 // SetName sets the "name" field.
 func (au *ArtistUpdate) SetName(s string) *ArtistUpdate {
 	au.mutation.SetName(s)
@@ -149,6 +163,11 @@ func (au *ArtistUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (au *ArtistUpdate) check() error {
+	if v, ok := au.mutation.SpotifyId(); ok {
+		if err := artist.SpotifyIdValidator(v); err != nil {
+			return &ValidationError{Name: "spotifyId", err: fmt.Errorf(`ent: validator failed for field "Artist.spotifyId": %w`, err)}
+		}
+	}
 	if v, ok := au.mutation.Name(); ok {
 		if err := artist.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Artist.name": %w`, err)}
@@ -161,13 +180,16 @@ func (au *ArtistUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := au.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(artist.Table, artist.Columns, sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString))
+	_spec := sqlgraph.NewUpdateSpec(artist.Table, artist.Columns, sqlgraph.NewFieldSpec(artist.FieldID, field.TypeInt))
 	if ps := au.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := au.mutation.SpotifyId(); ok {
+		_spec.SetField(artist.FieldSpotifyId, field.TypeString, value)
 	}
 	if value, ok := au.mutation.Name(); ok {
 		_spec.SetField(artist.FieldName, field.TypeString, value)
@@ -280,6 +302,20 @@ type ArtistUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *ArtistMutation
+}
+
+// SetSpotifyId sets the "spotifyId" field.
+func (auo *ArtistUpdateOne) SetSpotifyId(s string) *ArtistUpdateOne {
+	auo.mutation.SetSpotifyId(s)
+	return auo
+}
+
+// SetNillableSpotifyId sets the "spotifyId" field if the given value is not nil.
+func (auo *ArtistUpdateOne) SetNillableSpotifyId(s *string) *ArtistUpdateOne {
+	if s != nil {
+		auo.SetSpotifyId(*s)
+	}
+	return auo
 }
 
 // SetName sets the "name" field.
@@ -415,6 +451,11 @@ func (auo *ArtistUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (auo *ArtistUpdateOne) check() error {
+	if v, ok := auo.mutation.SpotifyId(); ok {
+		if err := artist.SpotifyIdValidator(v); err != nil {
+			return &ValidationError{Name: "spotifyId", err: fmt.Errorf(`ent: validator failed for field "Artist.spotifyId": %w`, err)}
+		}
+	}
 	if v, ok := auo.mutation.Name(); ok {
 		if err := artist.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Artist.name": %w`, err)}
@@ -427,7 +468,7 @@ func (auo *ArtistUpdateOne) sqlSave(ctx context.Context) (_node *Artist, err err
 	if err := auo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(artist.Table, artist.Columns, sqlgraph.NewFieldSpec(artist.FieldID, field.TypeString))
+	_spec := sqlgraph.NewUpdateSpec(artist.Table, artist.Columns, sqlgraph.NewFieldSpec(artist.FieldID, field.TypeInt))
 	id, ok := auo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Artist.id" for update`)}
@@ -451,6 +492,9 @@ func (auo *ArtistUpdateOne) sqlSave(ctx context.Context) (_node *Artist, err err
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := auo.mutation.SpotifyId(); ok {
+		_spec.SetField(artist.FieldSpotifyId, field.TypeString, value)
 	}
 	if value, ok := auo.mutation.Name(); ok {
 		_spec.SetField(artist.FieldName, field.TypeString, value)

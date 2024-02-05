@@ -12,6 +12,8 @@ const (
 	Label = "artist"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldSpotifyId holds the string denoting the spotifyid field in the database.
+	FieldSpotifyId = "spotify_id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// EdgeTracks holds the string denoting the tracks edge name in mutations.
@@ -35,6 +37,7 @@ const (
 // Columns holds all SQL columns for artist fields.
 var Columns = []string{
 	FieldID,
+	FieldSpotifyId,
 	FieldName,
 }
 
@@ -58,10 +61,10 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// SpotifyIdValidator is a validator for the "spotifyId" field. It is called by the builders before save.
+	SpotifyIdValidator func(string) error
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
-	// IDValidator is a validator for the "id" field. It is called by the builders before save.
-	IDValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the Artist queries.
@@ -70,6 +73,11 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// BySpotifyId orders the results by the spotifyId field.
+func BySpotifyId(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSpotifyId, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.
