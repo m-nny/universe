@@ -3,7 +3,7 @@ package spotify
 import (
 	"context"
 	"fmt"
-	"log"
+	"regexp"
 	"slices"
 	"strings"
 
@@ -45,7 +45,7 @@ func (s *Service) toAlbum(ctx context.Context, a spotify.SimpleAlbum) (*ent.Albu
 	if slices.Contains(album.SpotifyIds, string(a.ID)) {
 		return album, nil
 	}
-	log.Printf("new album version: cur: %v new: %v", album, a.ID)
+	// log.Printf("new album version: cur: %v new: %v", album, a.ID)
 	return album.Update().AppendSpotifyIds([]string{string(a.ID)}).Save(ctx)
 }
 
@@ -63,14 +63,42 @@ func (s *Service) _newAlbum(ctx context.Context, a spotify.SimpleAlbum, simplifi
 		Save(ctx)
 }
 
-// simplifiedAlbumName will return a string in form of "<artist1>, <artist2> - <album name> [<album release year]"
+var simplifyAlbumNameRegex = func() *regexp.Regexp {
+	blocklistItems := []string{
+		` \((\d{4} )?Remastered( Version)?\)`,
+		` \(Bonus Edition\)`,
+		` \(Collector's Edition\)`,
+		` \(Deluxe Edition\)`,
+		` \(Deluxe Version\)`,
+		` \(Deluxe\)`,
+		` \(Expanded Edition\)`,
+		` \(Explicit Version\)`,
+		` \(Extended Edition\)`,
+		` \(Special Edition\)`,
+		` \(Standard Version\)`,
+		` \(The Complete Edition\)`,
+		` \(Tour Edition\)`,
+		` \(Wembley Edition\)`,
+		` \(20th Anniversary Edition\)`,
+		` Deluxe`,
+	}
+
+	regex := strings.Join(utils.SliceMap(blocklistItems, func(s string) string {
+		return fmt.Sprintf("(%s)", s)
+	}), "|")
+	return regexp.MustCompile(regex)
+}()
+
+// simplifiedAlbumName will return a string in form of "<artist1>, <artist2> - <album name>"
 func simplifiedAlbumName(a spotify.SimpleAlbum) string {
 	artistNames := strings.Join(
 		utils.SliceMap(a.Artists, func(a spotify.SimpleArtist) string { return a.Name }),
 		", ",
 	)
-	releaseYear := a.ReleaseDateTime().Year()
-	msg := fmt.Sprintf("%s - %s [%d]", artistNames, a.Name, releaseYear)
+	// releaseYear := a.ReleaseDateTime().Year()
+	// albumName := strings.ReplaceAll(a.Name, "(Deluxe Edition)", "")
+	albumName := simplifyAlbumNameRegex.ReplaceAllString(a.Name, "")
+	msg := fmt.Sprintf("%s - %s", artistNames, albumName)
 	msg = strings.ToLower(msg)
 	return msg
 }

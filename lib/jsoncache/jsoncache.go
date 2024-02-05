@@ -39,6 +39,7 @@ func CachedExec[Data any](key string, fn func() (Data, error)) (Data, error) {
 	if err != nil {
 		log.Printf("[cache] miss on key %s: %v", key, err)
 	} else if err == nil {
+		log.Printf("[cache] hit on key %s", key)
 		return cachedVal, nil
 	}
 	val, err := fn()
@@ -48,5 +49,6 @@ func CachedExec[Data any](key string, fn func() (Data, error)) (Data, error) {
 	if err := SetValue(key, val); err != nil {
 		return val, err
 	}
+	log.Printf("[cache] saved for key %s", key)
 	return val, nil
 }
