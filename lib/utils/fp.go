@@ -1,5 +1,19 @@
 package utils
 
+import "context"
+
+func SliceMapCtxErr[T, D any](ctx context.Context, arr []T, fn func(ctx context.Context, item T) (D, error)) ([]D, error) {
+	var res []D
+	for _, item := range arr {
+		val, err := fn(ctx, item)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, val)
+	}
+	return res, nil
+}
+
 func SliceMap[T, D any](arr []T, fn func(item T) D) []D {
 	var res []D
 	for _, item := range arr {

@@ -34,7 +34,7 @@ func main() {
 	}
 	log.Printf("found total %d playlists", len(playlists))
 
-	tracks, err := spotify.GetAllTracks(ctx)
+	tracks, err := spotify.GetUserTracks(ctx)
 	if err != nil {
 		log.Fatalf("Error getting all tracks: %v", err)
 	}

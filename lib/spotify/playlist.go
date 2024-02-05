@@ -25,6 +25,7 @@ func (s *Service) GetAllPlaylists(ctx context.Context) ([]*ent.Playlist, error) 
 	}
 	return s.getUserPlaylists(ctx)
 }
+
 func (s *Service) _GetAllPlaylists(ctx context.Context) (playlists []spotify.SimplePlaylist, err error) {
 	for resp, err := s.spotify.CurrentUsersPlaylists(ctx); err == nil; err = s.spotify.NextPage(ctx, resp) {
 		log.Printf("len(resp.Playlists)=%d offest=%d total=%d", len(resp.Playlists), resp.Offset, resp.Total)

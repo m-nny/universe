@@ -3,27 +3,20 @@ package spotify
 import (
 	"context"
 
-	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/lib/utils"
 	"github.com/zmb3/spotify/v2"
 )
 
-func (s *Service) toArtist(t spotify.SimpleArtist) *ent.ArtistCreate {
-	return s.ent.Artist.Create().
+func (s *Service) toArtist(ctx context.Context, t spotify.SimpleArtist) (string, error) {
+	return s.ent.Artist.
+		Create().
 		SetID(string(t.ID)).
-		SetName(string(t.Name))
-}
-
-func (s *Service) saveTrackArtists(ctx context.Context, rawTracks []spotify.SavedTrack) error {
-	rawArtists := utils.SliceFlatMap(rawTracks, func(p spotify.SavedTrack) []spotify.SimpleArtist {
-		return append(p.Artists, p.Album.Artists...)
-	})
-	rawArtists = utils.SliceUniqe(rawArtists, func(item spotify.SimpleArtist) string { return string(item.ID) })
-	artists := utils.SliceMap(rawArtists, s.toArtist)
-	err := s.ent.Artist.
-		CreateBulk(artists...).
+		SetName(t.Name).
 		OnConflict().
 		UpdateNewValues().
-		Exec(ctx)
-	return err
+		ID(ctx)
+}
+
+func (s *Service) toArtists(ctx context.Context, rawArtists []spotify.SimpleArtist) ([]string, error) {
+	return utils.SliceMapCtxErr(ctx, rawArtists, s.toArtist)
 }
