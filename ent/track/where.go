@@ -9,63 +9,63 @@ import (
 )
 
 // ID filters vertices based on their ID field.
-func ID(id string) predicate.Track {
+func ID(id int) predicate.Track {
 	return predicate.Track(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id string) predicate.Track {
+func IDEQ(id int) predicate.Track {
 	return predicate.Track(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id string) predicate.Track {
+func IDNEQ(id int) predicate.Track {
 	return predicate.Track(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...string) predicate.Track {
+func IDIn(ids ...int) predicate.Track {
 	return predicate.Track(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...string) predicate.Track {
+func IDNotIn(ids ...int) predicate.Track {
 	return predicate.Track(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id string) predicate.Track {
+func IDGT(id int) predicate.Track {
 	return predicate.Track(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id string) predicate.Track {
+func IDGTE(id int) predicate.Track {
 	return predicate.Track(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id string) predicate.Track {
+func IDLT(id int) predicate.Track {
 	return predicate.Track(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id string) predicate.Track {
+func IDLTE(id int) predicate.Track {
 	return predicate.Track(sql.FieldLTE(FieldID, id))
-}
-
-// IDEqualFold applies the EqualFold predicate on the ID field.
-func IDEqualFold(id string) predicate.Track {
-	return predicate.Track(sql.FieldEqualFold(FieldID, id))
-}
-
-// IDContainsFold applies the ContainsFold predicate on the ID field.
-func IDContainsFold(id string) predicate.Track {
-	return predicate.Track(sql.FieldContainsFold(FieldID, id))
 }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.Track {
 	return predicate.Track(sql.FieldEQ(FieldName, v))
+}
+
+// TrackNumber applies equality check predicate on the "trackNumber" field. It's identical to TrackNumberEQ.
+func TrackNumber(v int) predicate.Track {
+	return predicate.Track(sql.FieldEQ(FieldTrackNumber, v))
+}
+
+// SimplifiedName applies equality check predicate on the "simplifiedName" field. It's identical to SimplifiedNameEQ.
+func SimplifiedName(v string) predicate.Track {
+	return predicate.Track(sql.FieldEQ(FieldSimplifiedName, v))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.
@@ -131,6 +131,111 @@ func NameEqualFold(v string) predicate.Track {
 // NameContainsFold applies the ContainsFold predicate on the "name" field.
 func NameContainsFold(v string) predicate.Track {
 	return predicate.Track(sql.FieldContainsFold(FieldName, v))
+}
+
+// TrackNumberEQ applies the EQ predicate on the "trackNumber" field.
+func TrackNumberEQ(v int) predicate.Track {
+	return predicate.Track(sql.FieldEQ(FieldTrackNumber, v))
+}
+
+// TrackNumberNEQ applies the NEQ predicate on the "trackNumber" field.
+func TrackNumberNEQ(v int) predicate.Track {
+	return predicate.Track(sql.FieldNEQ(FieldTrackNumber, v))
+}
+
+// TrackNumberIn applies the In predicate on the "trackNumber" field.
+func TrackNumberIn(vs ...int) predicate.Track {
+	return predicate.Track(sql.FieldIn(FieldTrackNumber, vs...))
+}
+
+// TrackNumberNotIn applies the NotIn predicate on the "trackNumber" field.
+func TrackNumberNotIn(vs ...int) predicate.Track {
+	return predicate.Track(sql.FieldNotIn(FieldTrackNumber, vs...))
+}
+
+// TrackNumberGT applies the GT predicate on the "trackNumber" field.
+func TrackNumberGT(v int) predicate.Track {
+	return predicate.Track(sql.FieldGT(FieldTrackNumber, v))
+}
+
+// TrackNumberGTE applies the GTE predicate on the "trackNumber" field.
+func TrackNumberGTE(v int) predicate.Track {
+	return predicate.Track(sql.FieldGTE(FieldTrackNumber, v))
+}
+
+// TrackNumberLT applies the LT predicate on the "trackNumber" field.
+func TrackNumberLT(v int) predicate.Track {
+	return predicate.Track(sql.FieldLT(FieldTrackNumber, v))
+}
+
+// TrackNumberLTE applies the LTE predicate on the "trackNumber" field.
+func TrackNumberLTE(v int) predicate.Track {
+	return predicate.Track(sql.FieldLTE(FieldTrackNumber, v))
+}
+
+// SimplifiedNameEQ applies the EQ predicate on the "simplifiedName" field.
+func SimplifiedNameEQ(v string) predicate.Track {
+	return predicate.Track(sql.FieldEQ(FieldSimplifiedName, v))
+}
+
+// SimplifiedNameNEQ applies the NEQ predicate on the "simplifiedName" field.
+func SimplifiedNameNEQ(v string) predicate.Track {
+	return predicate.Track(sql.FieldNEQ(FieldSimplifiedName, v))
+}
+
+// SimplifiedNameIn applies the In predicate on the "simplifiedName" field.
+func SimplifiedNameIn(vs ...string) predicate.Track {
+	return predicate.Track(sql.FieldIn(FieldSimplifiedName, vs...))
+}
+
+// SimplifiedNameNotIn applies the NotIn predicate on the "simplifiedName" field.
+func SimplifiedNameNotIn(vs ...string) predicate.Track {
+	return predicate.Track(sql.FieldNotIn(FieldSimplifiedName, vs...))
+}
+
+// SimplifiedNameGT applies the GT predicate on the "simplifiedName" field.
+func SimplifiedNameGT(v string) predicate.Track {
+	return predicate.Track(sql.FieldGT(FieldSimplifiedName, v))
+}
+
+// SimplifiedNameGTE applies the GTE predicate on the "simplifiedName" field.
+func SimplifiedNameGTE(v string) predicate.Track {
+	return predicate.Track(sql.FieldGTE(FieldSimplifiedName, v))
+}
+
+// SimplifiedNameLT applies the LT predicate on the "simplifiedName" field.
+func SimplifiedNameLT(v string) predicate.Track {
+	return predicate.Track(sql.FieldLT(FieldSimplifiedName, v))
+}
+
+// SimplifiedNameLTE applies the LTE predicate on the "simplifiedName" field.
+func SimplifiedNameLTE(v string) predicate.Track {
+	return predicate.Track(sql.FieldLTE(FieldSimplifiedName, v))
+}
+
+// SimplifiedNameContains applies the Contains predicate on the "simplifiedName" field.
+func SimplifiedNameContains(v string) predicate.Track {
+	return predicate.Track(sql.FieldContains(FieldSimplifiedName, v))
+}
+
+// SimplifiedNameHasPrefix applies the HasPrefix predicate on the "simplifiedName" field.
+func SimplifiedNameHasPrefix(v string) predicate.Track {
+	return predicate.Track(sql.FieldHasPrefix(FieldSimplifiedName, v))
+}
+
+// SimplifiedNameHasSuffix applies the HasSuffix predicate on the "simplifiedName" field.
+func SimplifiedNameHasSuffix(v string) predicate.Track {
+	return predicate.Track(sql.FieldHasSuffix(FieldSimplifiedName, v))
+}
+
+// SimplifiedNameEqualFold applies the EqualFold predicate on the "simplifiedName" field.
+func SimplifiedNameEqualFold(v string) predicate.Track {
+	return predicate.Track(sql.FieldEqualFold(FieldSimplifiedName, v))
+}
+
+// SimplifiedNameContainsFold applies the ContainsFold predicate on the "simplifiedName" field.
+func SimplifiedNameContainsFold(v string) predicate.Track {
+	return predicate.Track(sql.FieldContainsFold(FieldSimplifiedName, v))
 }
 
 // HasSavedBy applies the HasEdge predicate on the "savedBy" edge.

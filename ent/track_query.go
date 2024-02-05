@@ -155,8 +155,8 @@ func (tq *TrackQuery) FirstX(ctx context.Context) *Track {
 
 // FirstID returns the first Track ID from the query.
 // Returns a *NotFoundError when no Track ID was found.
-func (tq *TrackQuery) FirstID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (tq *TrackQuery) FirstID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = tq.Limit(1).IDs(setContextOp(ctx, tq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -168,7 +168,7 @@ func (tq *TrackQuery) FirstID(ctx context.Context) (id string, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (tq *TrackQuery) FirstIDX(ctx context.Context) string {
+func (tq *TrackQuery) FirstIDX(ctx context.Context) int {
 	id, err := tq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -206,8 +206,8 @@ func (tq *TrackQuery) OnlyX(ctx context.Context) *Track {
 // OnlyID is like Only, but returns the only Track ID in the query.
 // Returns a *NotSingularError when more than one Track ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (tq *TrackQuery) OnlyID(ctx context.Context) (id string, err error) {
-	var ids []string
+func (tq *TrackQuery) OnlyID(ctx context.Context) (id int, err error) {
+	var ids []int
 	if ids, err = tq.Limit(2).IDs(setContextOp(ctx, tq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -223,7 +223,7 @@ func (tq *TrackQuery) OnlyID(ctx context.Context) (id string, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (tq *TrackQuery) OnlyIDX(ctx context.Context) string {
+func (tq *TrackQuery) OnlyIDX(ctx context.Context) int {
 	id, err := tq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -251,7 +251,7 @@ func (tq *TrackQuery) AllX(ctx context.Context) []*Track {
 }
 
 // IDs executes the query and returns a list of Track IDs.
-func (tq *TrackQuery) IDs(ctx context.Context) (ids []string, err error) {
+func (tq *TrackQuery) IDs(ctx context.Context) (ids []int, err error) {
 	if tq.ctx.Unique == nil && tq.path != nil {
 		tq.Unique(true)
 	}
@@ -263,7 +263,7 @@ func (tq *TrackQuery) IDs(ctx context.Context) (ids []string, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (tq *TrackQuery) IDsX(ctx context.Context) []string {
+func (tq *TrackQuery) IDsX(ctx context.Context) []int {
 	ids, err := tq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -371,12 +371,12 @@ func (tq *TrackQuery) WithArtists(opts ...func(*ArtistQuery)) *TrackQuery {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		SpotifyIds []string `json:"spotifyIds,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Track.Query().
-//		GroupBy(track.FieldName).
+//		GroupBy(track.FieldSpotifyIds).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (tq *TrackQuery) GroupBy(field string, fields ...string) *TrackGroupBy {
@@ -394,11 +394,11 @@ func (tq *TrackQuery) GroupBy(field string, fields ...string) *TrackGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		SpotifyIds []string `json:"spotifyIds,omitempty"`
 //	}
 //
 //	client.Track.Query().
-//		Select(track.FieldName).
+//		Select(track.FieldSpotifyIds).
 //		Scan(ctx, &v)
 func (tq *TrackQuery) Select(fields ...string) *TrackSelect {
 	tq.ctx.Fields = append(tq.ctx.Fields, fields...)
@@ -499,7 +499,7 @@ func (tq *TrackQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Track,
 
 func (tq *TrackQuery) loadSavedBy(ctx context.Context, query *UserQuery, nodes []*Track, init func(*Track), assign func(*Track, *User)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[string]*Track)
+	byID := make(map[int]*Track)
 	nids := make(map[string]map[*Track]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
@@ -529,10 +529,10 @@ func (tq *TrackQuery) loadSavedBy(ctx context.Context, query *UserQuery, nodes [
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullString)}, values...), nil
+				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := values[0].(*sql.NullString).String
+				outValue := int(values[0].(*sql.NullInt64).Int64)
 				inValue := values[1].(*sql.NullString).String
 				if nids[inValue] == nil {
 					nids[inValue] = map[*Track]struct{}{byID[outValue]: {}}
@@ -592,7 +592,7 @@ func (tq *TrackQuery) loadAlbum(ctx context.Context, query *AlbumQuery, nodes []
 }
 func (tq *TrackQuery) loadArtists(ctx context.Context, query *ArtistQuery, nodes []*Track, init func(*Track), assign func(*Track, *Artist)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[string]*Track)
+	byID := make(map[int]*Track)
 	nids := make(map[int]map[*Track]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
@@ -622,10 +622,10 @@ func (tq *TrackQuery) loadArtists(ctx context.Context, query *ArtistQuery, nodes
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullString)}, values...), nil
+				return append([]any{new(sql.NullInt64)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := values[0].(*sql.NullString).String
+				outValue := int(values[0].(*sql.NullInt64).Int64)
 				inValue := int(values[1].(*sql.NullInt64).Int64)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*Track]struct{}{byID[outValue]: {}}
@@ -662,7 +662,7 @@ func (tq *TrackQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (tq *TrackQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(track.Table, track.Columns, sqlgraph.NewFieldSpec(track.FieldID, field.TypeString))
+	_spec := sqlgraph.NewQuerySpec(track.Table, track.Columns, sqlgraph.NewFieldSpec(track.FieldID, field.TypeInt))
 	_spec.From = tq.sql
 	if unique := tq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

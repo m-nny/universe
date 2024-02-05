@@ -56,8 +56,11 @@ var (
 	}
 	// TracksColumns holds the columns for the "tracks" table.
 	TracksColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeString},
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "spotify_ids", Type: field.TypeJSON},
 		{Name: "name", Type: field.TypeString},
+		{Name: "track_number", Type: field.TypeInt},
+		{Name: "simplified_name", Type: field.TypeString},
 		{Name: "album_tracks", Type: field.TypeInt, Nullable: true},
 	}
 	// TracksTable holds the schema information for the "tracks" table.
@@ -68,7 +71,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "tracks_albums_tracks",
-				Columns:    []*schema.Column{TracksColumns[2]},
+				Columns:    []*schema.Column{TracksColumns[5]},
 				RefColumns: []*schema.Column{AlbumsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -88,7 +91,7 @@ var (
 	// ArtistTracksColumns holds the columns for the "artist_tracks" table.
 	ArtistTracksColumns = []*schema.Column{
 		{Name: "artist_id", Type: field.TypeInt},
-		{Name: "track_id", Type: field.TypeString},
+		{Name: "track_id", Type: field.TypeInt},
 	}
 	// ArtistTracksTable holds the schema information for the "artist_tracks" table.
 	ArtistTracksTable = &schema.Table{
@@ -138,7 +141,7 @@ var (
 	// UserSavedTracksColumns holds the columns for the "user_savedTracks" table.
 	UserSavedTracksColumns = []*schema.Column{
 		{Name: "user_id", Type: field.TypeString},
-		{Name: "track_id", Type: field.TypeString},
+		{Name: "track_id", Type: field.TypeInt},
 	}
 	// UserSavedTracksTable holds the schema information for the "user_savedTracks" table.
 	UserSavedTracksTable = &schema.Table{

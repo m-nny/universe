@@ -12,8 +12,14 @@ const (
 	Label = "track"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldSpotifyIds holds the string denoting the spotifyids field in the database.
+	FieldSpotifyIds = "spotify_ids"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldTrackNumber holds the string denoting the tracknumber field in the database.
+	FieldTrackNumber = "track_number"
+	// FieldSimplifiedName holds the string denoting the simplifiedname field in the database.
+	FieldSimplifiedName = "simplified_name"
 	// EdgeSavedBy holds the string denoting the savedby edge name in mutations.
 	EdgeSavedBy = "savedBy"
 	// EdgeAlbum holds the string denoting the album edge name in mutations.
@@ -44,7 +50,10 @@ const (
 // Columns holds all SQL columns for track fields.
 var Columns = []string{
 	FieldID,
+	FieldSpotifyIds,
 	FieldName,
+	FieldTrackNumber,
+	FieldSimplifiedName,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "tracks"
@@ -80,8 +89,10 @@ func ValidColumn(column string) bool {
 var (
 	// NameValidator is a validator for the "name" field. It is called by the builders before save.
 	NameValidator func(string) error
-	// IDValidator is a validator for the "id" field. It is called by the builders before save.
-	IDValidator func(string) error
+	// TrackNumberValidator is a validator for the "trackNumber" field. It is called by the builders before save.
+	TrackNumberValidator func(int) error
+	// SimplifiedNameValidator is a validator for the "simplifiedName" field. It is called by the builders before save.
+	SimplifiedNameValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the Track queries.
@@ -95,6 +106,16 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 // ByName orders the results by the name field.
 func ByName(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldName, opts...).ToFunc()
+}
+
+// ByTrackNumber orders the results by the trackNumber field.
+func ByTrackNumber(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTrackNumber, opts...).ToFunc()
+}
+
+// BySimplifiedName orders the results by the simplifiedName field.
+func BySimplifiedName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSimplifiedName, opts...).ToFunc()
 }
 
 // BySavedByCount orders the results by savedBy count.

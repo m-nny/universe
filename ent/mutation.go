@@ -46,8 +46,8 @@ type AlbumMutation struct {
 	name             *string
 	simplifiedName   *string
 	clearedFields    map[string]struct{}
-	tracks           map[string]struct{}
-	removedtracks    map[string]struct{}
+	tracks           map[int]struct{}
+	removedtracks    map[int]struct{}
 	clearedtracks    bool
 	artists          map[int]struct{}
 	removedartists   map[int]struct{}
@@ -279,9 +279,9 @@ func (m *AlbumMutation) ResetSimplifiedName() {
 }
 
 // AddTrackIDs adds the "tracks" edge to the Track entity by ids.
-func (m *AlbumMutation) AddTrackIDs(ids ...string) {
+func (m *AlbumMutation) AddTrackIDs(ids ...int) {
 	if m.tracks == nil {
-		m.tracks = make(map[string]struct{})
+		m.tracks = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.tracks[ids[i]] = struct{}{}
@@ -299,9 +299,9 @@ func (m *AlbumMutation) TracksCleared() bool {
 }
 
 // RemoveTrackIDs removes the "tracks" edge to the Track entity by IDs.
-func (m *AlbumMutation) RemoveTrackIDs(ids ...string) {
+func (m *AlbumMutation) RemoveTrackIDs(ids ...int) {
 	if m.removedtracks == nil {
-		m.removedtracks = make(map[string]struct{})
+		m.removedtracks = make(map[int]struct{})
 	}
 	for i := range ids {
 		delete(m.tracks, ids[i])
@@ -310,7 +310,7 @@ func (m *AlbumMutation) RemoveTrackIDs(ids ...string) {
 }
 
 // RemovedTracks returns the removed IDs of the "tracks" edge to the Track entity.
-func (m *AlbumMutation) RemovedTracksIDs() (ids []string) {
+func (m *AlbumMutation) RemovedTracksIDs() (ids []int) {
 	for id := range m.removedtracks {
 		ids = append(ids, id)
 	}
@@ -318,7 +318,7 @@ func (m *AlbumMutation) RemovedTracksIDs() (ids []string) {
 }
 
 // TracksIDs returns the "tracks" edge IDs in the mutation.
-func (m *AlbumMutation) TracksIDs() (ids []string) {
+func (m *AlbumMutation) TracksIDs() (ids []int) {
 	for id := range m.tracks {
 		ids = append(ids, id)
 	}
@@ -670,8 +670,8 @@ type ArtistMutation struct {
 	spotifyId     *string
 	name          *string
 	clearedFields map[string]struct{}
-	tracks        map[string]struct{}
-	removedtracks map[string]struct{}
+	tracks        map[int]struct{}
+	removedtracks map[int]struct{}
 	clearedtracks bool
 	albums        map[int]struct{}
 	removedalbums map[int]struct{}
@@ -852,9 +852,9 @@ func (m *ArtistMutation) ResetName() {
 }
 
 // AddTrackIDs adds the "tracks" edge to the Track entity by ids.
-func (m *ArtistMutation) AddTrackIDs(ids ...string) {
+func (m *ArtistMutation) AddTrackIDs(ids ...int) {
 	if m.tracks == nil {
-		m.tracks = make(map[string]struct{})
+		m.tracks = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.tracks[ids[i]] = struct{}{}
@@ -872,9 +872,9 @@ func (m *ArtistMutation) TracksCleared() bool {
 }
 
 // RemoveTrackIDs removes the "tracks" edge to the Track entity by IDs.
-func (m *ArtistMutation) RemoveTrackIDs(ids ...string) {
+func (m *ArtistMutation) RemoveTrackIDs(ids ...int) {
 	if m.removedtracks == nil {
-		m.removedtracks = make(map[string]struct{})
+		m.removedtracks = make(map[int]struct{})
 	}
 	for i := range ids {
 		delete(m.tracks, ids[i])
@@ -883,7 +883,7 @@ func (m *ArtistMutation) RemoveTrackIDs(ids ...string) {
 }
 
 // RemovedTracks returns the removed IDs of the "tracks" edge to the Track entity.
-func (m *ArtistMutation) RemovedTracksIDs() (ids []string) {
+func (m *ArtistMutation) RemovedTracksIDs() (ids []int) {
 	for id := range m.removedtracks {
 		ids = append(ids, id)
 	}
@@ -891,7 +891,7 @@ func (m *ArtistMutation) RemovedTracksIDs() (ids []string) {
 }
 
 // TracksIDs returns the "tracks" edge IDs in the mutation.
-func (m *ArtistMutation) TracksIDs() (ids []string) {
+func (m *ArtistMutation) TracksIDs() (ids []int) {
 	for id := range m.tracks {
 		ids = append(ids, id)
 	}
@@ -1673,22 +1673,27 @@ func (m *PlaylistMutation) ResetEdge(name string) error {
 // TrackMutation represents an operation that mutates the Track nodes in the graph.
 type TrackMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *string
-	name           *string
-	clearedFields  map[string]struct{}
-	savedBy        map[string]struct{}
-	removedsavedBy map[string]struct{}
-	clearedsavedBy bool
-	album          *int
-	clearedalbum   bool
-	artists        map[int]struct{}
-	removedartists map[int]struct{}
-	clearedartists bool
-	done           bool
-	oldValue       func(context.Context) (*Track, error)
-	predicates     []predicate.Track
+	op               Op
+	typ              string
+	id               *int
+	spotifyIds       *[]string
+	appendspotifyIds []string
+	name             *string
+	trackNumber      *int
+	addtrackNumber   *int
+	simplifiedName   *string
+	clearedFields    map[string]struct{}
+	savedBy          map[string]struct{}
+	removedsavedBy   map[string]struct{}
+	clearedsavedBy   bool
+	album            *int
+	clearedalbum     bool
+	artists          map[int]struct{}
+	removedartists   map[int]struct{}
+	clearedartists   bool
+	done             bool
+	oldValue         func(context.Context) (*Track, error)
+	predicates       []predicate.Track
 }
 
 var _ ent.Mutation = (*TrackMutation)(nil)
@@ -1711,7 +1716,7 @@ func newTrackMutation(c config, op Op, opts ...trackOption) *TrackMutation {
 }
 
 // withTrackID sets the ID field of the mutation.
-func withTrackID(id string) trackOption {
+func withTrackID(id int) trackOption {
 	return func(m *TrackMutation) {
 		var (
 			err   error
@@ -1761,15 +1766,9 @@ func (m TrackMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
-// SetID sets the value of the id field. Note that this
-// operation is only accepted on creation of Track entities.
-func (m *TrackMutation) SetID(id string) {
-	m.id = &id
-}
-
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *TrackMutation) ID() (id string, exists bool) {
+func (m *TrackMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -1780,12 +1779,12 @@ func (m *TrackMutation) ID() (id string, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *TrackMutation) IDs(ctx context.Context) ([]string, error) {
+func (m *TrackMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []string{id}, nil
+			return []int{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -1793,6 +1792,57 @@ func (m *TrackMutation) IDs(ctx context.Context) ([]string, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetSpotifyIds sets the "spotifyIds" field.
+func (m *TrackMutation) SetSpotifyIds(s []string) {
+	m.spotifyIds = &s
+	m.appendspotifyIds = nil
+}
+
+// SpotifyIds returns the value of the "spotifyIds" field in the mutation.
+func (m *TrackMutation) SpotifyIds() (r []string, exists bool) {
+	v := m.spotifyIds
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSpotifyIds returns the old "spotifyIds" field's value of the Track entity.
+// If the Track object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TrackMutation) OldSpotifyIds(ctx context.Context) (v []string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSpotifyIds is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSpotifyIds requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSpotifyIds: %w", err)
+	}
+	return oldValue.SpotifyIds, nil
+}
+
+// AppendSpotifyIds adds s to the "spotifyIds" field.
+func (m *TrackMutation) AppendSpotifyIds(s []string) {
+	m.appendspotifyIds = append(m.appendspotifyIds, s...)
+}
+
+// AppendedSpotifyIds returns the list of values that were appended to the "spotifyIds" field in this mutation.
+func (m *TrackMutation) AppendedSpotifyIds() ([]string, bool) {
+	if len(m.appendspotifyIds) == 0 {
+		return nil, false
+	}
+	return m.appendspotifyIds, true
+}
+
+// ResetSpotifyIds resets all changes to the "spotifyIds" field.
+func (m *TrackMutation) ResetSpotifyIds() {
+	m.spotifyIds = nil
+	m.appendspotifyIds = nil
 }
 
 // SetName sets the "name" field.
@@ -1829,6 +1879,98 @@ func (m *TrackMutation) OldName(ctx context.Context) (v string, err error) {
 // ResetName resets all changes to the "name" field.
 func (m *TrackMutation) ResetName() {
 	m.name = nil
+}
+
+// SetTrackNumber sets the "trackNumber" field.
+func (m *TrackMutation) SetTrackNumber(i int) {
+	m.trackNumber = &i
+	m.addtrackNumber = nil
+}
+
+// TrackNumber returns the value of the "trackNumber" field in the mutation.
+func (m *TrackMutation) TrackNumber() (r int, exists bool) {
+	v := m.trackNumber
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTrackNumber returns the old "trackNumber" field's value of the Track entity.
+// If the Track object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TrackMutation) OldTrackNumber(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTrackNumber is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTrackNumber requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTrackNumber: %w", err)
+	}
+	return oldValue.TrackNumber, nil
+}
+
+// AddTrackNumber adds i to the "trackNumber" field.
+func (m *TrackMutation) AddTrackNumber(i int) {
+	if m.addtrackNumber != nil {
+		*m.addtrackNumber += i
+	} else {
+		m.addtrackNumber = &i
+	}
+}
+
+// AddedTrackNumber returns the value that was added to the "trackNumber" field in this mutation.
+func (m *TrackMutation) AddedTrackNumber() (r int, exists bool) {
+	v := m.addtrackNumber
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetTrackNumber resets all changes to the "trackNumber" field.
+func (m *TrackMutation) ResetTrackNumber() {
+	m.trackNumber = nil
+	m.addtrackNumber = nil
+}
+
+// SetSimplifiedName sets the "simplifiedName" field.
+func (m *TrackMutation) SetSimplifiedName(s string) {
+	m.simplifiedName = &s
+}
+
+// SimplifiedName returns the value of the "simplifiedName" field in the mutation.
+func (m *TrackMutation) SimplifiedName() (r string, exists bool) {
+	v := m.simplifiedName
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSimplifiedName returns the old "simplifiedName" field's value of the Track entity.
+// If the Track object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TrackMutation) OldSimplifiedName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSimplifiedName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSimplifiedName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSimplifiedName: %w", err)
+	}
+	return oldValue.SimplifiedName, nil
+}
+
+// ResetSimplifiedName resets all changes to the "simplifiedName" field.
+func (m *TrackMutation) ResetSimplifiedName() {
+	m.simplifiedName = nil
 }
 
 // AddSavedByIDs adds the "savedBy" edge to the User entity by ids.
@@ -2012,9 +2154,18 @@ func (m *TrackMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TrackMutation) Fields() []string {
-	fields := make([]string, 0, 1)
+	fields := make([]string, 0, 4)
+	if m.spotifyIds != nil {
+		fields = append(fields, track.FieldSpotifyIds)
+	}
 	if m.name != nil {
 		fields = append(fields, track.FieldName)
+	}
+	if m.trackNumber != nil {
+		fields = append(fields, track.FieldTrackNumber)
+	}
+	if m.simplifiedName != nil {
+		fields = append(fields, track.FieldSimplifiedName)
 	}
 	return fields
 }
@@ -2024,8 +2175,14 @@ func (m *TrackMutation) Fields() []string {
 // schema.
 func (m *TrackMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case track.FieldSpotifyIds:
+		return m.SpotifyIds()
 	case track.FieldName:
 		return m.Name()
+	case track.FieldTrackNumber:
+		return m.TrackNumber()
+	case track.FieldSimplifiedName:
+		return m.SimplifiedName()
 	}
 	return nil, false
 }
@@ -2035,8 +2192,14 @@ func (m *TrackMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *TrackMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case track.FieldSpotifyIds:
+		return m.OldSpotifyIds(ctx)
 	case track.FieldName:
 		return m.OldName(ctx)
+	case track.FieldTrackNumber:
+		return m.OldTrackNumber(ctx)
+	case track.FieldSimplifiedName:
+		return m.OldSimplifiedName(ctx)
 	}
 	return nil, fmt.Errorf("unknown Track field %s", name)
 }
@@ -2046,12 +2209,33 @@ func (m *TrackMutation) OldField(ctx context.Context, name string) (ent.Value, e
 // type.
 func (m *TrackMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case track.FieldSpotifyIds:
+		v, ok := value.([]string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSpotifyIds(v)
+		return nil
 	case track.FieldName:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
+		return nil
+	case track.FieldTrackNumber:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTrackNumber(v)
+		return nil
+	case track.FieldSimplifiedName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSimplifiedName(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Track field %s", name)
@@ -2060,13 +2244,21 @@ func (m *TrackMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *TrackMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addtrackNumber != nil {
+		fields = append(fields, track.FieldTrackNumber)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *TrackMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case track.FieldTrackNumber:
+		return m.AddedTrackNumber()
+	}
 	return nil, false
 }
 
@@ -2075,6 +2267,13 @@ func (m *TrackMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *TrackMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case track.FieldTrackNumber:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTrackNumber(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Track numeric field %s", name)
 }
@@ -2102,8 +2301,17 @@ func (m *TrackMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *TrackMutation) ResetField(name string) error {
 	switch name {
+	case track.FieldSpotifyIds:
+		m.ResetSpotifyIds()
+		return nil
 	case track.FieldName:
 		m.ResetName()
+		return nil
+	case track.FieldTrackNumber:
+		m.ResetTrackNumber()
+		return nil
+	case track.FieldSimplifiedName:
+		m.ResetSimplifiedName()
 		return nil
 	}
 	return fmt.Errorf("unknown Track field %s", name)
@@ -2248,8 +2456,8 @@ type UserMutation struct {
 	playlists          map[string]struct{}
 	removedplaylists   map[string]struct{}
 	clearedplaylists   bool
-	savedTracks        map[string]struct{}
-	removedsavedTracks map[string]struct{}
+	savedTracks        map[int]struct{}
+	removedsavedTracks map[int]struct{}
 	clearedsavedTracks bool
 	done               bool
 	oldValue           func(context.Context) (*User, error)
@@ -2451,9 +2659,9 @@ func (m *UserMutation) ResetPlaylists() {
 }
 
 // AddSavedTrackIDs adds the "savedTracks" edge to the Track entity by ids.
-func (m *UserMutation) AddSavedTrackIDs(ids ...string) {
+func (m *UserMutation) AddSavedTrackIDs(ids ...int) {
 	if m.savedTracks == nil {
-		m.savedTracks = make(map[string]struct{})
+		m.savedTracks = make(map[int]struct{})
 	}
 	for i := range ids {
 		m.savedTracks[ids[i]] = struct{}{}
@@ -2471,9 +2679,9 @@ func (m *UserMutation) SavedTracksCleared() bool {
 }
 
 // RemoveSavedTrackIDs removes the "savedTracks" edge to the Track entity by IDs.
-func (m *UserMutation) RemoveSavedTrackIDs(ids ...string) {
+func (m *UserMutation) RemoveSavedTrackIDs(ids ...int) {
 	if m.removedsavedTracks == nil {
-		m.removedsavedTracks = make(map[string]struct{})
+		m.removedsavedTracks = make(map[int]struct{})
 	}
 	for i := range ids {
 		delete(m.savedTracks, ids[i])
@@ -2482,7 +2690,7 @@ func (m *UserMutation) RemoveSavedTrackIDs(ids ...string) {
 }
 
 // RemovedSavedTracks returns the removed IDs of the "savedTracks" edge to the Track entity.
-func (m *UserMutation) RemovedSavedTracksIDs() (ids []string) {
+func (m *UserMutation) RemovedSavedTracksIDs() (ids []int) {
 	for id := range m.removedsavedTracks {
 		ids = append(ids, id)
 	}
@@ -2490,7 +2698,7 @@ func (m *UserMutation) RemovedSavedTracksIDs() (ids []string) {
 }
 
 // SavedTracksIDs returns the "savedTracks" edge IDs in the mutation.
-func (m *UserMutation) SavedTracksIDs() (ids []string) {
+func (m *UserMutation) SavedTracksIDs() (ids []int) {
 	for id := range m.savedTracks {
 		ids = append(ids, id)
 	}

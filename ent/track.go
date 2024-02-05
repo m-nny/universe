@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -16,9 +17,15 @@ import (
 type Track struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID string `json:"id,omitempty"`
+	ID int `json:"id,omitempty"`
+	// SpotifyIds holds the value of the "spotifyIds" field.
+	SpotifyIds []string `json:"spotifyIds,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// TrackNumber holds the value of the "trackNumber" field.
+	TrackNumber int `json:"trackNumber,omitempty"`
+	// SimplifiedName holds the value of the "simplifiedName" field.
+	SimplifiedName string `json:"simplifiedName,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TrackQuery when eager-loading is set.
 	Edges        TrackEdges `json:"edges"`
@@ -75,7 +82,11 @@ func (*Track) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case track.FieldID, track.FieldName:
+		case track.FieldSpotifyIds:
+			values[i] = new([]byte)
+		case track.FieldID, track.FieldTrackNumber:
+			values[i] = new(sql.NullInt64)
+		case track.FieldName, track.FieldSimplifiedName:
 			values[i] = new(sql.NullString)
 		case track.ForeignKeys[0]: // album_tracks
 			values[i] = new(sql.NullInt64)
@@ -95,16 +106,36 @@ func (t *Track) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case track.FieldID:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value.Valid {
-				t.ID = value.String
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
+			}
+			t.ID = int(value.Int64)
+		case track.FieldSpotifyIds:
+			if value, ok := values[i].(*[]byte); !ok {
+				return fmt.Errorf("unexpected type %T for field spotifyIds", values[i])
+			} else if value != nil && len(*value) > 0 {
+				if err := json.Unmarshal(*value, &t.SpotifyIds); err != nil {
+					return fmt.Errorf("unmarshal field spotifyIds: %w", err)
+				}
 			}
 		case track.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				t.Name = value.String
+			}
+		case track.FieldTrackNumber:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field trackNumber", values[i])
+			} else if value.Valid {
+				t.TrackNumber = int(value.Int64)
+			}
+		case track.FieldSimplifiedName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field simplifiedName", values[i])
+			} else if value.Valid {
+				t.SimplifiedName = value.String
 			}
 		case track.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -164,8 +195,17 @@ func (t *Track) String() string {
 	var builder strings.Builder
 	builder.WriteString("Track(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
+	builder.WriteString("spotifyIds=")
+	builder.WriteString(fmt.Sprintf("%v", t.SpotifyIds))
+	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(t.Name)
+	builder.WriteString(", ")
+	builder.WriteString("trackNumber=")
+	builder.WriteString(fmt.Sprintf("%v", t.TrackNumber))
+	builder.WriteString(", ")
+	builder.WriteString("simplifiedName=")
+	builder.WriteString(t.SimplifiedName)
 	builder.WriteByte(')')
 	return builder.String()
 }

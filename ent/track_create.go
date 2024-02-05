@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -25,15 +24,27 @@ type TrackCreate struct {
 	conflict []sql.ConflictOption
 }
 
+// SetSpotifyIds sets the "spotifyIds" field.
+func (tc *TrackCreate) SetSpotifyIds(s []string) *TrackCreate {
+	tc.mutation.SetSpotifyIds(s)
+	return tc
+}
+
 // SetName sets the "name" field.
 func (tc *TrackCreate) SetName(s string) *TrackCreate {
 	tc.mutation.SetName(s)
 	return tc
 }
 
-// SetID sets the "id" field.
-func (tc *TrackCreate) SetID(s string) *TrackCreate {
-	tc.mutation.SetID(s)
+// SetTrackNumber sets the "trackNumber" field.
+func (tc *TrackCreate) SetTrackNumber(i int) *TrackCreate {
+	tc.mutation.SetTrackNumber(i)
+	return tc
+}
+
+// SetSimplifiedName sets the "simplifiedName" field.
+func (tc *TrackCreate) SetSimplifiedName(s string) *TrackCreate {
+	tc.mutation.SetSimplifiedName(s)
 	return tc
 }
 
@@ -120,6 +131,9 @@ func (tc *TrackCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (tc *TrackCreate) check() error {
+	if _, ok := tc.mutation.SpotifyIds(); !ok {
+		return &ValidationError{Name: "spotifyIds", err: errors.New(`ent: missing required field "Track.spotifyIds"`)}
+	}
 	if _, ok := tc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Track.name"`)}
 	}
@@ -128,9 +142,20 @@ func (tc *TrackCreate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Track.name": %w`, err)}
 		}
 	}
-	if v, ok := tc.mutation.ID(); ok {
-		if err := track.IDValidator(v); err != nil {
-			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "Track.id": %w`, err)}
+	if _, ok := tc.mutation.TrackNumber(); !ok {
+		return &ValidationError{Name: "trackNumber", err: errors.New(`ent: missing required field "Track.trackNumber"`)}
+	}
+	if v, ok := tc.mutation.TrackNumber(); ok {
+		if err := track.TrackNumberValidator(v); err != nil {
+			return &ValidationError{Name: "trackNumber", err: fmt.Errorf(`ent: validator failed for field "Track.trackNumber": %w`, err)}
+		}
+	}
+	if _, ok := tc.mutation.SimplifiedName(); !ok {
+		return &ValidationError{Name: "simplifiedName", err: errors.New(`ent: missing required field "Track.simplifiedName"`)}
+	}
+	if v, ok := tc.mutation.SimplifiedName(); ok {
+		if err := track.SimplifiedNameValidator(v); err != nil {
+			return &ValidationError{Name: "simplifiedName", err: fmt.Errorf(`ent: validator failed for field "Track.simplifiedName": %w`, err)}
 		}
 	}
 	return nil
@@ -147,13 +172,8 @@ func (tc *TrackCreate) sqlSave(ctx context.Context) (*Track, error) {
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(string); ok {
-			_node.ID = id
-		} else {
-			return nil, fmt.Errorf("unexpected Track.ID type: %T", _spec.ID.Value)
-		}
-	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
 	tc.mutation.id = &_node.ID
 	tc.mutation.done = true
 	return _node, nil
@@ -162,16 +182,24 @@ func (tc *TrackCreate) sqlSave(ctx context.Context) (*Track, error) {
 func (tc *TrackCreate) createSpec() (*Track, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Track{config: tc.config}
-		_spec = sqlgraph.NewCreateSpec(track.Table, sqlgraph.NewFieldSpec(track.FieldID, field.TypeString))
+		_spec = sqlgraph.NewCreateSpec(track.Table, sqlgraph.NewFieldSpec(track.FieldID, field.TypeInt))
 	)
 	_spec.OnConflict = tc.conflict
-	if id, ok := tc.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
+	if value, ok := tc.mutation.SpotifyIds(); ok {
+		_spec.SetField(track.FieldSpotifyIds, field.TypeJSON, value)
+		_node.SpotifyIds = value
 	}
 	if value, ok := tc.mutation.Name(); ok {
 		_spec.SetField(track.FieldName, field.TypeString, value)
 		_node.Name = value
+	}
+	if value, ok := tc.mutation.TrackNumber(); ok {
+		_spec.SetField(track.FieldTrackNumber, field.TypeInt, value)
+		_node.TrackNumber = value
+	}
+	if value, ok := tc.mutation.SimplifiedName(); ok {
+		_spec.SetField(track.FieldSimplifiedName, field.TypeString, value)
+		_node.SimplifiedName = value
 	}
 	if nodes := tc.mutation.SavedByIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -229,7 +257,7 @@ func (tc *TrackCreate) createSpec() (*Track, *sqlgraph.CreateSpec) {
 // of the `INSERT` statement. For example:
 //
 //	client.Track.Create().
-//		SetName(v).
+//		SetSpotifyIds(v).
 //		OnConflict(
 //			// Update the row with the new values
 //			// the was proposed for insertion.
@@ -238,7 +266,7 @@ func (tc *TrackCreate) createSpec() (*Track, *sqlgraph.CreateSpec) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.TrackUpsert) {
-//			SetName(v+v).
+//			SetSpotifyIds(v+v).
 //		}).
 //		Exec(ctx)
 func (tc *TrackCreate) OnConflict(opts ...sql.ConflictOption) *TrackUpsertOne {
@@ -274,6 +302,18 @@ type (
 	}
 )
 
+// SetSpotifyIds sets the "spotifyIds" field.
+func (u *TrackUpsert) SetSpotifyIds(v []string) *TrackUpsert {
+	u.Set(track.FieldSpotifyIds, v)
+	return u
+}
+
+// UpdateSpotifyIds sets the "spotifyIds" field to the value that was provided on create.
+func (u *TrackUpsert) UpdateSpotifyIds() *TrackUpsert {
+	u.SetExcluded(track.FieldSpotifyIds)
+	return u
+}
+
 // SetName sets the "name" field.
 func (u *TrackUpsert) SetName(v string) *TrackUpsert {
 	u.Set(track.FieldName, v)
@@ -286,24 +326,46 @@ func (u *TrackUpsert) UpdateName() *TrackUpsert {
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
+// SetTrackNumber sets the "trackNumber" field.
+func (u *TrackUpsert) SetTrackNumber(v int) *TrackUpsert {
+	u.Set(track.FieldTrackNumber, v)
+	return u
+}
+
+// UpdateTrackNumber sets the "trackNumber" field to the value that was provided on create.
+func (u *TrackUpsert) UpdateTrackNumber() *TrackUpsert {
+	u.SetExcluded(track.FieldTrackNumber)
+	return u
+}
+
+// AddTrackNumber adds v to the "trackNumber" field.
+func (u *TrackUpsert) AddTrackNumber(v int) *TrackUpsert {
+	u.Add(track.FieldTrackNumber, v)
+	return u
+}
+
+// SetSimplifiedName sets the "simplifiedName" field.
+func (u *TrackUpsert) SetSimplifiedName(v string) *TrackUpsert {
+	u.Set(track.FieldSimplifiedName, v)
+	return u
+}
+
+// UpdateSimplifiedName sets the "simplifiedName" field to the value that was provided on create.
+func (u *TrackUpsert) UpdateSimplifiedName() *TrackUpsert {
+	u.SetExcluded(track.FieldSimplifiedName)
+	return u
+}
+
+// UpdateNewValues updates the mutable fields using the new values that were set on create.
 // Using this option is equivalent to using:
 //
 //	client.Track.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
-//			sql.ResolveWith(func(u *sql.UpdateSet) {
-//				u.SetIgnore(track.FieldID)
-//			}),
 //		).
 //		Exec(ctx)
 func (u *TrackUpsertOne) UpdateNewValues() *TrackUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
-		if _, exists := u.create.mutation.ID(); exists {
-			s.SetIgnore(track.FieldID)
-		}
-	}))
 	return u
 }
 
@@ -334,6 +396,20 @@ func (u *TrackUpsertOne) Update(set func(*TrackUpsert)) *TrackUpsertOne {
 	return u
 }
 
+// SetSpotifyIds sets the "spotifyIds" field.
+func (u *TrackUpsertOne) SetSpotifyIds(v []string) *TrackUpsertOne {
+	return u.Update(func(s *TrackUpsert) {
+		s.SetSpotifyIds(v)
+	})
+}
+
+// UpdateSpotifyIds sets the "spotifyIds" field to the value that was provided on create.
+func (u *TrackUpsertOne) UpdateSpotifyIds() *TrackUpsertOne {
+	return u.Update(func(s *TrackUpsert) {
+		s.UpdateSpotifyIds()
+	})
+}
+
 // SetName sets the "name" field.
 func (u *TrackUpsertOne) SetName(v string) *TrackUpsertOne {
 	return u.Update(func(s *TrackUpsert) {
@@ -345,6 +421,41 @@ func (u *TrackUpsertOne) SetName(v string) *TrackUpsertOne {
 func (u *TrackUpsertOne) UpdateName() *TrackUpsertOne {
 	return u.Update(func(s *TrackUpsert) {
 		s.UpdateName()
+	})
+}
+
+// SetTrackNumber sets the "trackNumber" field.
+func (u *TrackUpsertOne) SetTrackNumber(v int) *TrackUpsertOne {
+	return u.Update(func(s *TrackUpsert) {
+		s.SetTrackNumber(v)
+	})
+}
+
+// AddTrackNumber adds v to the "trackNumber" field.
+func (u *TrackUpsertOne) AddTrackNumber(v int) *TrackUpsertOne {
+	return u.Update(func(s *TrackUpsert) {
+		s.AddTrackNumber(v)
+	})
+}
+
+// UpdateTrackNumber sets the "trackNumber" field to the value that was provided on create.
+func (u *TrackUpsertOne) UpdateTrackNumber() *TrackUpsertOne {
+	return u.Update(func(s *TrackUpsert) {
+		s.UpdateTrackNumber()
+	})
+}
+
+// SetSimplifiedName sets the "simplifiedName" field.
+func (u *TrackUpsertOne) SetSimplifiedName(v string) *TrackUpsertOne {
+	return u.Update(func(s *TrackUpsert) {
+		s.SetSimplifiedName(v)
+	})
+}
+
+// UpdateSimplifiedName sets the "simplifiedName" field to the value that was provided on create.
+func (u *TrackUpsertOne) UpdateSimplifiedName() *TrackUpsertOne {
+	return u.Update(func(s *TrackUpsert) {
+		s.UpdateSimplifiedName()
 	})
 }
 
@@ -364,12 +475,7 @@ func (u *TrackUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *TrackUpsertOne) ID(ctx context.Context) (id string, err error) {
-	if u.create.driver.Dialect() == dialect.MySQL {
-		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
-		// fields from the database since MySQL does not support the RETURNING clause.
-		return id, errors.New("ent: TrackUpsertOne.ID is not supported by MySQL driver. Use TrackUpsertOne.Exec instead")
-	}
+func (u *TrackUpsertOne) ID(ctx context.Context) (id int, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -378,7 +484,7 @@ func (u *TrackUpsertOne) ID(ctx context.Context) (id string, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *TrackUpsertOne) IDX(ctx context.Context) string {
+func (u *TrackUpsertOne) IDX(ctx context.Context) int {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -432,6 +538,10 @@ func (tcb *TrackCreateBulk) Save(ctx context.Context) ([]*Track, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
+				if specs[i].ID.Value != nil {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = int(id)
+				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -483,7 +593,7 @@ func (tcb *TrackCreateBulk) ExecX(ctx context.Context) {
 //		// Override some of the fields with custom
 //		// update values.
 //		Update(func(u *ent.TrackUpsert) {
-//			SetName(v+v).
+//			SetSpotifyIds(v+v).
 //		}).
 //		Exec(ctx)
 func (tcb *TrackCreateBulk) OnConflict(opts ...sql.ConflictOption) *TrackUpsertBulk {
@@ -518,20 +628,10 @@ type TrackUpsertBulk struct {
 //	client.Track.Create().
 //		OnConflict(
 //			sql.ResolveWithNewValues(),
-//			sql.ResolveWith(func(u *sql.UpdateSet) {
-//				u.SetIgnore(track.FieldID)
-//			}),
 //		).
 //		Exec(ctx)
 func (u *TrackUpsertBulk) UpdateNewValues() *TrackUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
-	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
-		for _, b := range u.create.builders {
-			if _, exists := b.mutation.ID(); exists {
-				s.SetIgnore(track.FieldID)
-			}
-		}
-	}))
 	return u
 }
 
@@ -562,6 +662,20 @@ func (u *TrackUpsertBulk) Update(set func(*TrackUpsert)) *TrackUpsertBulk {
 	return u
 }
 
+// SetSpotifyIds sets the "spotifyIds" field.
+func (u *TrackUpsertBulk) SetSpotifyIds(v []string) *TrackUpsertBulk {
+	return u.Update(func(s *TrackUpsert) {
+		s.SetSpotifyIds(v)
+	})
+}
+
+// UpdateSpotifyIds sets the "spotifyIds" field to the value that was provided on create.
+func (u *TrackUpsertBulk) UpdateSpotifyIds() *TrackUpsertBulk {
+	return u.Update(func(s *TrackUpsert) {
+		s.UpdateSpotifyIds()
+	})
+}
+
 // SetName sets the "name" field.
 func (u *TrackUpsertBulk) SetName(v string) *TrackUpsertBulk {
 	return u.Update(func(s *TrackUpsert) {
@@ -573,6 +687,41 @@ func (u *TrackUpsertBulk) SetName(v string) *TrackUpsertBulk {
 func (u *TrackUpsertBulk) UpdateName() *TrackUpsertBulk {
 	return u.Update(func(s *TrackUpsert) {
 		s.UpdateName()
+	})
+}
+
+// SetTrackNumber sets the "trackNumber" field.
+func (u *TrackUpsertBulk) SetTrackNumber(v int) *TrackUpsertBulk {
+	return u.Update(func(s *TrackUpsert) {
+		s.SetTrackNumber(v)
+	})
+}
+
+// AddTrackNumber adds v to the "trackNumber" field.
+func (u *TrackUpsertBulk) AddTrackNumber(v int) *TrackUpsertBulk {
+	return u.Update(func(s *TrackUpsert) {
+		s.AddTrackNumber(v)
+	})
+}
+
+// UpdateTrackNumber sets the "trackNumber" field to the value that was provided on create.
+func (u *TrackUpsertBulk) UpdateTrackNumber() *TrackUpsertBulk {
+	return u.Update(func(s *TrackUpsert) {
+		s.UpdateTrackNumber()
+	})
+}
+
+// SetSimplifiedName sets the "simplifiedName" field.
+func (u *TrackUpsertBulk) SetSimplifiedName(v string) *TrackUpsertBulk {
+	return u.Update(func(s *TrackUpsert) {
+		s.SetSimplifiedName(v)
+	})
+}
+
+// UpdateSimplifiedName sets the "simplifiedName" field to the value that was provided on create.
+func (u *TrackUpsertBulk) UpdateSimplifiedName() *TrackUpsertBulk {
+	return u.Update(func(s *TrackUpsert) {
+		s.UpdateSimplifiedName()
 	})
 }
 

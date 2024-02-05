@@ -480,7 +480,7 @@ func (uq *UserQuery) loadPlaylists(ctx context.Context, query *PlaylistQuery, no
 func (uq *UserQuery) loadSavedTracks(ctx context.Context, query *TrackQuery, nodes []*User, init func(*User), assign func(*User, *Track)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
 	byID := make(map[string]*User)
-	nids := make(map[string]map[*User]struct{})
+	nids := make(map[int]map[*User]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -513,7 +513,7 @@ func (uq *UserQuery) loadSavedTracks(ctx context.Context, query *TrackQuery, nod
 			}
 			spec.Assign = func(columns []string, values []any) error {
 				outValue := values[0].(*sql.NullString).String
-				inValue := values[1].(*sql.NullString).String
+				inValue := int(values[1].(*sql.NullInt64).Int64)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*User]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])

@@ -3,9 +3,13 @@ package spotify
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
+	"slices"
+	"strings"
 
 	"github.com/m-nny/universe/ent"
+	"github.com/m-nny/universe/ent/track"
 	"github.com/m-nny/universe/ent/user"
 	"github.com/m-nny/universe/lib/utils"
 	"github.com/zmb3/spotify/v2"
@@ -51,27 +55,64 @@ func (s *Service) getUserTracks(ctx context.Context) ([]*ent.Track, error) {
 	return plists, err
 }
 
-func (s *Service) saveUserTracks(ctx context.Context, rawTracks []spotify.SavedTrack) ([]string, error) {
+func (s *Service) saveUserTracks(ctx context.Context, rawTracks []spotify.SavedTrack) ([]*ent.Track, error) {
 	return utils.SliceMapCtxErr(ctx, rawTracks, s.toTrack)
 }
 
-func (s *Service) toTrack(ctx context.Context, t spotify.SavedTrack) (string, error) {
+func (s *Service) getTrackFromSpotify(ctx context.Context, t spotify.SavedTrack) (*ent.Track, error) {
+	simplifiedName := simplifiedTrackName(t)
+	return s.ent.Track.
+		Query().
+		Where(
+			track.Or(
+				track.SpotifyIdContains(string(t.ID)),
+				track.SimplifiedName(simplifiedName),
+			),
+		).
+		Only(ctx)
+}
+
+func (s *Service) toTrack(ctx context.Context, t spotify.SavedTrack) (*ent.Track, error) {
+	track, err := s.getTrackFromSpotify(ctx, t)
+	if err != nil {
+		// Track does not exist yet
+		return s._newTrack(ctx, t)
+	}
+	if slices.Contains(track.SpotifyIds, string(t.ID)) {
+		return track, nil
+	}
+	log.Printf("new track version: cur: %v new: %v", track, t.ID)
+	return track.Update().AppendSpotifyIds([]string{string(t.ID)}).Save(ctx)
+}
+
+func (s *Service) _newTrack(ctx context.Context, t spotify.SavedTrack) (*ent.Track, error) {
 	artistIds, err := s.toArtists(ctx, t.Artists)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	album, err := s.toAlbum(ctx, t.Album)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
+	simplfiedName := simplifiedTrackName(t)
 	return s.ent.Track.
 		Create().
-		SetID(string(t.ID)).
-		SetName(string(t.Name)).
 		AddArtistIDs(artistIds...).
-		SetAlbum(album).
 		AddSavedByIDs(s.username).
-		OnConflict().
-		UpdateNewValues().
-		ID(ctx)
+		SetAlbum(album).
+		SetName(string(t.Name)).
+		SetSimplifiedName(simplfiedName).
+		SetSpotifyIds([]string{string(t.ID)}).
+		SetTrackNumber(t.TrackNumber).
+		Save(ctx)
+}
+
+// simplifiedTrackName will return a string in form of
+//
+//	"<artist1>, <artist2> - <album name> [<album release year] - <track_num>. <track_name>"
+func simplifiedTrackName(t spotify.SavedTrack) string {
+	msg := simplifiedAlbumName(t.Album)
+	msg += fmt.Sprintf("%d.  %s", t.TrackNumber, t.Name)
+	msg = strings.ToLower(msg)
+	return msg
 }

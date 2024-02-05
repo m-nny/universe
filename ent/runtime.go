@@ -55,10 +55,14 @@ func init() {
 	trackDescName := trackFields[1].Descriptor()
 	// track.NameValidator is a validator for the "name" field. It is called by the builders before save.
 	track.NameValidator = trackDescName.Validators[0].(func(string) error)
-	// trackDescID is the schema descriptor for id field.
-	trackDescID := trackFields[0].Descriptor()
-	// track.IDValidator is a validator for the "id" field. It is called by the builders before save.
-	track.IDValidator = trackDescID.Validators[0].(func(string) error)
+	// trackDescTrackNumber is the schema descriptor for trackNumber field.
+	trackDescTrackNumber := trackFields[2].Descriptor()
+	// track.TrackNumberValidator is a validator for the "trackNumber" field. It is called by the builders before save.
+	track.TrackNumberValidator = trackDescTrackNumber.Validators[0].(func(int) error)
+	// trackDescSimplifiedName is the schema descriptor for simplifiedName field.
+	trackDescSimplifiedName := trackFields[3].Descriptor()
+	// track.SimplifiedNameValidator is a validator for the "simplifiedName" field. It is called by the builders before save.
+	track.SimplifiedNameValidator = trackDescSimplifiedName.Validators[0].(func(string) error)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescID is the schema descriptor for id field.

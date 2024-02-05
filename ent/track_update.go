@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/dialect/sql/sqljson"
 	"entgo.io/ent/schema/field"
 	"github.com/m-nny/universe/ent/album"
 	"github.com/m-nny/universe/ent/artist"
@@ -30,6 +31,18 @@ func (tu *TrackUpdate) Where(ps ...predicate.Track) *TrackUpdate {
 	return tu
 }
 
+// SetSpotifyIds sets the "spotifyIds" field.
+func (tu *TrackUpdate) SetSpotifyIds(s []string) *TrackUpdate {
+	tu.mutation.SetSpotifyIds(s)
+	return tu
+}
+
+// AppendSpotifyIds appends s to the "spotifyIds" field.
+func (tu *TrackUpdate) AppendSpotifyIds(s []string) *TrackUpdate {
+	tu.mutation.AppendSpotifyIds(s)
+	return tu
+}
+
 // SetName sets the "name" field.
 func (tu *TrackUpdate) SetName(s string) *TrackUpdate {
 	tu.mutation.SetName(s)
@@ -40,6 +53,41 @@ func (tu *TrackUpdate) SetName(s string) *TrackUpdate {
 func (tu *TrackUpdate) SetNillableName(s *string) *TrackUpdate {
 	if s != nil {
 		tu.SetName(*s)
+	}
+	return tu
+}
+
+// SetTrackNumber sets the "trackNumber" field.
+func (tu *TrackUpdate) SetTrackNumber(i int) *TrackUpdate {
+	tu.mutation.ResetTrackNumber()
+	tu.mutation.SetTrackNumber(i)
+	return tu
+}
+
+// SetNillableTrackNumber sets the "trackNumber" field if the given value is not nil.
+func (tu *TrackUpdate) SetNillableTrackNumber(i *int) *TrackUpdate {
+	if i != nil {
+		tu.SetTrackNumber(*i)
+	}
+	return tu
+}
+
+// AddTrackNumber adds i to the "trackNumber" field.
+func (tu *TrackUpdate) AddTrackNumber(i int) *TrackUpdate {
+	tu.mutation.AddTrackNumber(i)
+	return tu
+}
+
+// SetSimplifiedName sets the "simplifiedName" field.
+func (tu *TrackUpdate) SetSimplifiedName(s string) *TrackUpdate {
+	tu.mutation.SetSimplifiedName(s)
+	return tu
+}
+
+// SetNillableSimplifiedName sets the "simplifiedName" field if the given value is not nil.
+func (tu *TrackUpdate) SetNillableSimplifiedName(s *string) *TrackUpdate {
+	if s != nil {
+		tu.SetSimplifiedName(*s)
 	}
 	return tu
 }
@@ -180,6 +228,16 @@ func (tu *TrackUpdate) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Track.name": %w`, err)}
 		}
 	}
+	if v, ok := tu.mutation.TrackNumber(); ok {
+		if err := track.TrackNumberValidator(v); err != nil {
+			return &ValidationError{Name: "trackNumber", err: fmt.Errorf(`ent: validator failed for field "Track.trackNumber": %w`, err)}
+		}
+	}
+	if v, ok := tu.mutation.SimplifiedName(); ok {
+		if err := track.SimplifiedNameValidator(v); err != nil {
+			return &ValidationError{Name: "simplifiedName", err: fmt.Errorf(`ent: validator failed for field "Track.simplifiedName": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -187,7 +245,7 @@ func (tu *TrackUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if err := tu.check(); err != nil {
 		return n, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(track.Table, track.Columns, sqlgraph.NewFieldSpec(track.FieldID, field.TypeString))
+	_spec := sqlgraph.NewUpdateSpec(track.Table, track.Columns, sqlgraph.NewFieldSpec(track.FieldID, field.TypeInt))
 	if ps := tu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
@@ -195,8 +253,25 @@ func (tu *TrackUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := tu.mutation.SpotifyIds(); ok {
+		_spec.SetField(track.FieldSpotifyIds, field.TypeJSON, value)
+	}
+	if value, ok := tu.mutation.AppendedSpotifyIds(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, track.FieldSpotifyIds, value)
+		})
+	}
 	if value, ok := tu.mutation.Name(); ok {
 		_spec.SetField(track.FieldName, field.TypeString, value)
+	}
+	if value, ok := tu.mutation.TrackNumber(); ok {
+		_spec.SetField(track.FieldTrackNumber, field.TypeInt, value)
+	}
+	if value, ok := tu.mutation.AddedTrackNumber(); ok {
+		_spec.AddField(track.FieldTrackNumber, field.TypeInt, value)
+	}
+	if value, ok := tu.mutation.SimplifiedName(); ok {
+		_spec.SetField(track.FieldSimplifiedName, field.TypeString, value)
 	}
 	if tu.mutation.SavedByCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -337,6 +412,18 @@ type TrackUpdateOne struct {
 	mutation *TrackMutation
 }
 
+// SetSpotifyIds sets the "spotifyIds" field.
+func (tuo *TrackUpdateOne) SetSpotifyIds(s []string) *TrackUpdateOne {
+	tuo.mutation.SetSpotifyIds(s)
+	return tuo
+}
+
+// AppendSpotifyIds appends s to the "spotifyIds" field.
+func (tuo *TrackUpdateOne) AppendSpotifyIds(s []string) *TrackUpdateOne {
+	tuo.mutation.AppendSpotifyIds(s)
+	return tuo
+}
+
 // SetName sets the "name" field.
 func (tuo *TrackUpdateOne) SetName(s string) *TrackUpdateOne {
 	tuo.mutation.SetName(s)
@@ -347,6 +434,41 @@ func (tuo *TrackUpdateOne) SetName(s string) *TrackUpdateOne {
 func (tuo *TrackUpdateOne) SetNillableName(s *string) *TrackUpdateOne {
 	if s != nil {
 		tuo.SetName(*s)
+	}
+	return tuo
+}
+
+// SetTrackNumber sets the "trackNumber" field.
+func (tuo *TrackUpdateOne) SetTrackNumber(i int) *TrackUpdateOne {
+	tuo.mutation.ResetTrackNumber()
+	tuo.mutation.SetTrackNumber(i)
+	return tuo
+}
+
+// SetNillableTrackNumber sets the "trackNumber" field if the given value is not nil.
+func (tuo *TrackUpdateOne) SetNillableTrackNumber(i *int) *TrackUpdateOne {
+	if i != nil {
+		tuo.SetTrackNumber(*i)
+	}
+	return tuo
+}
+
+// AddTrackNumber adds i to the "trackNumber" field.
+func (tuo *TrackUpdateOne) AddTrackNumber(i int) *TrackUpdateOne {
+	tuo.mutation.AddTrackNumber(i)
+	return tuo
+}
+
+// SetSimplifiedName sets the "simplifiedName" field.
+func (tuo *TrackUpdateOne) SetSimplifiedName(s string) *TrackUpdateOne {
+	tuo.mutation.SetSimplifiedName(s)
+	return tuo
+}
+
+// SetNillableSimplifiedName sets the "simplifiedName" field if the given value is not nil.
+func (tuo *TrackUpdateOne) SetNillableSimplifiedName(s *string) *TrackUpdateOne {
+	if s != nil {
+		tuo.SetSimplifiedName(*s)
 	}
 	return tuo
 }
@@ -500,6 +622,16 @@ func (tuo *TrackUpdateOne) check() error {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Track.name": %w`, err)}
 		}
 	}
+	if v, ok := tuo.mutation.TrackNumber(); ok {
+		if err := track.TrackNumberValidator(v); err != nil {
+			return &ValidationError{Name: "trackNumber", err: fmt.Errorf(`ent: validator failed for field "Track.trackNumber": %w`, err)}
+		}
+	}
+	if v, ok := tuo.mutation.SimplifiedName(); ok {
+		if err := track.SimplifiedNameValidator(v); err != nil {
+			return &ValidationError{Name: "simplifiedName", err: fmt.Errorf(`ent: validator failed for field "Track.simplifiedName": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -507,7 +639,7 @@ func (tuo *TrackUpdateOne) sqlSave(ctx context.Context) (_node *Track, err error
 	if err := tuo.check(); err != nil {
 		return _node, err
 	}
-	_spec := sqlgraph.NewUpdateSpec(track.Table, track.Columns, sqlgraph.NewFieldSpec(track.FieldID, field.TypeString))
+	_spec := sqlgraph.NewUpdateSpec(track.Table, track.Columns, sqlgraph.NewFieldSpec(track.FieldID, field.TypeInt))
 	id, ok := tuo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Track.id" for update`)}
@@ -532,8 +664,25 @@ func (tuo *TrackUpdateOne) sqlSave(ctx context.Context) (_node *Track, err error
 			}
 		}
 	}
+	if value, ok := tuo.mutation.SpotifyIds(); ok {
+		_spec.SetField(track.FieldSpotifyIds, field.TypeJSON, value)
+	}
+	if value, ok := tuo.mutation.AppendedSpotifyIds(); ok {
+		_spec.AddModifier(func(u *sql.UpdateBuilder) {
+			sqljson.Append(u, track.FieldSpotifyIds, value)
+		})
+	}
 	if value, ok := tuo.mutation.Name(); ok {
 		_spec.SetField(track.FieldName, field.TypeString, value)
+	}
+	if value, ok := tuo.mutation.TrackNumber(); ok {
+		_spec.SetField(track.FieldTrackNumber, field.TypeInt, value)
+	}
+	if value, ok := tuo.mutation.AddedTrackNumber(); ok {
+		_spec.AddField(track.FieldTrackNumber, field.TypeInt, value)
+	}
+	if value, ok := tuo.mutation.SimplifiedName(); ok {
+		_spec.SetField(track.FieldSimplifiedName, field.TypeString, value)
 	}
 	if tuo.mutation.SavedByCleared() {
 		edge := &sqlgraph.EdgeSpec{

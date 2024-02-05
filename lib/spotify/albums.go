@@ -57,14 +57,13 @@ func (s *Service) _newAlbum(ctx context.Context, a spotify.SimpleAlbum) (*ent.Al
 	if err != nil {
 		return nil, err
 	}
-	spotifyIds := []string{string(a.ID)}
 	simplfiedName := simplifiedAlbumName(a)
 	return s.ent.Album.
 		Create().
-		SetSpotifyIds(spotifyIds).
+		AddArtistIDs(artistIds...).
 		SetName(string(a.Name)).
 		SetSimplifiedName(simplfiedName).
-		AddArtistIDs(artistIds...).
+		SetSpotifyIds([]string{string(a.ID)}).
 		Save(ctx)
 }
 

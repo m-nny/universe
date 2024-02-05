@@ -53,14 +53,14 @@ func (uc *UserCreate) AddPlaylists(p ...*Playlist) *UserCreate {
 }
 
 // AddSavedTrackIDs adds the "savedTracks" edge to the Track entity by IDs.
-func (uc *UserCreate) AddSavedTrackIDs(ids ...string) *UserCreate {
+func (uc *UserCreate) AddSavedTrackIDs(ids ...int) *UserCreate {
 	uc.mutation.AddSavedTrackIDs(ids...)
 	return uc
 }
 
 // AddSavedTracks adds the "savedTracks" edges to the Track entity.
 func (uc *UserCreate) AddSavedTracks(t ...*Track) *UserCreate {
-	ids := make([]string, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -173,7 +173,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Columns: user.SavedTracksPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -71,14 +71,14 @@ func (au *AlbumUpdate) SetNillableSimplifiedName(s *string) *AlbumUpdate {
 }
 
 // AddTrackIDs adds the "tracks" edge to the Track entity by IDs.
-func (au *AlbumUpdate) AddTrackIDs(ids ...string) *AlbumUpdate {
+func (au *AlbumUpdate) AddTrackIDs(ids ...int) *AlbumUpdate {
 	au.mutation.AddTrackIDs(ids...)
 	return au
 }
 
 // AddTracks adds the "tracks" edges to the Track entity.
 func (au *AlbumUpdate) AddTracks(t ...*Track) *AlbumUpdate {
-	ids := make([]string, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -112,14 +112,14 @@ func (au *AlbumUpdate) ClearTracks() *AlbumUpdate {
 }
 
 // RemoveTrackIDs removes the "tracks" edge to Track entities by IDs.
-func (au *AlbumUpdate) RemoveTrackIDs(ids ...string) *AlbumUpdate {
+func (au *AlbumUpdate) RemoveTrackIDs(ids ...int) *AlbumUpdate {
 	au.mutation.RemoveTrackIDs(ids...)
 	return au
 }
 
 // RemoveTracks removes "tracks" edges to Track entities.
 func (au *AlbumUpdate) RemoveTracks(t ...*Track) *AlbumUpdate {
-	ids := make([]string, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -223,7 +223,7 @@ func (au *AlbumUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{album.TracksColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -236,7 +236,7 @@ func (au *AlbumUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{album.TracksColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -252,7 +252,7 @@ func (au *AlbumUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: []string{album.TracksColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -366,14 +366,14 @@ func (auo *AlbumUpdateOne) SetNillableSimplifiedName(s *string) *AlbumUpdateOne 
 }
 
 // AddTrackIDs adds the "tracks" edge to the Track entity by IDs.
-func (auo *AlbumUpdateOne) AddTrackIDs(ids ...string) *AlbumUpdateOne {
+func (auo *AlbumUpdateOne) AddTrackIDs(ids ...int) *AlbumUpdateOne {
 	auo.mutation.AddTrackIDs(ids...)
 	return auo
 }
 
 // AddTracks adds the "tracks" edges to the Track entity.
 func (auo *AlbumUpdateOne) AddTracks(t ...*Track) *AlbumUpdateOne {
-	ids := make([]string, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -407,14 +407,14 @@ func (auo *AlbumUpdateOne) ClearTracks() *AlbumUpdateOne {
 }
 
 // RemoveTrackIDs removes the "tracks" edge to Track entities by IDs.
-func (auo *AlbumUpdateOne) RemoveTrackIDs(ids ...string) *AlbumUpdateOne {
+func (auo *AlbumUpdateOne) RemoveTrackIDs(ids ...int) *AlbumUpdateOne {
 	auo.mutation.RemoveTrackIDs(ids...)
 	return auo
 }
 
 // RemoveTracks removes "tracks" edges to Track entities.
 func (auo *AlbumUpdateOne) RemoveTracks(t ...*Track) *AlbumUpdateOne {
-	ids := make([]string, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -548,7 +548,7 @@ func (auo *AlbumUpdateOne) sqlSave(ctx context.Context) (_node *Album, err error
 			Columns: []string{album.TracksColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -561,7 +561,7 @@ func (auo *AlbumUpdateOne) sqlSave(ctx context.Context) (_node *Album, err error
 			Columns: []string{album.TracksColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -577,7 +577,7 @@ func (auo *AlbumUpdateOne) sqlSave(ctx context.Context) (_node *Album, err error
 			Columns: []string{album.TracksColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

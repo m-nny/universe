@@ -52,14 +52,14 @@ func (uu *UserUpdate) AddPlaylists(p ...*Playlist) *UserUpdate {
 }
 
 // AddSavedTrackIDs adds the "savedTracks" edge to the Track entity by IDs.
-func (uu *UserUpdate) AddSavedTrackIDs(ids ...string) *UserUpdate {
+func (uu *UserUpdate) AddSavedTrackIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddSavedTrackIDs(ids...)
 	return uu
 }
 
 // AddSavedTracks adds the "savedTracks" edges to the Track entity.
 func (uu *UserUpdate) AddSavedTracks(t ...*Track) *UserUpdate {
-	ids := make([]string, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -99,14 +99,14 @@ func (uu *UserUpdate) ClearSavedTracks() *UserUpdate {
 }
 
 // RemoveSavedTrackIDs removes the "savedTracks" edge to Track entities by IDs.
-func (uu *UserUpdate) RemoveSavedTrackIDs(ids ...string) *UserUpdate {
+func (uu *UserUpdate) RemoveSavedTrackIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveSavedTrackIDs(ids...)
 	return uu
 }
 
 // RemoveSavedTracks removes "savedTracks" edges to Track entities.
 func (uu *UserUpdate) RemoveSavedTracks(t ...*Track) *UserUpdate {
-	ids := make([]string, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -205,7 +205,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: user.SavedTracksPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -218,7 +218,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: user.SavedTracksPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -234,7 +234,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Columns: user.SavedTracksPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -284,14 +284,14 @@ func (uuo *UserUpdateOne) AddPlaylists(p ...*Playlist) *UserUpdateOne {
 }
 
 // AddSavedTrackIDs adds the "savedTracks" edge to the Track entity by IDs.
-func (uuo *UserUpdateOne) AddSavedTrackIDs(ids ...string) *UserUpdateOne {
+func (uuo *UserUpdateOne) AddSavedTrackIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddSavedTrackIDs(ids...)
 	return uuo
 }
 
 // AddSavedTracks adds the "savedTracks" edges to the Track entity.
 func (uuo *UserUpdateOne) AddSavedTracks(t ...*Track) *UserUpdateOne {
-	ids := make([]string, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -331,14 +331,14 @@ func (uuo *UserUpdateOne) ClearSavedTracks() *UserUpdateOne {
 }
 
 // RemoveSavedTrackIDs removes the "savedTracks" edge to Track entities by IDs.
-func (uuo *UserUpdateOne) RemoveSavedTrackIDs(ids ...string) *UserUpdateOne {
+func (uuo *UserUpdateOne) RemoveSavedTrackIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveSavedTrackIDs(ids...)
 	return uuo
 }
 
 // RemoveSavedTracks removes "savedTracks" edges to Track entities.
 func (uuo *UserUpdateOne) RemoveSavedTracks(t ...*Track) *UserUpdateOne {
-	ids := make([]string, len(t))
+	ids := make([]int, len(t))
 	for i := range t {
 		ids[i] = t[i].ID
 	}
@@ -467,7 +467,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Columns: user.SavedTracksPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
@@ -480,7 +480,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Columns: user.SavedTracksPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -496,7 +496,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Columns: user.SavedTracksPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeString),
+				IDSpec: sqlgraph.NewFieldSpec(track.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

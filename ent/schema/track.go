@@ -14,8 +14,10 @@ type Track struct {
 // Fields of the Track.
 func (Track) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("id").NotEmpty(),
+		field.Strings("spotifyIds"),
 		field.String("name").NotEmpty(),
+		field.Int("trackNumber").Positive(),
+		field.String("simplifiedName").NotEmpty(),
 	}
 }
 
