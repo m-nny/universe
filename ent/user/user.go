@@ -14,19 +14,10 @@ const (
 	FieldID = "id"
 	// FieldSpotifyToken holds the string denoting the spotifytoken field in the database.
 	FieldSpotifyToken = "spotify_token"
-	// EdgePlaylists holds the string denoting the playlists edge name in mutations.
-	EdgePlaylists = "playlists"
 	// EdgeSavedTracks holds the string denoting the savedtracks edge name in mutations.
 	EdgeSavedTracks = "savedTracks"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// PlaylistsTable is the table that holds the playlists relation/edge.
-	PlaylistsTable = "playlists"
-	// PlaylistsInverseTable is the table name for the Playlist entity.
-	// It exists in this package in order to avoid circular dependency with the "playlist" package.
-	PlaylistsInverseTable = "playlists"
-	// PlaylistsColumn is the table column denoting the playlists relation/edge.
-	PlaylistsColumn = "user_playlists"
 	// SavedTracksTable is the table that holds the savedTracks relation/edge. The primary key declared below.
 	SavedTracksTable = "user_savedTracks"
 	// SavedTracksInverseTable is the table name for the Track entity.
@@ -69,20 +60,6 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByPlaylistsCount orders the results by playlists count.
-func ByPlaylistsCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPlaylistsStep(), opts...)
-	}
-}
-
-// ByPlaylists orders the results by playlists terms.
-func ByPlaylists(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPlaylistsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
 // BySavedTracksCount orders the results by savedTracks count.
 func BySavedTracksCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -95,13 +72,6 @@ func BySavedTracks(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newSavedTracksStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
-}
-func newPlaylistsStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(PlaylistsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, PlaylistsTable, PlaylistsColumn),
-	)
 }
 func newSavedTracksStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(

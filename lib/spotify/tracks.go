@@ -12,12 +12,15 @@ import (
 	"github.com/zmb3/spotify/v2"
 )
 
-func (s *Service) toTrackSaved(ctx context.Context, t spotify.SavedTrack) (*ent.Track, error) {
-	album, err := s.toAlbum(ctx, t.Album)
-	if err != nil {
-		return nil, err
-	}
-	return s.toTrackWithAlbum(ctx, t.SimpleTrack, album, s.username)
+func (s *Service) toTracksSaved(ctx context.Context, tracks []spotify.SavedTrack, username string) ([]*ent.Track, error) {
+	return utils.SliceMapCtxErr(ctx, tracks,
+		func(ctx context.Context, t spotify.SavedTrack) (*ent.Track, error) {
+			album, err := s.toAlbum(ctx, t.Album)
+			if err != nil {
+				return nil, err
+			}
+			return s.toTrackWithAlbum(ctx, t.SimpleTrack, album, username)
+		})
 }
 
 func (s *Service) toTracksWithAlbum(ctx context.Context, tracks []spotify.SimpleTrack, a *ent.Album) ([]*ent.Track, error) {

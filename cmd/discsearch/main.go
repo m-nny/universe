@@ -61,27 +61,18 @@ func getAlbumsById(ctx context.Context, spotify *spotify.Service, entClient *ent
 	return nil
 }
 
-func getPlaylists(ctx context.Context, spotify *spotify.Service) error {
-	playlists, err := spotify.GetAllPlaylists(ctx)
-	if err != nil {
-		return fmt.Errorf("Error getting all playlists: %w", err)
-	}
-	log.Printf("found total %d playlists", len(playlists))
-	return nil
-}
-
 func getUserTracks(ctx context.Context, spotify *spotify.Service, entClient *ent.Client) error {
-	tracks, err := spotify.GetUserTracks(ctx)
+	tracks, err := spotify.GetUserTracks(ctx, username)
 	if err != nil {
-		return fmt.Errorf("Error getting all tracks: %w", err)
+		return fmt.Errorf("error getting all tracks: %w", err)
 	}
 	log.Printf("found total %d tracks", len(tracks))
 
 	if err := getTopAlbums(ctx, entClient); err != nil {
-		return fmt.Errorf("Error getting all tracks: %w", err)
+		return fmt.Errorf("error getting all tracks: %w", err)
 	}
 	if err := getTopArtists(ctx, entClient); err != nil {
-		return fmt.Errorf("Error getting all tracks: %w", err)
+		return fmt.Errorf("error getting all tracks: %w", err)
 	}
 	return nil
 }

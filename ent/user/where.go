@@ -63,29 +63,6 @@ func IDContainsFold(id string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldID, id))
 }
 
-// HasPlaylists applies the HasEdge predicate on the "playlists" edge.
-func HasPlaylists() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, PlaylistsTable, PlaylistsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasPlaylistsWith applies the HasEdge predicate on the "playlists" edge with a given conditions (other predicates).
-func HasPlaylistsWith(preds ...predicate.Playlist) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := newPlaylistsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasSavedTracks applies the HasEdge predicate on the "savedTracks" edge.
 func HasSavedTracks() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

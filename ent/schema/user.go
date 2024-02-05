@@ -23,7 +23,6 @@ func (User) Fields() []ent.Field {
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("playlists", Playlist.Type),
 		edge.To("savedTracks", Track.Type),
 	}
 }

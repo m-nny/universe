@@ -33,27 +33,6 @@ var (
 		Columns:    ArtistsColumns,
 		PrimaryKey: []*schema.Column{ArtistsColumns[0]},
 	}
-	// PlaylistsColumns holds the columns for the "playlists" table.
-	PlaylistsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeString},
-		{Name: "name", Type: field.TypeString},
-		{Name: "snaphot_id", Type: field.TypeString},
-		{Name: "user_playlists", Type: field.TypeString, Nullable: true},
-	}
-	// PlaylistsTable holds the schema information for the "playlists" table.
-	PlaylistsTable = &schema.Table{
-		Name:       "playlists",
-		Columns:    PlaylistsColumns,
-		PrimaryKey: []*schema.Column{PlaylistsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "playlists_users_playlists",
-				Columns:    []*schema.Column{PlaylistsColumns[3]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
 	// TracksColumns holds the columns for the "tracks" table.
 	TracksColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -167,7 +146,6 @@ var (
 	Tables = []*schema.Table{
 		AlbumsTable,
 		ArtistsTable,
-		PlaylistsTable,
 		TracksTable,
 		UsersTable,
 		ArtistTracksTable,
@@ -177,7 +155,6 @@ var (
 )
 
 func init() {
-	PlaylistsTable.ForeignKeys[0].RefTable = UsersTable
 	TracksTable.ForeignKeys[0].RefTable = AlbumsTable
 	ArtistTracksTable.ForeignKeys[0].RefTable = ArtistsTable
 	ArtistTracksTable.ForeignKeys[1].RefTable = TracksTable

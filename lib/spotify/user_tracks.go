@@ -8,11 +8,10 @@ import (
 	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/ent/user"
 	"github.com/m-nny/universe/lib/jsoncache"
-	"github.com/m-nny/universe/lib/utils"
 	"github.com/zmb3/spotify/v2"
 )
 
-func (s *Service) GetUserTracks(ctx context.Context) ([]*ent.Track, error) {
+func (s *Service) GetUserTracks(ctx context.Context, username string) ([]*ent.Track, error) {
 	// tracks, err := s._GetUserTracks(ctx)
 	// if err == nil && len(tracks) > 0 {
 	// 	return tracks, nil
@@ -35,13 +34,13 @@ func (s *Service) GetUserTracks(ctx context.Context) ([]*ent.Track, error) {
 	if err != nil {
 		return nil, err
 	}
-	return utils.SliceMapCtxErr(ctx, rawTracks, s.toTrackSaved)
+	return s.toTracksSaved(ctx, rawTracks, username)
 }
 
-func (s *Service) _GetUserTracks(ctx context.Context) ([]*ent.Track, error) {
+func (s *Service) _GetUserTracks(ctx context.Context, username string) ([]*ent.Track, error) {
 	plists, err := s.ent.User.
 		Query().
-		Where(user.ID(s.username)).
+		Where(user.ID(username)).
 		QuerySavedTracks().
 		All(ctx)
 	return plists, err

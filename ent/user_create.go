@@ -11,7 +11,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/m-nny/universe/ent/playlist"
 	"github.com/m-nny/universe/ent/track"
 	"github.com/m-nny/universe/ent/user"
 	"golang.org/x/oauth2"
@@ -35,21 +34,6 @@ func (uc *UserCreate) SetSpotifyToken(o *oauth2.Token) *UserCreate {
 func (uc *UserCreate) SetID(s string) *UserCreate {
 	uc.mutation.SetID(s)
 	return uc
-}
-
-// AddPlaylistIDs adds the "playlists" edge to the Playlist entity by IDs.
-func (uc *UserCreate) AddPlaylistIDs(ids ...string) *UserCreate {
-	uc.mutation.AddPlaylistIDs(ids...)
-	return uc
-}
-
-// AddPlaylists adds the "playlists" edges to the Playlist entity.
-func (uc *UserCreate) AddPlaylists(p ...*Playlist) *UserCreate {
-	ids := make([]string, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return uc.AddPlaylistIDs(ids...)
 }
 
 // AddSavedTrackIDs adds the "savedTracks" edge to the Track entity by IDs.
@@ -148,22 +132,6 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	if value, ok := uc.mutation.SpotifyToken(); ok {
 		_spec.SetField(user.FieldSpotifyToken, field.TypeJSON, value)
 		_node.SpotifyToken = value
-	}
-	if nodes := uc.mutation.PlaylistsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.PlaylistsTable,
-			Columns: []string{user.PlaylistsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playlist.FieldID, field.TypeString),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := uc.mutation.SavedTracksIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

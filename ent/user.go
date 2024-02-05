@@ -28,28 +28,17 @@ type User struct {
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
-	// Playlists holds the value of the playlists edge.
-	Playlists []*Playlist `json:"playlists,omitempty"`
 	// SavedTracks holds the value of the savedTracks edge.
 	SavedTracks []*Track `json:"savedTracks,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
-}
-
-// PlaylistsOrErr returns the Playlists value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) PlaylistsOrErr() ([]*Playlist, error) {
-	if e.loadedTypes[0] {
-		return e.Playlists, nil
-	}
-	return nil, &NotLoadedError{edge: "playlists"}
+	loadedTypes [1]bool
 }
 
 // SavedTracksOrErr returns the SavedTracks value or an error if the edge
 // was not loaded in eager-loading.
 func (e UserEdges) SavedTracksOrErr() ([]*Track, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[0] {
 		return e.SavedTracks, nil
 	}
 	return nil, &NotLoadedError{edge: "savedTracks"}
@@ -104,11 +93,6 @@ func (u *User) assignValues(columns []string, values []any) error {
 // This includes values selected through modifiers, order, etc.
 func (u *User) Value(name string) (ent.Value, error) {
 	return u.selectValues.Get(name)
-}
-
-// QueryPlaylists queries the "playlists" edge of the User entity.
-func (u *User) QueryPlaylists() *PlaylistQuery {
-	return NewUserClient(u.config).QueryPlaylists(u)
 }
 
 // QuerySavedTracks queries the "savedTracks" edge of the User entity.
