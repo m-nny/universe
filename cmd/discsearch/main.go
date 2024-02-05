@@ -4,17 +4,17 @@ import (
 	"context"
 	"log"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/joho/godotenv"
 	"github.com/m-nny/universe/cmd/internal"
 	"github.com/m-nny/universe/ent"
-	"github.com/m-nny/universe/ent/track"
-	"github.com/m-nny/universe/ent/user"
+	"github.com/m-nny/universe/ent/album"
+	"github.com/m-nny/universe/ent/artist"
 	"github.com/m-nny/universe/lib/spotify"
 )
 
-const username = "m-nny"
-
 func main() {
+	username := "m-nny"
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Could not load .env: %v", err)
 	}
@@ -40,25 +40,62 @@ func main() {
 	}
 	log.Printf("found total %d tracks", len(tracks))
 
-	savedTracks, err := entClient.Track.
-		Query().
-		WithAlbum().
-		WithArtists().
-		First(ctx)
-	if err != nil {
+	if err := getTopAlbums(ctx, entClient, username); err != nil {
 		log.Fatalf("Error getting all tracks: %v", err)
 	}
-	log.Printf("tracks: %+v", savedTracks)
+	if err := getTopArtists(ctx, entClient, username); err != nil {
+		log.Fatalf("Error getting all tracks: %v", err)
+	}
 }
 
-func getTracks(ctx context.Context, ent *ent.Client) error {
-	tracks, err := ent.Track.
+func getTopAlbums(ctx context.Context, entC *ent.Client, username string) error {
+	const tracksNumCol = "tracks_num"
+	albums, err := entC.Album.
 		Query().
-		Where(track.HasSavedByWith(user.ID(username))).
+		Order(
+			album.ByTracksCount(
+				sql.OrderDesc(),
+				sql.OrderSelectAs(tracksNumCol),
+			),
+		).
+		Limit(10).
 		All(ctx)
 	if err != nil {
 		return err
 	}
-	log.Printf("tracks: %+v", tracks)
+	log.Print("top albums:")
+	for _, album := range albums {
+		tracksNum, err := album.Value(tracksNumCol)
+		if err != nil {
+			return err
+		}
+		log.Printf("name: %s tracks_num: %d", album.Name, tracksNum)
+	}
+	return nil
+}
+
+func getTopArtists(ctx context.Context, entC *ent.Client, username string) error {
+	const tracksNumCol = "tracks_num"
+	artists, err := entC.Artist.
+		Query().
+		Order(
+			artist.ByTracksCount(
+				sql.OrderDesc(),
+				sql.OrderSelectAs(tracksNumCol),
+			),
+		).
+		Limit(10).
+		All(ctx)
+	if err != nil {
+		return err
+	}
+	log.Print("top artists:")
+	for _, artist := range artists {
+		tracksNum, err := artist.Value(tracksNumCol)
+		if err != nil {
+			return err
+		}
+		log.Printf("name: %s tracks_num: %d", artist.Name, tracksNum)
+	}
 	return nil
 }

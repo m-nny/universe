@@ -59,7 +59,8 @@ func New(ctx context.Context, ent *ent.Client, username string) (*Service, error
 	}
 	client := spotify.New(auth.Client(ctx, token))
 	return &Service{
-		ent:     ent,
-		spotify: client,
+		ent:      ent,
+		spotify:  client,
+		username: username,
 	}, nil
 }

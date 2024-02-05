@@ -34,8 +34,10 @@ func (s *Service) GetAllTracks(ctx context.Context) ([]*ent.Track, error) {
 
 func (s *Service) _GetAllTracks(ctx context.Context) ([]spotify.SavedTrack, error) {
 	var allTracks []spotify.SavedTrack
-	var err error
-	for resp, err := s.spotify.CurrentUsersTracks(ctx, spotify.Limit(50)); err == nil; err = s.spotify.NextPage(ctx, resp) {
+	resp, err := s.spotify.CurrentUsersTracks(ctx,
+		spotify.Limit(50),
+	)
+	for ; err == nil; err = s.spotify.NextPage(ctx, resp) {
 		log.Printf("len(resp.Tracks)=%d offest=%d total=%d", len(resp.Tracks), resp.Offset, resp.Total)
 		allTracks = append(allTracks, resp.Tracks...)
 	}
