@@ -11,3 +11,10 @@ func SpotifyIdContains(spotifyId string) predicate.Track {
 		s.Where(sqljson.ValueContains(FieldSpotifyIds, spotifyId))
 	})
 }
+
+func Similar(spotifyId string, simplifiedName string) predicate.Track {
+	return Or(
+		SpotifyIdContains(spotifyId),
+		SimplifiedName(simplifiedName),
+	)
+}

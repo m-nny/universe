@@ -18,51 +18,41 @@ func (s *Service) GetAlbumsById(ctx context.Context, ids []spotify.ID) ([]*ent.A
 	if err != nil {
 		return nil, err
 	}
-	return utils.SliceMapCtxErr(
-		ctx,
-		rawAlbums,
-		func(ctx context.Context, a *spotify.FullAlbum) (*ent.Album, error) {
-			return s.toAlbum(ctx, a.SimpleAlbum)
-		})
+	return utils.SliceMapCtxErr(ctx, rawAlbums, s.toAlbumFull)
 }
 
-func (s *Service) getAlbumFromSpotify(ctx context.Context, a spotify.SimpleAlbum) (*ent.Album, error) {
+func (s *Service) toAlbumFull(ctx context.Context, a *spotify.FullAlbum) (*ent.Album, error) {
+	// TODO(m-nny): save tracks as weel
+	return s.toAlbum(ctx, a.SimpleAlbum)
+}
+func (s *Service) toAlbum(ctx context.Context, a spotify.SimpleAlbum) (*ent.Album, error) {
 	simplifiedName := simplifiedAlbumName(a)
-	return s.ent.Album.
+	album, err := s.ent.Album.
 		Query().
-		Where(
-			album.Or(
-				album.SpotifyIdContains(string(a.ID)),
-				album.SimplifiedName(simplifiedName),
-			),
-		).
+		Where(album.Similar(string(a.ID), simplifiedName)).
 		Only(ctx)
-}
 
-func (s *Service) toAlbum(ctx context.Context, rawAlbum spotify.SimpleAlbum) (*ent.Album, error) {
-	album, err := s.getAlbumFromSpotify(ctx, rawAlbum)
 	if err != nil {
 		// Album does not exist yet
-		return s._newAlbum(ctx, rawAlbum)
+		return s._newAlbum(ctx, a, simplifiedName)
 	}
-	if slices.Contains(album.SpotifyIds, string(rawAlbum.ID)) {
+	if slices.Contains(album.SpotifyIds, string(a.ID)) {
 		return album, nil
 	}
-	log.Printf("new album version: cur: %v new: %v", album, rawAlbum.ID)
-	return album.Update().AppendSpotifyIds([]string{string(rawAlbum.ID)}).Save(ctx)
+	log.Printf("new album version: cur: %v new: %v", album, a.ID)
+	return album.Update().AppendSpotifyIds([]string{string(a.ID)}).Save(ctx)
 }
 
-func (s *Service) _newAlbum(ctx context.Context, a spotify.SimpleAlbum) (*ent.Album, error) {
+func (s *Service) _newAlbum(ctx context.Context, a spotify.SimpleAlbum, simplifiedName string) (*ent.Album, error) {
 	artistIds, err := s.toArtists(ctx, a.Artists)
 	if err != nil {
 		return nil, err
 	}
-	simplfiedName := simplifiedAlbumName(a)
 	return s.ent.Album.
 		Create().
 		AddArtistIDs(artistIds...).
 		SetName(string(a.Name)).
-		SetSimplifiedName(simplfiedName).
+		SetSimplifiedName(simplifiedName).
 		SetSpotifyIds([]string{string(a.ID)}).
 		Save(ctx)
 }
