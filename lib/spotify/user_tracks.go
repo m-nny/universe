@@ -28,7 +28,7 @@ func (s *Service) GetUserTracks(ctx context.Context) ([]*ent.Track, error) {
 	if !errors.Is(err, spotify.ErrNoMorePages) && err != nil {
 		return nil, err
 	}
-	return utils.SliceMapCtxErr(ctx, rawTracks, s.toTrack)
+	return utils.SliceMapCtxErr(ctx, rawTracks, s.toTrackSaved)
 }
 
 func (s *Service) _GetUserTracks(ctx context.Context) ([]*ent.Track, error) {

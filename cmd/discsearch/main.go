@@ -31,13 +31,13 @@ func main() {
 		log.Fatalf("Error getting spotify client: %v", err)
 	}
 
-	// if err := getAlbumsById(ctx, spotify, entClient); err != nil {
-	// 	log.Fatalf("%v", err)
-	// }
-
-	if err := getUserTracks(ctx, spotify, entClient); err != nil {
+	if err := getAlbumsById(ctx, spotify, entClient); err != nil {
 		log.Fatalf("%v", err)
 	}
+
+	// if err := getUserTracks(ctx, spotify, entClient); err != nil {
+	// 	log.Fatalf("%v", err)
+	// }
 }
 
 func getAlbumsById(ctx context.Context, spotify *spotify.Service, entClient *ent.Client) error {

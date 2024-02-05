@@ -22,8 +22,14 @@ func (s *Service) GetAlbumsById(ctx context.Context, ids []spotify.ID) ([]*ent.A
 }
 
 func (s *Service) toAlbumFull(ctx context.Context, a *spotify.FullAlbum) (*ent.Album, error) {
-	// TODO(m-nny): save tracks as weel
-	return s.toAlbum(ctx, a.SimpleAlbum)
+	album, err := s.toAlbum(ctx, a.SimpleAlbum)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := s.toTracksWithAlbum(ctx, a.Tracks.Tracks, album); err != nil {
+		return nil, err
+	}
+	return album, nil
 }
 func (s *Service) toAlbum(ctx context.Context, a spotify.SimpleAlbum) (*ent.Album, error) {
 	simplifiedName := simplifiedAlbumName(a)
@@ -51,7 +57,7 @@ func (s *Service) _newAlbum(ctx context.Context, a spotify.SimpleAlbum, simplifi
 	return s.ent.Album.
 		Create().
 		AddArtistIDs(artistIds...).
-		SetName(string(a.Name)).
+		SetName(a.Name).
 		SetSimplifiedName(simplifiedName).
 		SetSpotifyIds([]string{string(a.ID)}).
 		Save(ctx)
