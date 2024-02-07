@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 )
@@ -72,13 +73,14 @@ func (d *Service) headers() http.Header {
 	return h
 }
 
-func (d *Service) get(ctx context.Context, fullUrl string, result any) error {
+func get(ctx context.Context, fullUrl string, h http.Header, result any) error {
+	log.Printf("[discogs] GET: %s", fullUrl)
 	req, err := http.NewRequestWithContext(ctx, "GET", fullUrl, nil)
 	if err != nil {
 		return err
 	}
-	req.Header = d.headers()
-	resp, err := d.http.Do(req)
+	req.Header = h
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}

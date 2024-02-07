@@ -166,7 +166,7 @@ func (ac *AlbumCreate) createSpec() (*Album, *sqlgraph.CreateSpec) {
 	}
 	if value, ok := ac.mutation.DiscogsMasterId(); ok {
 		_spec.SetField(album.FieldDiscogsMasterId, field.TypeString, value)
-		_node.DiscogsMasterId = value
+		_node.DiscogsMasterId = &value
 	}
 	if value, ok := ac.mutation.Name(); ok {
 		_spec.SetField(album.FieldName, field.TypeString, value)

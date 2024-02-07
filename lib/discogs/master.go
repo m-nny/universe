@@ -8,7 +8,7 @@ import (
 func (d *Service) Master(ctx context.Context, releaseId int) (*Master, error) {
 	var release Master
 	discogsUrl := fmt.Sprintf("%s/masters/%d", d.config.BaseUrl, releaseId)
-	if err := d.get(ctx, discogsUrl, &release); err != nil {
+	if err := get(ctx, discogsUrl, d.headers(), &release); err != nil {
 		return nil, err
 	}
 	return &release, nil

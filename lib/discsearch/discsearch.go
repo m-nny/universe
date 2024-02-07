@@ -8,6 +8,7 @@ import (
 	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/lib/discogs"
 	"github.com/m-nny/universe/lib/spotify"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type App struct {

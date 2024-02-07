@@ -35,7 +35,7 @@ func main() {
 }
 
 func getDiscogs(ctx context.Context, app *discsearch.App) error {
-	if _, err := app.Discogs.Release(ctx, 14957969); err != nil {
+	if _, err := app.Discogs.SellerInventory(ctx, "nezrathebeatmaker"); err != nil {
 		return err
 	}
 	return nil
