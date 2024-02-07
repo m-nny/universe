@@ -6,9 +6,9 @@ import (
 	"log"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/m-nny/universe/cmd/internal"
 	"github.com/m-nny/universe/ent/album"
 	"github.com/m-nny/universe/ent/artist"
+	"github.com/m-nny/universe/lib/discsearch"
 	spotify2 "github.com/zmb3/spotify/v2"
 )
 
@@ -16,7 +16,7 @@ const username = "m-nny"
 
 func main() {
 	ctx := context.Background()
-	app, err := internal.NewApp(ctx, username)
+	app, err := discsearch.New(ctx, username)
 	if err != nil {
 		log.Fatalf("Could not init app: %v", err)
 	}
@@ -34,14 +34,14 @@ func main() {
 	}
 }
 
-func getDiscogs(ctx context.Context, app *internal.App) error {
-	if err := app.Discogs.GetRelease(ctx, 14957969); err != nil {
+func getDiscogs(ctx context.Context, app *discsearch.App) error {
+	if _, err := app.Discogs.Release(ctx, 14957969); err != nil {
 		return err
 	}
 	return nil
 }
 
-func getAlbumsById(ctx context.Context, app *internal.App) error {
+func getAlbumsById(ctx context.Context, app *discsearch.App) error {
 	albumIds := []spotify2.ID{"025WnFQfYniZWzIzFHx0mb", "1svovXeaO67ZpSgWhj0UaP", "2ArGu1xrwGla8pZfTNOBfp"}
 	targetAlbums, err := app.Spotify.GetAlbumsById(ctx, albumIds)
 	if err != nil {
@@ -62,7 +62,7 @@ func getAlbumsById(ctx context.Context, app *internal.App) error {
 	return nil
 }
 
-func getUserTracks(ctx context.Context, app *internal.App) error {
+func getUserTracks(ctx context.Context, app *discsearch.App) error {
 	tracks, err := app.Spotify.GetUserTracks(ctx, username)
 	if err != nil {
 		return fmt.Errorf("error getting all tracks: %w", err)
@@ -78,7 +78,7 @@ func getUserTracks(ctx context.Context, app *internal.App) error {
 	return nil
 }
 
-func getTopAlbums(ctx context.Context, app *internal.App) error {
+func getTopAlbums(ctx context.Context, app *discsearch.App) error {
 	const tracksNumCol = "tracks_num"
 	albums, err := app.Ent.Album.
 		Query().
@@ -104,7 +104,7 @@ func getTopAlbums(ctx context.Context, app *internal.App) error {
 	return nil
 }
 
-func getTopArtists(ctx context.Context, app *internal.App) error {
+func getTopArtists(ctx context.Context, app *discsearch.App) error {
 	const tracksNumCol = "tracks_num"
 	artists, err := app.Ent.Artist.
 		Query().

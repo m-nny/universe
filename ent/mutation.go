@@ -41,6 +41,7 @@ type AlbumMutation struct {
 	id               *int
 	spotifyIds       *[]string
 	appendspotifyIds []string
+	discogsMasterId  *string
 	name             *string
 	simplifiedName   *string
 	clearedFields    map[string]struct{}
@@ -202,6 +203,42 @@ func (m *AlbumMutation) AppendedSpotifyIds() ([]string, bool) {
 func (m *AlbumMutation) ResetSpotifyIds() {
 	m.spotifyIds = nil
 	m.appendspotifyIds = nil
+}
+
+// SetDiscogsMasterId sets the "discogsMasterId" field.
+func (m *AlbumMutation) SetDiscogsMasterId(s string) {
+	m.discogsMasterId = &s
+}
+
+// DiscogsMasterId returns the value of the "discogsMasterId" field in the mutation.
+func (m *AlbumMutation) DiscogsMasterId() (r string, exists bool) {
+	v := m.discogsMasterId
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDiscogsMasterId returns the old "discogsMasterId" field's value of the Album entity.
+// If the Album object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AlbumMutation) OldDiscogsMasterId(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDiscogsMasterId is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDiscogsMasterId requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDiscogsMasterId: %w", err)
+	}
+	return oldValue.DiscogsMasterId, nil
+}
+
+// ResetDiscogsMasterId resets all changes to the "discogsMasterId" field.
+func (m *AlbumMutation) ResetDiscogsMasterId() {
+	m.discogsMasterId = nil
 }
 
 // SetName sets the "name" field.
@@ -418,9 +455,12 @@ func (m *AlbumMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AlbumMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.spotifyIds != nil {
 		fields = append(fields, album.FieldSpotifyIds)
+	}
+	if m.discogsMasterId != nil {
+		fields = append(fields, album.FieldDiscogsMasterId)
 	}
 	if m.name != nil {
 		fields = append(fields, album.FieldName)
@@ -438,6 +478,8 @@ func (m *AlbumMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case album.FieldSpotifyIds:
 		return m.SpotifyIds()
+	case album.FieldDiscogsMasterId:
+		return m.DiscogsMasterId()
 	case album.FieldName:
 		return m.Name()
 	case album.FieldSimplifiedName:
@@ -453,6 +495,8 @@ func (m *AlbumMutation) OldField(ctx context.Context, name string) (ent.Value, e
 	switch name {
 	case album.FieldSpotifyIds:
 		return m.OldSpotifyIds(ctx)
+	case album.FieldDiscogsMasterId:
+		return m.OldDiscogsMasterId(ctx)
 	case album.FieldName:
 		return m.OldName(ctx)
 	case album.FieldSimplifiedName:
@@ -472,6 +516,13 @@ func (m *AlbumMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSpotifyIds(v)
+		return nil
+	case album.FieldDiscogsMasterId:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDiscogsMasterId(v)
 		return nil
 	case album.FieldName:
 		v, ok := value.(string)
@@ -538,6 +589,9 @@ func (m *AlbumMutation) ResetField(name string) error {
 	switch name {
 	case album.FieldSpotifyIds:
 		m.ResetSpotifyIds()
+		return nil
+	case album.FieldDiscogsMasterId:
+		m.ResetDiscogsMasterId()
 		return nil
 	case album.FieldName:
 		m.ResetName()

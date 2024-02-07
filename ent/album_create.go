@@ -29,6 +29,12 @@ func (ac *AlbumCreate) SetSpotifyIds(s []string) *AlbumCreate {
 	return ac
 }
 
+// SetDiscogsMasterId sets the "discogsMasterId" field.
+func (ac *AlbumCreate) SetDiscogsMasterId(s string) *AlbumCreate {
+	ac.mutation.SetDiscogsMasterId(s)
+	return ac
+}
+
 // SetName sets the "name" field.
 func (ac *AlbumCreate) SetName(s string) *AlbumCreate {
 	ac.mutation.SetName(s)
@@ -108,6 +114,9 @@ func (ac *AlbumCreate) check() error {
 	if _, ok := ac.mutation.SpotifyIds(); !ok {
 		return &ValidationError{Name: "spotifyIds", err: errors.New(`ent: missing required field "Album.spotifyIds"`)}
 	}
+	if _, ok := ac.mutation.DiscogsMasterId(); !ok {
+		return &ValidationError{Name: "discogsMasterId", err: errors.New(`ent: missing required field "Album.discogsMasterId"`)}
+	}
 	if _, ok := ac.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Album.name"`)}
 	}
@@ -154,6 +163,10 @@ func (ac *AlbumCreate) createSpec() (*Album, *sqlgraph.CreateSpec) {
 	if value, ok := ac.mutation.SpotifyIds(); ok {
 		_spec.SetField(album.FieldSpotifyIds, field.TypeJSON, value)
 		_node.SpotifyIds = value
+	}
+	if value, ok := ac.mutation.DiscogsMasterId(); ok {
+		_spec.SetField(album.FieldDiscogsMasterId, field.TypeString, value)
+		_node.DiscogsMasterId = value
 	}
 	if value, ok := ac.mutation.Name(); ok {
 		_spec.SetField(album.FieldName, field.TypeString, value)
@@ -259,6 +272,18 @@ func (u *AlbumUpsert) UpdateSpotifyIds() *AlbumUpsert {
 	return u
 }
 
+// SetDiscogsMasterId sets the "discogsMasterId" field.
+func (u *AlbumUpsert) SetDiscogsMasterId(v string) *AlbumUpsert {
+	u.Set(album.FieldDiscogsMasterId, v)
+	return u
+}
+
+// UpdateDiscogsMasterId sets the "discogsMasterId" field to the value that was provided on create.
+func (u *AlbumUpsert) UpdateDiscogsMasterId() *AlbumUpsert {
+	u.SetExcluded(album.FieldDiscogsMasterId)
+	return u
+}
+
 // SetName sets the "name" field.
 func (u *AlbumUpsert) SetName(v string) *AlbumUpsert {
 	u.Set(album.FieldName, v)
@@ -334,6 +359,20 @@ func (u *AlbumUpsertOne) SetSpotifyIds(v []string) *AlbumUpsertOne {
 func (u *AlbumUpsertOne) UpdateSpotifyIds() *AlbumUpsertOne {
 	return u.Update(func(s *AlbumUpsert) {
 		s.UpdateSpotifyIds()
+	})
+}
+
+// SetDiscogsMasterId sets the "discogsMasterId" field.
+func (u *AlbumUpsertOne) SetDiscogsMasterId(v string) *AlbumUpsertOne {
+	return u.Update(func(s *AlbumUpsert) {
+		s.SetDiscogsMasterId(v)
+	})
+}
+
+// UpdateDiscogsMasterId sets the "discogsMasterId" field to the value that was provided on create.
+func (u *AlbumUpsertOne) UpdateDiscogsMasterId() *AlbumUpsertOne {
+	return u.Update(func(s *AlbumUpsert) {
+		s.UpdateDiscogsMasterId()
 	})
 }
 
@@ -579,6 +618,20 @@ func (u *AlbumUpsertBulk) SetSpotifyIds(v []string) *AlbumUpsertBulk {
 func (u *AlbumUpsertBulk) UpdateSpotifyIds() *AlbumUpsertBulk {
 	return u.Update(func(s *AlbumUpsert) {
 		s.UpdateSpotifyIds()
+	})
+}
+
+// SetDiscogsMasterId sets the "discogsMasterId" field.
+func (u *AlbumUpsertBulk) SetDiscogsMasterId(v string) *AlbumUpsertBulk {
+	return u.Update(func(s *AlbumUpsert) {
+		s.SetDiscogsMasterId(v)
+	})
+}
+
+// UpdateDiscogsMasterId sets the "discogsMasterId" field to the value that was provided on create.
+func (u *AlbumUpsertBulk) UpdateDiscogsMasterId() *AlbumUpsertBulk {
+	return u.Update(func(s *AlbumUpsert) {
+		s.UpdateDiscogsMasterId()
 	})
 }
 

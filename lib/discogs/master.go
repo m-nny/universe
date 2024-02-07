@@ -1,11 +1,11 @@
-package client
+package discogs
 
 import (
 	"context"
 	"fmt"
 )
 
-func (d *Discogs) Master(ctx context.Context, releaseId int) (*Master, error) {
+func (d *Service) Master(ctx context.Context, releaseId int) (*Master, error) {
 	var release Master
 	discogsUrl := fmt.Sprintf("%s/masters/%d", d.config.BaseUrl, releaseId)
 	if err := d.get(ctx, discogsUrl, &release); err != nil {

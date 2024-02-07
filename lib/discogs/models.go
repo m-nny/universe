@@ -1,4 +1,4 @@
-package client
+package discogs
 
 // Identifier ...
 type Identifier struct {

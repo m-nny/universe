@@ -42,6 +42,20 @@ func (au *AlbumUpdate) AppendSpotifyIds(s []string) *AlbumUpdate {
 	return au
 }
 
+// SetDiscogsMasterId sets the "discogsMasterId" field.
+func (au *AlbumUpdate) SetDiscogsMasterId(s string) *AlbumUpdate {
+	au.mutation.SetDiscogsMasterId(s)
+	return au
+}
+
+// SetNillableDiscogsMasterId sets the "discogsMasterId" field if the given value is not nil.
+func (au *AlbumUpdate) SetNillableDiscogsMasterId(s *string) *AlbumUpdate {
+	if s != nil {
+		au.SetDiscogsMasterId(*s)
+	}
+	return au
+}
+
 // SetName sets the "name" field.
 func (au *AlbumUpdate) SetName(s string) *AlbumUpdate {
 	au.mutation.SetName(s)
@@ -209,6 +223,9 @@ func (au *AlbumUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			sqljson.Append(u, album.FieldSpotifyIds, value)
 		})
 	}
+	if value, ok := au.mutation.DiscogsMasterId(); ok {
+		_spec.SetField(album.FieldDiscogsMasterId, field.TypeString, value)
+	}
 	if value, ok := au.mutation.Name(); ok {
 		_spec.SetField(album.FieldName, field.TypeString, value)
 	}
@@ -334,6 +351,20 @@ func (auo *AlbumUpdateOne) SetSpotifyIds(s []string) *AlbumUpdateOne {
 // AppendSpotifyIds appends s to the "spotifyIds" field.
 func (auo *AlbumUpdateOne) AppendSpotifyIds(s []string) *AlbumUpdateOne {
 	auo.mutation.AppendSpotifyIds(s)
+	return auo
+}
+
+// SetDiscogsMasterId sets the "discogsMasterId" field.
+func (auo *AlbumUpdateOne) SetDiscogsMasterId(s string) *AlbumUpdateOne {
+	auo.mutation.SetDiscogsMasterId(s)
+	return auo
+}
+
+// SetNillableDiscogsMasterId sets the "discogsMasterId" field if the given value is not nil.
+func (auo *AlbumUpdateOne) SetNillableDiscogsMasterId(s *string) *AlbumUpdateOne {
+	if s != nil {
+		auo.SetDiscogsMasterId(*s)
+	}
 	return auo
 }
 
@@ -533,6 +564,9 @@ func (auo *AlbumUpdateOne) sqlSave(ctx context.Context) (_node *Album, err error
 		_spec.AddModifier(func(u *sql.UpdateBuilder) {
 			sqljson.Append(u, album.FieldSpotifyIds, value)
 		})
+	}
+	if value, ok := auo.mutation.DiscogsMasterId(); ok {
+		_spec.SetField(album.FieldDiscogsMasterId, field.TypeString, value)
 	}
 	if value, ok := auo.mutation.Name(); ok {
 		_spec.SetField(album.FieldName, field.TypeString, value)

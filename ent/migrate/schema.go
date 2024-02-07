@@ -12,6 +12,7 @@ var (
 	AlbumsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "spotify_ids", Type: field.TypeJSON},
+		{Name: "discogs_master_id", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString},
 		{Name: "simplified_name", Type: field.TypeString},
 	}

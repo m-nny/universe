@@ -1,4 +1,4 @@
-package internal
+package discsearch
 
 import (
 	"context"
@@ -8,20 +8,7 @@ import (
 	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/lib/discogs"
 	"github.com/m-nny/universe/lib/spotify"
-	_ "github.com/mattn/go-sqlite3"
 )
-
-func getEntClient() (*ent.Client, error) {
-	client, err := ent.Open("sqlite3", "file:data/ent.db?cache=shared&_fk=1")
-	if err != nil {
-		return nil, fmt.Errorf("failed opening connection to sqlite: %w", err)
-	}
-	// Run the auto migration tool.
-	if err := client.Schema.Create(context.Background()); err != nil {
-		return nil, fmt.Errorf("failed creating schema resources: %w", err)
-	}
-	return client, nil
-}
 
 type App struct {
 	Ent     *ent.Client
@@ -29,7 +16,7 @@ type App struct {
 	Discogs *discogs.Service
 }
 
-func NewApp(ctx context.Context, username string) (*App, error) {
+func New(ctx context.Context, username string) (*App, error) {
 	if err := godotenv.Load(); err != nil {
 		return nil, fmt.Errorf("could not load .env: %v", err)
 	}
@@ -41,7 +28,7 @@ func NewApp(ctx context.Context, username string) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	discogs, err := discogs.New(spotify, ent)
+	discogs, err := discogs.New()
 	if err != nil {
 		return nil, err
 	}
@@ -50,4 +37,16 @@ func NewApp(ctx context.Context, username string) (*App, error) {
 		Spotify: spotify,
 		Discogs: discogs,
 	}, nil
+}
+
+func getEntClient() (*ent.Client, error) {
+	client, err := ent.Open("sqlite3", "file:data/ent.db?cache=shared&_fk=1")
+	if err != nil {
+		return nil, fmt.Errorf("failed opening connection to sqlite: %w", err)
+	}
+	// Run the auto migration tool.
+	if err := client.Schema.Create(context.Background()); err != nil {
+		return nil, fmt.Errorf("failed creating schema resources: %w", err)
+	}
+	return client, nil
 }

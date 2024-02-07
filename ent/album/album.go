@@ -14,6 +14,8 @@ const (
 	FieldID = "id"
 	// FieldSpotifyIds holds the string denoting the spotifyids field in the database.
 	FieldSpotifyIds = "spotify_ids"
+	// FieldDiscogsMasterId holds the string denoting the discogsmasterid field in the database.
+	FieldDiscogsMasterId = "discogs_master_id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldSimplifiedName holds the string denoting the simplifiedname field in the database.
@@ -42,6 +44,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldSpotifyIds,
+	FieldDiscogsMasterId,
 	FieldName,
 	FieldSimplifiedName,
 }
@@ -75,6 +78,11 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByDiscogsMasterId orders the results by the discogsMasterId field.
+func ByDiscogsMasterId(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDiscogsMasterId, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.

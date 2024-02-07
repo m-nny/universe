@@ -53,6 +53,11 @@ func IDLTE(id int) predicate.Album {
 	return predicate.Album(sql.FieldLTE(FieldID, id))
 }
 
+// DiscogsMasterId applies equality check predicate on the "discogsMasterId" field. It's identical to DiscogsMasterIdEQ.
+func DiscogsMasterId(v string) predicate.Album {
+	return predicate.Album(sql.FieldEQ(FieldDiscogsMasterId, v))
+}
+
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.Album {
 	return predicate.Album(sql.FieldEQ(FieldName, v))
@@ -61,6 +66,71 @@ func Name(v string) predicate.Album {
 // SimplifiedName applies equality check predicate on the "simplifiedName" field. It's identical to SimplifiedNameEQ.
 func SimplifiedName(v string) predicate.Album {
 	return predicate.Album(sql.FieldEQ(FieldSimplifiedName, v))
+}
+
+// DiscogsMasterIdEQ applies the EQ predicate on the "discogsMasterId" field.
+func DiscogsMasterIdEQ(v string) predicate.Album {
+	return predicate.Album(sql.FieldEQ(FieldDiscogsMasterId, v))
+}
+
+// DiscogsMasterIdNEQ applies the NEQ predicate on the "discogsMasterId" field.
+func DiscogsMasterIdNEQ(v string) predicate.Album {
+	return predicate.Album(sql.FieldNEQ(FieldDiscogsMasterId, v))
+}
+
+// DiscogsMasterIdIn applies the In predicate on the "discogsMasterId" field.
+func DiscogsMasterIdIn(vs ...string) predicate.Album {
+	return predicate.Album(sql.FieldIn(FieldDiscogsMasterId, vs...))
+}
+
+// DiscogsMasterIdNotIn applies the NotIn predicate on the "discogsMasterId" field.
+func DiscogsMasterIdNotIn(vs ...string) predicate.Album {
+	return predicate.Album(sql.FieldNotIn(FieldDiscogsMasterId, vs...))
+}
+
+// DiscogsMasterIdGT applies the GT predicate on the "discogsMasterId" field.
+func DiscogsMasterIdGT(v string) predicate.Album {
+	return predicate.Album(sql.FieldGT(FieldDiscogsMasterId, v))
+}
+
+// DiscogsMasterIdGTE applies the GTE predicate on the "discogsMasterId" field.
+func DiscogsMasterIdGTE(v string) predicate.Album {
+	return predicate.Album(sql.FieldGTE(FieldDiscogsMasterId, v))
+}
+
+// DiscogsMasterIdLT applies the LT predicate on the "discogsMasterId" field.
+func DiscogsMasterIdLT(v string) predicate.Album {
+	return predicate.Album(sql.FieldLT(FieldDiscogsMasterId, v))
+}
+
+// DiscogsMasterIdLTE applies the LTE predicate on the "discogsMasterId" field.
+func DiscogsMasterIdLTE(v string) predicate.Album {
+	return predicate.Album(sql.FieldLTE(FieldDiscogsMasterId, v))
+}
+
+// DiscogsMasterIdContains applies the Contains predicate on the "discogsMasterId" field.
+func DiscogsMasterIdContains(v string) predicate.Album {
+	return predicate.Album(sql.FieldContains(FieldDiscogsMasterId, v))
+}
+
+// DiscogsMasterIdHasPrefix applies the HasPrefix predicate on the "discogsMasterId" field.
+func DiscogsMasterIdHasPrefix(v string) predicate.Album {
+	return predicate.Album(sql.FieldHasPrefix(FieldDiscogsMasterId, v))
+}
+
+// DiscogsMasterIdHasSuffix applies the HasSuffix predicate on the "discogsMasterId" field.
+func DiscogsMasterIdHasSuffix(v string) predicate.Album {
+	return predicate.Album(sql.FieldHasSuffix(FieldDiscogsMasterId, v))
+}
+
+// DiscogsMasterIdEqualFold applies the EqualFold predicate on the "discogsMasterId" field.
+func DiscogsMasterIdEqualFold(v string) predicate.Album {
+	return predicate.Album(sql.FieldEqualFold(FieldDiscogsMasterId, v))
+}
+
+// DiscogsMasterIdContainsFold applies the ContainsFold predicate on the "discogsMasterId" field.
+func DiscogsMasterIdContainsFold(v string) predicate.Album {
+	return predicate.Album(sql.FieldContainsFold(FieldDiscogsMasterId, v))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.

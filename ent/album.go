@@ -19,6 +19,8 @@ type Album struct {
 	ID int `json:"id,omitempty"`
 	// SpotifyIds holds the value of the "spotifyIds" field.
 	SpotifyIds []string `json:"spotifyIds,omitempty"`
+	// DiscogsMasterId holds the value of the "discogsMasterId" field.
+	DiscogsMasterId string `json:"discogsMasterId,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// SimplifiedName holds the value of the "simplifiedName" field.
@@ -67,7 +69,7 @@ func (*Album) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case album.FieldID:
 			values[i] = new(sql.NullInt64)
-		case album.FieldName, album.FieldSimplifiedName:
+		case album.FieldDiscogsMasterId, album.FieldName, album.FieldSimplifiedName:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -97,6 +99,12 @@ func (a *Album) assignValues(columns []string, values []any) error {
 				if err := json.Unmarshal(*value, &a.SpotifyIds); err != nil {
 					return fmt.Errorf("unmarshal field spotifyIds: %w", err)
 				}
+			}
+		case album.FieldDiscogsMasterId:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field discogsMasterId", values[i])
+			} else if value.Valid {
+				a.DiscogsMasterId = value.String
 			}
 		case album.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -158,6 +166,9 @@ func (a *Album) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v, ", a.ID))
 	builder.WriteString("spotifyIds=")
 	builder.WriteString(fmt.Sprintf("%v", a.SpotifyIds))
+	builder.WriteString(", ")
+	builder.WriteString("discogsMasterId=")
+	builder.WriteString(a.DiscogsMasterId)
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(a.Name)

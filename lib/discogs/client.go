@@ -1,17 +1,16 @@
-package client
+package discogs
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 )
 
 type Config struct {
 	// Discogs API endpoint (optional).
 	BaseUrl string
-	// Currency to use (optional, default is USD).
-	Currency string
 	// UserAgent to to call discogs api with.
 	UserAgent string
 
@@ -24,28 +23,44 @@ type Config struct {
 	Key string
 }
 
-type Discogs struct {
+type Service struct {
 	http   *http.Client
 	config *Config
 }
 
-func New(config *Config) (*Discogs, error) {
-	if config.UserAgent == "" {
+func LoadConfig() (*Config, error) {
+	c := &Config{
+		BaseUrl:   "https://api.discogs.com",
+		UserAgent: os.Getenv("discogs_userAgent"),
+		Token:     os.Getenv("discogs_token"),
+	}
+	if c.Token == "" {
+		return nil, fmt.Errorf("discogs Token is not set")
+	}
+	if c.UserAgent == "" {
 		return nil, fmt.Errorf("config: UserAgent is empty")
 	}
-	if config.Secret == "" && config.Key != "" {
+	if c.Secret == "" && c.Key != "" {
 		return nil, fmt.Errorf("config: Secret is empty, but Key is not")
 	}
-	if config.Secret != "" && config.Key == "" {
+	if c.Secret != "" && c.Key == "" {
 		return nil, fmt.Errorf("config: Key is empty, but Secret is not")
 	}
-	return &Discogs{
+	return c, nil
+}
+
+func New() (*Service, error) {
+	config, err := LoadConfig()
+	if err != nil {
+		return nil, err
+	}
+	return &Service{
 		http:   &http.Client{},
 		config: config,
 	}, nil
 }
 
-func (d *Discogs) headers() http.Header {
+func (d *Service) headers() http.Header {
 	h := http.Header{}
 	h.Add("User-Agent", d.config.UserAgent)
 	if token := d.config.Token; token != "" {
@@ -57,7 +72,7 @@ func (d *Discogs) headers() http.Header {
 	return h
 }
 
-func (d *Discogs) get(ctx context.Context, fullUrl string, result any) error {
+func (d *Service) get(ctx context.Context, fullUrl string, result any) error {
 	req, err := http.NewRequestWithContext(ctx, "GET", fullUrl, nil)
 	if err != nil {
 		return err
