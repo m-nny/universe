@@ -6,43 +6,44 @@ import (
 	"log"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/joho/godotenv"
 	"github.com/m-nny/universe/cmd/internal"
-	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/ent/album"
 	"github.com/m-nny/universe/ent/artist"
-	"github.com/m-nny/universe/lib/spotify"
 	spotify2 "github.com/zmb3/spotify/v2"
 )
 
 const username = "m-nny"
 
 func main() {
-	if err := godotenv.Load(); err != nil {
-		log.Fatalf("Could not load .env: %v", err)
-	}
 	ctx := context.Background()
-	entClient, err := internal.GetEntClient()
+	app, err := internal.NewApp(ctx, username)
 	if err != nil {
-		log.Fatalf("failed creating ent Client: %v", err)
-	}
-	spotify, err := spotify.New(ctx, entClient, username)
-	if err != nil {
-		log.Fatalf("Error getting spotify client: %v", err)
+		log.Fatalf("Could not init app: %v", err)
 	}
 
 	// if err := getAlbumsById(ctx, spotify, entClient); err != nil {
 	// 	log.Fatalf("%v", err)
 	// }
 
-	if err := getUserTracks(ctx, spotify, entClient); err != nil {
+	// if err := getUserTracks(ctx, app); err != nil {
+	// 	log.Fatalf("%v", err)
+	// }
+
+	if err := getDiscogs(ctx, app); err != nil {
 		log.Fatalf("%v", err)
 	}
 }
 
-func getAlbumsById(ctx context.Context, spotify *spotify.Service, entClient *ent.Client) error {
+func getDiscogs(ctx context.Context, app *internal.App) error {
+	if err := app.Discogs.GetRelease(ctx, 14957969); err != nil {
+		return err
+	}
+	return nil
+}
+
+func getAlbumsById(ctx context.Context, app *internal.App) error {
 	albumIds := []spotify2.ID{"025WnFQfYniZWzIzFHx0mb", "1svovXeaO67ZpSgWhj0UaP", "2ArGu1xrwGla8pZfTNOBfp"}
-	targetAlbums, err := spotify.GetAlbumsById(ctx, albumIds)
+	targetAlbums, err := app.Spotify.GetAlbumsById(ctx, albumIds)
 	if err != nil {
 		return err
 	}
@@ -52,34 +53,34 @@ func getAlbumsById(ctx context.Context, spotify *spotify.Service, entClient *ent
 	}
 	log.Print()
 
-	if err := getTopAlbums(ctx, entClient); err != nil {
+	if err := getTopAlbums(ctx, app); err != nil {
 		return err
 	}
-	if err := getTopArtists(ctx, entClient); err != nil {
+	if err := getTopArtists(ctx, app); err != nil {
 		return err
 	}
 	return nil
 }
 
-func getUserTracks(ctx context.Context, spotify *spotify.Service, entClient *ent.Client) error {
-	tracks, err := spotify.GetUserTracks(ctx, username)
+func getUserTracks(ctx context.Context, app *internal.App) error {
+	tracks, err := app.Spotify.GetUserTracks(ctx, username)
 	if err != nil {
 		return fmt.Errorf("error getting all tracks: %w", err)
 	}
 	log.Printf("found total %d tracks", len(tracks))
 
-	if err := getTopAlbums(ctx, entClient); err != nil {
+	if err := getTopAlbums(ctx, app); err != nil {
 		return fmt.Errorf("error getting all tracks: %w", err)
 	}
-	if err := getTopArtists(ctx, entClient); err != nil {
+	if err := getTopArtists(ctx, app); err != nil {
 		return fmt.Errorf("error getting all tracks: %w", err)
 	}
 	return nil
 }
 
-func getTopAlbums(ctx context.Context, entC *ent.Client) error {
+func getTopAlbums(ctx context.Context, app *internal.App) error {
 	const tracksNumCol = "tracks_num"
-	albums, err := entC.Album.
+	albums, err := app.Ent.Album.
 		Query().
 		Order(
 			album.ByTracksCount(
@@ -103,9 +104,9 @@ func getTopAlbums(ctx context.Context, entC *ent.Client) error {
 	return nil
 }
 
-func getTopArtists(ctx context.Context, entC *ent.Client) error {
+func getTopArtists(ctx context.Context, app *internal.App) error {
 	const tracksNumCol = "tracks_num"
-	artists, err := entC.Artist.
+	artists, err := app.Ent.Artist.
 		Query().
 		Order(
 			artist.ByTracksCount(

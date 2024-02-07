@@ -30,13 +30,13 @@ func LoadConfig() (*Config, error) {
 		RedirectUrl:  "http://localhost:3000/callback",
 	}
 	if c.ClientId == "" {
-		return nil, fmt.Errorf("clientId ClientId is not set")
+		return nil, fmt.Errorf("spotify ClientId is not set")
 	}
 	if c.ClientSecret == "" {
-		return nil, fmt.Errorf("clientId ClientSecret is not set")
+		return nil, fmt.Errorf("spotify ClientSecret is not set")
 	}
 	if c.RedirectUrl == "" {
-		return nil, fmt.Errorf("clientId RedirectUrl is not set")
+		return nil, fmt.Errorf("spotify RedirectUrl is not set")
 	}
 	return c, nil
 }
