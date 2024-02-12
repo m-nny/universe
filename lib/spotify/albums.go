@@ -9,12 +9,15 @@ import (
 
 	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/ent/album"
+	"github.com/m-nny/universe/lib/jsoncache"
 	"github.com/m-nny/universe/lib/utils"
 	"github.com/zmb3/spotify/v2"
 )
 
 func (s *Service) SearchAlbum(ctx context.Context, q string) ([]*ent.Album, error) {
-	results, err := s.spotify.Search(ctx, q, spotify.SearchTypeAlbum, spotify.Limit(50))
+	results, err := jsoncache.CachedExec("discogs_search_"+q, func() (*spotify.SearchResult, error) {
+		return s.spotify.Search(ctx, q, spotify.SearchTypeAlbum, spotify.Limit(50))
+	})
 	if err != nil {
 		return nil, err
 	}

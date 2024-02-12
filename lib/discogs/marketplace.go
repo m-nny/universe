@@ -9,13 +9,13 @@ import (
 	"github.com/m-nny/universe/lib/jsoncache"
 )
 
-func (d *Service) SellerInventory(ctx context.Context, username string) ([]Listing, error) {
-	return jsoncache.CachedExec("discogs_inventory_"+username, func() ([]Listing, error) {
+func (d *Service) SellerInventory(ctx context.Context, username string) ([]*Listing, error) {
+	return jsoncache.CachedExec("discogs_inventory_"+username, func() ([]*Listing, error) {
 		return d._SellerInventory(ctx, username)
 	})
 }
-func (d *Service) _SellerInventory(ctx context.Context, username string) ([]Listing, error) {
-	var results []Listing
+func (d *Service) _SellerInventory(ctx context.Context, username string) ([]*Listing, error) {
+	var results []*Listing
 	params := url.Values{}
 	params.Set("status", "For Sale")
 	params.Set("per_page", "100")
@@ -40,7 +40,7 @@ func (d *Service) _SellerInventory(ctx context.Context, username string) ([]List
 
 type inventoryResult struct {
 	Pagination Pagination `json:"pagination"`
-	Listings   []Listing  `json:"listings"`
+	Listings   []*Listing `json:"listings"`
 }
 
 func (i *inventoryResult) nextPage() string {
@@ -52,19 +52,19 @@ func (i *inventoryResult) totalItems() int {
 }
 
 type Listing struct {
-	AllowOffers     bool           `json:"allow_offers"`
-	Audio           bool           `json:"audio"`
-	Comments        string         `json:"comments"`
-	Condition       string         `json:"condition"`
-	ID              int            `json:"id"`
-	Posted          string         `json:"posted"`
-	Price           Price          `json:"price"`
-	Release         ListingRelease `json:"release,omitempty"`
-	ResourceURL     string         `json:"resource_url"`
-	ShipsFrom       string         `json:"ships_from"`
-	SleeveCondition string         `json:"sleeve_condition"`
-	Status          string         `json:"status"`
-	URI             string         `json:"uri"`
+	AllowOffers     bool            `json:"allow_offers"`
+	Audio           bool            `json:"audio"`
+	Comments        string          `json:"comments"`
+	Condition       string          `json:"condition"`
+	ID              int             `json:"id"`
+	Posted          string          `json:"posted"`
+	Price           Price           `json:"price"`
+	Release         *ListingRelease `json:"release,omitempty"`
+	ResourceURL     string          `json:"resource_url"`
+	ShipsFrom       string          `json:"ships_from"`
+	SleeveCondition string          `json:"sleeve_condition"`
+	Status          string          `json:"status"`
+	URI             string          `json:"uri"`
 }
 type Pagination struct {
 	Items   int               `json:"items"`
