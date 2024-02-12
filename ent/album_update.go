@@ -56,6 +56,12 @@ func (au *AlbumUpdate) SetNillableDiscogsMasterId(s *string) *AlbumUpdate {
 	return au
 }
 
+// ClearDiscogsMasterId clears the value of the "discogsMasterId" field.
+func (au *AlbumUpdate) ClearDiscogsMasterId() *AlbumUpdate {
+	au.mutation.ClearDiscogsMasterId()
+	return au
+}
+
 // SetName sets the "name" field.
 func (au *AlbumUpdate) SetName(s string) *AlbumUpdate {
 	au.mutation.SetName(s)
@@ -226,6 +232,9 @@ func (au *AlbumUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := au.mutation.DiscogsMasterId(); ok {
 		_spec.SetField(album.FieldDiscogsMasterId, field.TypeString, value)
 	}
+	if au.mutation.DiscogsMasterIdCleared() {
+		_spec.ClearField(album.FieldDiscogsMasterId, field.TypeString)
+	}
 	if value, ok := au.mutation.Name(); ok {
 		_spec.SetField(album.FieldName, field.TypeString, value)
 	}
@@ -365,6 +374,12 @@ func (auo *AlbumUpdateOne) SetNillableDiscogsMasterId(s *string) *AlbumUpdateOne
 	if s != nil {
 		auo.SetDiscogsMasterId(*s)
 	}
+	return auo
+}
+
+// ClearDiscogsMasterId clears the value of the "discogsMasterId" field.
+func (auo *AlbumUpdateOne) ClearDiscogsMasterId() *AlbumUpdateOne {
+	auo.mutation.ClearDiscogsMasterId()
 	return auo
 }
 
@@ -567,6 +582,9 @@ func (auo *AlbumUpdateOne) sqlSave(ctx context.Context) (_node *Album, err error
 	}
 	if value, ok := auo.mutation.DiscogsMasterId(); ok {
 		_spec.SetField(album.FieldDiscogsMasterId, field.TypeString, value)
+	}
+	if auo.mutation.DiscogsMasterIdCleared() {
+		_spec.ClearField(album.FieldDiscogsMasterId, field.TypeString)
 	}
 	if value, ok := auo.mutation.Name(); ok {
 		_spec.SetField(album.FieldName, field.TypeString, value)

@@ -6,7 +6,6 @@ import (
 	"log"
 
 	"github.com/m-nny/universe/ent"
-	"github.com/m-nny/universe/ent/user"
 	"github.com/m-nny/universe/lib/jsoncache"
 	"github.com/zmb3/spotify/v2"
 )
@@ -35,13 +34,4 @@ func (s *Service) GetUserTracks(ctx context.Context, username string) ([]*ent.Tr
 		return nil, err
 	}
 	return s.toTracksSaved(ctx, rawTracks, username)
-}
-
-func (s *Service) _GetUserTracks(ctx context.Context, username string) ([]*ent.Track, error) {
-	plists, err := s.ent.User.
-		Query().
-		Where(user.ID(username)).
-		QuerySavedTracks().
-		All(ctx)
-	return plists, err
 }

@@ -123,6 +123,16 @@ func DiscogsMasterIdHasSuffix(v string) predicate.Album {
 	return predicate.Album(sql.FieldHasSuffix(FieldDiscogsMasterId, v))
 }
 
+// DiscogsMasterIdIsNil applies the IsNil predicate on the "discogsMasterId" field.
+func DiscogsMasterIdIsNil() predicate.Album {
+	return predicate.Album(sql.FieldIsNull(FieldDiscogsMasterId))
+}
+
+// DiscogsMasterIdNotNil applies the NotNil predicate on the "discogsMasterId" field.
+func DiscogsMasterIdNotNil() predicate.Album {
+	return predicate.Album(sql.FieldNotNull(FieldDiscogsMasterId))
+}
+
 // DiscogsMasterIdEqualFold applies the EqualFold predicate on the "discogsMasterId" field.
 func DiscogsMasterIdEqualFold(v string) predicate.Album {
 	return predicate.Album(sql.FieldEqualFold(FieldDiscogsMasterId, v))

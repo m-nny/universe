@@ -13,6 +13,14 @@ import (
 	"github.com/zmb3/spotify/v2"
 )
 
+func (s *Service) SearchAlbum(ctx context.Context, q string) ([]*ent.Album, error) {
+	results, err := s.spotify.Search(ctx, q, spotify.SearchTypeAlbum, spotify.Limit(50))
+	if err != nil {
+		return nil, err
+	}
+	return s.toAlbums(ctx, results.Albums.Albums)
+}
+
 func (s *Service) GetAlbumsById(ctx context.Context, ids []spotify.ID) ([]*ent.Album, error) {
 	rawAlbums, err := s.spotify.GetAlbums(ctx, ids)
 	if err != nil {
@@ -31,6 +39,11 @@ func (s *Service) toAlbumFull(ctx context.Context, a *spotify.FullAlbum) (*ent.A
 	}
 	return album, nil
 }
+
+func (s *Service) toAlbums(ctx context.Context, arr []spotify.SimpleAlbum) ([]*ent.Album, error) {
+	return utils.SliceMapCtxErr(ctx, arr, s.toAlbum)
+}
+
 func (s *Service) toAlbum(ctx context.Context, a spotify.SimpleAlbum) (*ent.Album, error) {
 	simplifiedName := simplifiedAlbumName(a)
 	album, err := s.ent.Album.

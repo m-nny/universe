@@ -2,7 +2,9 @@ package spotify
 
 import (
 	"context"
+	"strings"
 
+	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/ent/artist"
 	"github.com/m-nny/universe/lib/utils"
 	"github.com/zmb3/spotify/v2"
@@ -31,4 +33,12 @@ func (s *Service) toArtist(ctx context.Context, a spotify.SimpleArtist) (int, er
 
 func (s *Service) toArtists(ctx context.Context, rawArtists []spotify.SimpleArtist) ([]int, error) {
 	return utils.SliceMapCtxErr(ctx, rawArtists, s.toArtist)
+}
+
+func ArtistsString(artists []*ent.Artist) string {
+	var s []string
+	for _, a := range artists {
+		s = append(s, a.Name)
+	}
+	return strings.Join(s, " ")
 }

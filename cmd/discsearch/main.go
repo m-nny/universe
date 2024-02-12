@@ -32,6 +32,10 @@ func main() {
 	if err := getDiscogs(ctx, app); err != nil {
 		log.Fatalf("%v", err)
 	}
+
+	// if _, err := app.Master(ctx, 74519); err != nil {
+	// 	log.Fatalf("%v", err)
+	// }
 }
 
 func getDiscogs(ctx context.Context, app *discsearch.App) error {

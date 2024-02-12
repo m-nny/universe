@@ -15,13 +15,13 @@ func (d *Service) Master(ctx context.Context, releaseId int) (*Master, error) {
 }
 
 type Master struct {
-	Artists        []Artist `json:"artists"`
-	ID             int      `json:"id"`
-	MainRelease    int      `json:"main_release"`
-	MainReleaseURL string   `json:"main_release_url"`
-	ResourceURL    string   `json:"resource_url"`
-	Title          string   `json:"title"`
-	Tracks         []Track  `json:"tracklist"`
-	URI            string   `json:"uri"`
-	Year           int      `json:"year"`
+	Artists        []*Artist `json:"artists"`
+	ID             int       `json:"id"`
+	MainRelease    int       `json:"main_release"`
+	MainReleaseURL string    `json:"main_release_url"`
+	ResourceURL    string    `json:"resource_url"`
+	Title          string    `json:"title"`
+	Tracks         []Track   `json:"tracklist"`
+	URI            string    `json:"uri"`
+	Year           int       `json:"year"`
 }

@@ -2,8 +2,8 @@ package utils
 
 import "context"
 
-func SliceMapCtxErr[T, D any](ctx context.Context, arr []T, fn func(ctx context.Context, item T) (D, error)) ([]D, error) {
-	var res []D
+func SliceMapCtxErr[T, R any](ctx context.Context, arr []T, fn func(ctx context.Context, item T) (R, error)) ([]R, error) {
+	var res []R
 	for _, item := range arr {
 		val, err := fn(ctx, item)
 		if err != nil {
@@ -14,16 +14,16 @@ func SliceMapCtxErr[T, D any](ctx context.Context, arr []T, fn func(ctx context.
 	return res, nil
 }
 
-func SliceMap[T, D any](arr []T, fn func(item T) D) []D {
-	var res []D
+func SliceMap[T, R any](arr []T, fn func(item T) R) []R {
+	var res []R
 	for _, item := range arr {
 		res = append(res, fn(item))
 	}
 	return res
 }
 
-func SliceFlatMap[T, D any](arr []T, fn func(item T) []D) []D {
-	var res []D
+func SliceFlatMap[T, R any](arr []T, fn func(item T) []R) []R {
+	var res []R
 	for _, item := range arr {
 		res = append(res, fn(item)...)
 	}
@@ -42,4 +42,26 @@ func SliceUniqe[T any](arr []T, fn func(item T) string) []T {
 		result = append(result, item)
 	}
 	return result
+}
+
+func SliceCnt[T any](arr []T, fn func(item T) int) int {
+	val := 0
+	for _, item := range arr {
+		val += fn(item)
+	}
+	return val
+}
+
+func SliceStar[A, B, R any](arrA []A, arrB []B, fn func(a A, b B) R) []R {
+	var res []R
+	for _, a := range arrA {
+		for _, b := range arrB {
+			res = append(res, fn(a, b))
+		}
+	}
+	return res
+}
+
+func Identity[T any](item T) T {
+	return item
 }

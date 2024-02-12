@@ -3,6 +3,7 @@ package discogs
 import (
 	"context"
 	"fmt"
+	"strings"
 )
 
 func (d *Service) Release(ctx context.Context, releaseId int) (*Release, error) {
@@ -15,7 +16,7 @@ func (d *Service) Release(ctx context.Context, releaseId int) (*Release, error) 
 }
 
 type Release struct {
-	Artists     []Artist     `json:"artists"`
+	Artists     []*Artist    `json:"artists"`
 	ID          int          `json:"id"`
 	Identifiers []Identifier `json:"identifiers"`
 	MasterID    int          `json:"master_id"`
@@ -24,4 +25,12 @@ type Release struct {
 	Tracks      []Track      `json:"tracklist"`
 	URI         string       `json:"uri"`
 	Year        int          `json:"year"`
+}
+
+func ArtistsString(artists []*Artist) string {
+	var s []string
+	for _, a := range artists {
+		s = append(s, a.Name)
+	}
+	return strings.Join(s, " ")
 }
