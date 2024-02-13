@@ -2,7 +2,6 @@ package discsearch
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"regexp"
@@ -10,10 +9,8 @@ import (
 
 	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/lib/discogs"
-	"github.com/m-nny/universe/lib/utils"
+	"github.com/m-nny/universe/lib/utils/slices"
 )
-
-var ErrAlbumNotFound = errors.New("spotify: matching album not found")
 
 func (a *App) ListingRelease(ctx context.Context, release *discogs.ListingRelease) (*ent.Album, error) {
 	q := sanitizeQ(fmt.Sprintf("%s %s", release.Artist, release.Title))
@@ -22,7 +19,7 @@ func (a *App) ListingRelease(ctx context.Context, release *discogs.ListingReleas
 	if err != nil {
 		return nil, err
 	}
-	albums = utils.SliceUniqe(albums, func(item *ent.Album) string { return fmt.Sprintf("%d", item.ID) })
+	albums = slices.Uniqe(albums, func(item *ent.Album) string { return fmt.Sprintf("%d", item.ID) })
 	result, err := mostSimilarAlbum(ctx, release, albums)
 	if err != nil {
 		return nil, err
@@ -62,8 +59,8 @@ func mostSimilarAlbum(ctx context.Context, m *discogs.ListingRelease, arr []*ent
 }
 
 func albumSimilarity(m *discogs.ListingRelease, a *ent.Album) int {
-	artistScores := utils.SliceMap(a.Edges.Artists, func(e *ent.Artist) int { return similaryScore(m.Artist, e.Name) })
-	artistScore := utils.SliceCnt(artistScores, utils.Identity)
+	artistScores := slices.Map(a.Edges.Artists, func(e *ent.Artist) int { return similaryScore(m.Artist, e.Name) })
+	artistScore := slices.Cnt(artistScores, slices.Identity)
 	titleScore := similaryScore(m.Title, a.Name)
 	return artistScore + titleScore
 }

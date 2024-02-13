@@ -6,7 +6,7 @@ import (
 
 	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/ent/artist"
-	"github.com/m-nny/universe/lib/utils"
+	utils "github.com/m-nny/universe/lib/utils/slices"
 	"github.com/zmb3/spotify/v2"
 )
 
@@ -32,7 +32,7 @@ func (s *Service) toArtist(ctx context.Context, a spotify.SimpleArtist) (int, er
 }
 
 func (s *Service) toArtists(ctx context.Context, rawArtists []spotify.SimpleArtist) ([]int, error) {
-	return utils.SliceMapCtxErr(ctx, rawArtists, s.toArtist)
+	return utils.MapCtxErr(ctx, rawArtists, s.toArtist)
 }
 
 func ArtistsString(artists []*ent.Artist) string {

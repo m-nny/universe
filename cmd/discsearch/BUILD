@@ -9,7 +9,7 @@ go_library(
         "//ent/album",
         "//ent/artist",
         "//lib/discsearch",
-        "@com_github_zmb3_spotify_v2//:spotify",
+        "//lib/spotify",
         "@io_entgo_ent//dialect/sql",
     ],
 )
