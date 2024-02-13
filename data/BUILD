@@ -1,13 +1,11 @@
 filegroup(
     name = "ent_db",
-    srcs = ["ent.db"],
+    data = ["ent.db"],
     visibility = ["//visibility:public"],
 )
 
 filegroup(
     name = "json_cache",
-    srcs = glob([
-        "cache/*.json",
-    ]),
+    data = ["cache"],  ## intentionally passing whole folder
     visibility = ["//visibility:public"],
 )
