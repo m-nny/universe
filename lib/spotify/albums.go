@@ -53,7 +53,6 @@ func (s *Service) toAlbum(ctx context.Context, a spotify.SimpleAlbum) (*ent.Albu
 		Query().
 		Where(album.Similar(string(a.ID), simplifiedName)).
 		Only(ctx)
-
 	if err != nil {
 		// Album does not exist yet
 		return s._newAlbum(ctx, a, simplifiedName)

@@ -21,6 +21,7 @@ func MapCtxErr[T, R any](ctx context.Context, arr []T, fn func(ctx context.Conte
 	}
 	return res, nil
 }
+
 func Uniqe[T any](arr []T, fn func(item T) string) []T {
 	var result []T
 	has := make(map[string]bool)
