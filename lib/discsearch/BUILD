@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "discsearch",
@@ -9,7 +9,7 @@ go_library(
     ],
     data = [
         "//:dotenv",
-        "//data:ent_db"
+        "//data:ent_db",
     ],
     importpath = "github.com/m-nny/universe/lib/discsearch",
     visibility = ["//visibility:public"],

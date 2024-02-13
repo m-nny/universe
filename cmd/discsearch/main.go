@@ -9,7 +9,7 @@ import (
 	"github.com/m-nny/universe/ent/album"
 	"github.com/m-nny/universe/ent/artist"
 	"github.com/m-nny/universe/lib/discsearch"
-	spotify2 "github.com/zmb3/spotify/v2"
+	"github.com/m-nny/universe/lib/spotify"
 )
 
 const username = "m-nny"
@@ -21,7 +21,7 @@ func main() {
 		log.Fatalf("Could not init app: %v", err)
 	}
 
-	// if err := getAlbumsById(ctx, spotify, entClient); err != nil {
+	// if err := getAlbumsById(ctx, app); err != nil {
 	// 	log.Fatalf("%v", err)
 	// }
 
@@ -46,7 +46,7 @@ func getDiscogs(ctx context.Context, app *discsearch.App) error {
 }
 
 func getAlbumsById(ctx context.Context, app *discsearch.App) error {
-	albumIds := []spotify2.ID{"025WnFQfYniZWzIzFHx0mb", "1svovXeaO67ZpSgWhj0UaP", "2ArGu1xrwGla8pZfTNOBfp"}
+	albumIds := []spotify.ID{"025WnFQfYniZWzIzFHx0mb", "1svovXeaO67ZpSgWhj0UaP", "2ArGu1xrwGla8pZfTNOBfp"}
 	targetAlbums, err := app.Spotify.GetAlbumsById(ctx, albumIds)
 	if err != nil {
 		return err

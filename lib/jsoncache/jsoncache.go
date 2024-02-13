@@ -5,9 +5,13 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 )
 
-const cacheDir = "./data/cache"
+var cacheDir = func() string {
+	res, _ := filepath.Abs("./data/cache")
+	return res
+}()
 
 func SetValue[Data any](key string, data Data) error {
 	dir := path.Dir(cacheDir)
