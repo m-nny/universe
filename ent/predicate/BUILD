@@ -1,0 +1,9 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "predicate",
+    srcs = ["predicate.go"],
+    importpath = "github.com/m-nny/universe/ent/predicate",
+    visibility = ["//visibility:public"],
+    deps = ["@io_entgo_ent//dialect/sql"],
+)

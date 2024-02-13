@@ -3,6 +3,9 @@ package discsearch
 import (
 	"context"
 	"fmt"
+	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/joho/godotenv"
 	"github.com/m-nny/universe/ent"
@@ -18,7 +21,7 @@ type App struct {
 }
 
 func New(ctx context.Context, username string) (*App, error) {
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load(); err != nil && !os.IsNotExist(err) {
 		return nil, fmt.Errorf("could not load .env: %v", err)
 	}
 	ent, err := getEntClient()
@@ -41,7 +44,16 @@ func New(ctx context.Context, username string) (*App, error) {
 }
 
 func getEntClient() (*ent.Client, error) {
-	client, err := ent.Open("sqlite3", "file:data/ent.db?cache=shared&_fk=1")
+	databasePath := "data/ent.db"
+	databasePath, err := filepath.Abs(databasePath)
+	if err != nil {
+		return nil, err
+	}
+	if _, err := os.Stat(databasePath); err != nil {
+		log.Printf("err: %v", err)
+		return nil, err
+	}
+	client, err := ent.Open("sqlite3", fmt.Sprintf("file:%s?cache=shared&_fk=1", databasePath))
 	if err != nil {
 		return nil, fmt.Errorf("failed opening connection to sqlite: %w", err)
 	}

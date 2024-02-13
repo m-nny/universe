@@ -1,0 +1,14 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "enttest",
+    srcs = ["enttest.go"],
+    importpath = "github.com/m-nny/universe/ent/enttest",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//ent",
+        "//ent/migrate",
+        "//ent/runtime",
+        "@io_entgo_ent//dialect/sql/schema",
+    ],
+)

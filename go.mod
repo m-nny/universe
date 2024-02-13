@@ -1,6 +1,6 @@
 module github.com/m-nny/universe
 
-go 1.21.1
+go 1.21
 
 require (
 	entgo.io/ent v0.12.5

@@ -7,7 +7,7 @@ import (
 	"path"
 )
 
-const cacheDir = ".cache"
+const cacheDir = "./data/cache"
 
 func SetValue[Data any](key string, data Data) error {
 	dir := path.Dir(cacheDir)

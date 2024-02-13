@@ -25,17 +25,17 @@ func main() {
 	// 	log.Fatalf("%v", err)
 	// }
 
-	// if err := getUserTracks(ctx, app); err != nil {
-	// 	log.Fatalf("%v", err)
-	// }
+	if err := getUserTracks(ctx, app); err != nil {
+		log.Fatalf("%v", err)
+	}
 
 	// if err := getDiscogs(ctx, app); err != nil {
 	// 	log.Fatalf("%v", err)
 	// }
 
-	if _, err := app.Inventory(ctx, "nezrathebeatmaker"); err != nil {
-		log.Fatalf("%v", err)
-	}
+	// if _, err := app.Inventory(ctx, "nezrathebeatmaker"); err != nil {
+	// 	log.Fatalf("%v", err)
+	// }
 }
 
 func getDiscogs(ctx context.Context, app *discsearch.App) error {
