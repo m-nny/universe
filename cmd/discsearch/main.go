@@ -44,7 +44,8 @@ func main() {
 }
 
 func demoGorm(ctx context.Context, app *discsearch.App) error {
-	artistIds := []spotify.ID{"3dz0NnIZhtKKeXZxLOxCam", "6XyY86QOPPrYVGvF9ch6wz"}
+	// Porter Robinson, Linkin Park, Linkin Park
+	artistIds := []spotify.ID{"3dz0NnIZhtKKeXZxLOxCam", "6XyY86QOPPrYVGvF9ch6wz", "6XyY86QOPPrYVGvF9ch6wz"}
 	sArtists, err := app.Spotify.GetAristById(ctx, artistIds)
 	if err != nil {
 		return err
@@ -70,7 +71,8 @@ func getDiscogs(ctx context.Context, app *discsearch.App) error {
 }
 
 func getAlbumsById(ctx context.Context, app *discsearch.App) error {
-	albumIds := []spotify.ID{"025WnFQfYniZWzIzFHx0mb", "1svovXeaO67ZpSgWhj0UaP", "2ArGu1xrwGla8pZfTNOBfp"}
+	// Hybrid Theory, Hybrid Theory (20th Edition)
+	albumIds := []spotify.ID{"6PFPjumGRpZnBzqnDci6qJ", "28DUZ0itKISf2sr6hlseMy"}
 	targetAlbums, err := app.Spotify.GetAlbumsById(ctx, albumIds)
 	if err != nil {
 		return err

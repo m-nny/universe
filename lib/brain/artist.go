@@ -29,6 +29,9 @@ func (b *Brain) ToArtist(sArtist *spotify.FullArtist) (*Artist, error) {
 	return &artist, nil
 }
 
+// ToArtists takes list of spotify Artists and returns Brain representain of them.
+//   - It will create new entries in DB if necessary
+//   - It will deduplicate returned artists, this may result in len(result) < len(sArtists)
 func (b *Brain) ToArtists(sArtists []*spotify.FullArtist) ([]*Artist, error) {
 	spotifyIds := sliceutils.Map(sArtists, func(item *spotify.FullArtist) string { return item.ID.String() })
 	var existingArtists []*Artist

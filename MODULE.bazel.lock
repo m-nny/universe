@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 6,
-  "moduleFileHash": "b51c49fac8daa728096431b5f81f087f2fb124794c38a86d36558cfc39c45709",
+  "moduleFileHash": "dd669f241b21829d4eb8f776147e1ec59464aa809dc52399d04a01923e10ff9d",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -34,6 +34,7 @@
             "column": 24
           },
           "imports": {
+            "com_github_google_go_cmp": "com_github_google_go_cmp",
             "com_github_joho_godotenv": "com_github_joho_godotenv",
             "com_github_mattn_go_sqlite3": "com_github_mattn_go_sqlite3",
             "com_github_zmb3_spotify_v2": "com_github_zmb3_spotify_v2",
@@ -1492,10 +1493,10 @@
       "general": {
         "bzlTransitiveDigest": "D1+rhhbwX4ufoTmeUVxDpPg+Sknv3QzVXZnyK2zOjj4=",
         "recordedFileInputs": {
-          "@@//go.mod": "cf0041a6d9712751c642eeda4a202c9dc3d908e2833ea09f6744e83e48256c75",
+          "@@//go.mod": "d902b5caacf14789eac3578eb8018d3058c0fd426b4b517102d5d33e0815d874",
           "@@rules_go~//go.mod": "de22304b720f7f61350ec1c9739de6c0a1b1103fd22bfeb6e92c6c843ddc6d6e",
           "@@gazelle~//go.sum": "7c4460e8ecb5dd8691a51d4fa2e9e4751108b933636497ce46db499fc2e7a88d",
-          "@@//go.sum": "f9bca3fbb44d7a375525c86b06d8b38db9bc671aa6ea50f43a30193e7c2d552d",
+          "@@//go.sum": "7fc389dc5117be6a7b03fabe7f48c482b7666ffba2fcda9177441809cfff9b6d",
           "@@rules_go~//go.sum": "d56fdb19b21a5f12bcf625c49432371ac39c2def0f564098fbda107f7c080f40",
           "@@gazelle~//go.mod": "48dc6e771c3028ee1c18b9ffc81e596fd5f6d7e0016c5ef280e30f2821f60473"
         },
@@ -2037,6 +2038,7 @@
             "attributes": {
               "importpaths": {
                 "io_entgo_ent": "entgo.io/ent",
+                "com_github_google_go_cmp": "github.com/google/go-cmp",
                 "com_github_joho_godotenv": "github.com/joho/godotenv",
                 "com_github_mattn_go_sqlite3": "github.com/mattn/go-sqlite3",
                 "com_github_zmb3_spotify_v2": "github.com/zmb3/spotify/v2",
@@ -2048,7 +2050,6 @@
                 "com_github_apparentlymart_go_textseg_v13": "github.com/apparentlymart/go-textseg/v13",
                 "com_github_go_openapi_inflect": "github.com/go-openapi/inflect",
                 "com_github_golang_protobuf": "github.com/golang/protobuf",
-                "com_github_google_go_cmp": "github.com/google/go-cmp",
                 "com_github_google_uuid": "github.com/google/uuid",
                 "com_github_hashicorp_hcl_v2": "github.com/hashicorp/hcl/v2",
                 "com_github_jinzhu_inflection": "github.com/jinzhu/inflection",
@@ -2117,6 +2118,7 @@
         "moduleExtensionMetadata": {
           "explicitRootModuleDirectDeps": [
             "io_entgo_ent",
+            "com_github_google_go_cmp",
             "com_github_joho_godotenv",
             "com_github_mattn_go_sqlite3",
             "com_github_zmb3_spotify_v2",

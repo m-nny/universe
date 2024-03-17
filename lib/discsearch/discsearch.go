@@ -13,8 +13,6 @@ import (
 	"github.com/m-nny/universe/lib/discogs"
 	"github.com/m-nny/universe/lib/spotify"
 	_ "github.com/mattn/go-sqlite3"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
 )
 
 type App struct {
@@ -86,12 +84,5 @@ func getGormClient() (*brain.Brain, error) {
 	if err != nil {
 		return nil, err
 	}
-	db, err := gorm.Open(sqlite.Open(databasePath), &gorm.Config{})
-	if err != nil {
-		return nil, err
-	}
-	if err := db.AutoMigrate(&brain.Artist{}); err != nil {
-		return nil, err
-	}
-	return brain.New(db), nil
+	return brain.New(databasePath)
 }

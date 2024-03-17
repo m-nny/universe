@@ -22,7 +22,5 @@ go_library(
         "//lib/utils/sliceutils",
         "@com_github_joho_godotenv//:godotenv",
         "@com_github_mattn_go_sqlite3//:go-sqlite3",
-        "@io_gorm_driver_sqlite//:sqlite",
-        "@io_gorm_gorm//:gorm",
     ],
 )
