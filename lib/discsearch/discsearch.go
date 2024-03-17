@@ -9,6 +9,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/m-nny/universe/ent"
+	"github.com/m-nny/universe/lib/brain"
 	"github.com/m-nny/universe/lib/discogs"
 	"github.com/m-nny/universe/lib/spotify"
 	_ "github.com/mattn/go-sqlite3"
@@ -18,6 +19,7 @@ import (
 
 type App struct {
 	Ent     *ent.Client
+	Brain   *brain.Brain
 	Spotify *spotify.Service
 	Discogs *discogs.Service
 }
@@ -38,15 +40,20 @@ func New(ctx context.Context, username string) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
+	gormDb, err := getGormClient()
+	if err != nil {
+		return nil, err
+	}
 	return &App{
 		Ent:     ent,
 		Spotify: spotify,
 		Discogs: discogs,
+		Brain:   gormDb,
 	}, nil
 }
 
-func getDbPath() (string, error) {
-	databasePath := "data/ent.db"
+func getDbPath(db string) (string, error) {
+	databasePath := fmt.Sprintf("data/%s.db", db)
 	databasePath, err := filepath.Abs(databasePath)
 	if err != nil {
 		return "", err
@@ -59,7 +66,7 @@ func getDbPath() (string, error) {
 }
 
 func getEntClient() (*ent.Client, error) {
-	databasePath, err := getDbPath()
+	databasePath, err := getDbPath("ent")
 	if err != nil {
 		return nil, err
 	}
@@ -74,8 +81,8 @@ func getEntClient() (*ent.Client, error) {
 	return client, nil
 }
 
-func getGormClient() (*gorm.DB, error) {
-	databasePath, err := getDbPath()
+func getGormClient() (*brain.Brain, error) {
+	databasePath, err := getDbPath("gorm")
 	if err != nil {
 		return nil, err
 	}
@@ -83,8 +90,8 @@ func getGormClient() (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := db.AutoMigrate(); err != nil {
+	if err := db.AutoMigrate(&brain.Artist{}); err != nil {
 		return nil, err
 	}
-	return db, nil
+	return brain.New(db), nil
 }

@@ -22,13 +22,17 @@ func main() {
 		log.Fatalf("Could not init app: %v", err)
 	}
 
+	if err := demoGorm(ctx, app); err != nil {
+		log.Fatalf("%v", err)
+	}
+
 	// if err := getAlbumsById(ctx, app); err != nil {
 	// 	log.Fatalf("%v", err)
 	// }
 
-	if err := getUserTracks(ctx, app); err != nil {
-		log.Fatalf("%v", err)
-	}
+	// if err := getUserTracks(ctx, app); err != nil {
+	// 	log.Fatalf("%v", err)
+	// }
 
 	// if err := getDiscogs(ctx, app); err != nil {
 	// 	log.Fatalf("%v", err)
@@ -37,6 +41,21 @@ func main() {
 	// if _, err := app.Inventory(ctx, "nezrathebeatmaker"); err != nil {
 	// 	log.Fatalf("%v", err)
 	// }
+}
+
+func demoGorm(ctx context.Context, app *discsearch.App) error {
+	artistIds := []spotify.ID{"3dz0NnIZhtKKeXZxLOxCam"}
+	sArtists, err := app.Spotify.GetAristById(ctx, artistIds)
+	if err != nil {
+		return err
+	}
+	log.Printf("sArtist: %+v", sArtists[0])
+	bArtist, err := app.Brain.ToArtist(sArtists[0])
+	if err != nil {
+		return err
+	}
+	log.Printf("bArtist: %+v", bArtist)
+	return nil
 }
 
 func getDiscogs(ctx context.Context, app *discsearch.App) error {

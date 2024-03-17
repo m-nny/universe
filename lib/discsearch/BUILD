@@ -10,11 +10,13 @@ go_library(
     data = [
         "//:dotenv",
         "//data:ent_db",
+        "//data:gorm_db",
     ],
     importpath = "github.com/m-nny/universe/lib/discsearch",
     visibility = ["//visibility:public"],
     deps = [
         "//ent",
+        "//lib/brain",
         "//lib/discogs",
         "//lib/spotify",
         "//lib/utils/sliceutils",
