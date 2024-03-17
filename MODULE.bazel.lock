@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 6,
-  "moduleFileHash": "1b9e3a4fbd627f4bef0679c7461c87ddb0d56dc5326bd6a2ae30d696343d1b50",
+  "moduleFileHash": "b51c49fac8daa728096431b5f81f087f2fb124794c38a86d36558cfc39c45709",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -38,6 +38,8 @@
             "com_github_mattn_go_sqlite3": "com_github_mattn_go_sqlite3",
             "com_github_zmb3_spotify_v2": "com_github_zmb3_spotify_v2",
             "io_entgo_ent": "io_entgo_ent",
+            "io_gorm_driver_sqlite": "io_gorm_driver_sqlite",
+            "io_gorm_gorm": "io_gorm_gorm",
             "org_golang_x_oauth2": "org_golang_x_oauth2"
           },
           "devImports": [],
@@ -1461,14 +1463,39 @@
         "recordedRepoMappingEntries": []
       }
     },
+    "@@buildozer~//:buildozer_binary.bzl%buildozer_binary": {
+      "general": {
+        "bzlTransitiveDigest": "EleDU/FQ1+e/RgkW3aIDmdaxZEthvoWQhsqFTxiSgMI=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "buildozer_binary": {
+            "bzlFile": "@@buildozer~//private:buildozer_binary.bzl",
+            "ruleClassName": "_buildozer_binary_repo",
+            "attributes": {
+              "sha256": {
+                "darwin-amd64": "d29e347ecd6b5673d72cb1a8de05bf1b06178dd229ff5eb67fad5100c840cc8e",
+                "darwin-arm64": "9b9e71bdbec5e7223871e913b65d12f6d8fa026684daf991f00e52ed36a6978d",
+                "linux-amd64": "8dfd6345da4e9042daa738d7fdf34f699c5dfce4632f7207956fceedd8494119",
+                "linux-arm64": "6559558fded658c8fa7432a9d011f7c4dcbac6b738feae73d2d5c352e5f605fa",
+                "windows-amd64": "e7f05bf847f7c3689dd28926460ce6e1097ae97380ac8e6ae7147b7b706ba19b"
+              },
+              "version": "6.4.0"
+            }
+          }
+        },
+        "recordedRepoMappingEntries": []
+      }
+    },
     "@@gazelle~//:extensions.bzl%go_deps": {
       "general": {
         "bzlTransitiveDigest": "D1+rhhbwX4ufoTmeUVxDpPg+Sknv3QzVXZnyK2zOjj4=",
         "recordedFileInputs": {
-          "@@//go.mod": "cd988669ae6e2a09124f73ce8b06725af72fd07b9485c3f38ee29e93f38c9d05",
+          "@@//go.mod": "cf0041a6d9712751c642eeda4a202c9dc3d908e2833ea09f6744e83e48256c75",
           "@@rules_go~//go.mod": "de22304b720f7f61350ec1c9739de6c0a1b1103fd22bfeb6e92c6c843ddc6d6e",
           "@@gazelle~//go.sum": "7c4460e8ecb5dd8691a51d4fa2e9e4751108b933636497ce46db499fc2e7a88d",
-          "@@//go.sum": "59ea2f80ccca09b2ffd0cd0b959984f997307033b6f123e4915c86c7ee31c4c7",
+          "@@//go.sum": "f9bca3fbb44d7a375525c86b06d8b38db9bc671aa6ea50f43a30193e7c2d552d",
           "@@rules_go~//go.sum": "d56fdb19b21a5f12bcf625c49432371ac39c2def0f564098fbda107f7c080f40",
           "@@gazelle~//go.mod": "48dc6e771c3028ee1c18b9ffc81e596fd5f6d7e0016c5ef280e30f2821f60473"
         },
@@ -1503,6 +1530,21 @@
               "sum": "h1:cOIJqWBl99H1dH5LWizPa+0ImeeJq3t3cJjaeOWUAL4=",
               "replace": "",
               "version": "v0.1.0-deprecated"
+            }
+          },
+          "io_gorm_gorm": {
+            "bzlFile": "@@gazelle~//internal:go_repository.bzl",
+            "ruleClassName": "go_repository",
+            "attributes": {
+              "importpath": "gorm.io/gorm",
+              "build_directives": [],
+              "build_file_generation": "auto",
+              "build_extra_args": [],
+              "patches": [],
+              "patch_args": [],
+              "sum": "h1:VsD6acwRjz2zFxGO50gPO6AkNs7KKnvfzUjHQhZDz/A=",
+              "replace": "",
+              "version": "v1.25.7"
             }
           },
           "com_github_fsnotify_fsnotify": {
@@ -1685,6 +1727,21 @@
               "version": "v0.0.0-20200526211855-cb27e3aa2013"
             }
           },
+          "com_github_jinzhu_inflection": {
+            "bzlFile": "@@gazelle~//internal:go_repository.bzl",
+            "ruleClassName": "go_repository",
+            "attributes": {
+              "importpath": "github.com/jinzhu/inflection",
+              "build_directives": [],
+              "build_file_generation": "auto",
+              "build_extra_args": [],
+              "patches": [],
+              "patch_args": [],
+              "sum": "h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD/E=",
+              "replace": "",
+              "version": "v1.0.0"
+            }
+          },
           "com_github_gogo_protobuf": {
             "bzlFile": "@@gazelle~//internal:go_repository.bzl",
             "ruleClassName": "go_repository",
@@ -1824,6 +1881,21 @@
               "version": "v1.6.7"
             }
           },
+          "io_gorm_driver_sqlite": {
+            "bzlFile": "@@gazelle~//internal:go_repository.bzl",
+            "ruleClassName": "go_repository",
+            "attributes": {
+              "importpath": "gorm.io/driver/sqlite",
+              "build_directives": [],
+              "build_file_generation": "auto",
+              "build_extra_args": [],
+              "patches": [],
+              "patch_args": [],
+              "sum": "h1:7MDMtUZhV065SilG62E0MquljeArQZNfJnjd9i9gx3E=",
+              "replace": "",
+              "version": "v1.5.5"
+            }
+          },
           "com_github_google_go_cmp": {
             "bzlFile": "@@gazelle~//internal:go_repository.bzl",
             "ruleClassName": "go_repository",
@@ -1944,6 +2016,21 @@
               "version": "v1.5.3"
             }
           },
+          "com_github_jinzhu_now": {
+            "bzlFile": "@@gazelle~//internal:go_repository.bzl",
+            "ruleClassName": "go_repository",
+            "attributes": {
+              "importpath": "github.com/jinzhu/now",
+              "build_directives": [],
+              "build_file_generation": "auto",
+              "build_extra_args": [],
+              "patches": [],
+              "patch_args": [],
+              "sum": "h1:/o9tlHleP7gOFmsnYNz3RGnqzefHA47wQpKrrdTIwXQ=",
+              "replace": "",
+              "version": "v1.1.5"
+            }
+          },
           "bazel_gazelle_go_repository_config": {
             "bzlFile": "@@gazelle~//internal/bzlmod:go_deps.bzl",
             "ruleClassName": "_go_repository_config",
@@ -1954,6 +2041,8 @@
                 "com_github_mattn_go_sqlite3": "github.com/mattn/go-sqlite3",
                 "com_github_zmb3_spotify_v2": "github.com/zmb3/spotify/v2",
                 "org_golang_x_oauth2": "golang.org/x/oauth2",
+                "io_gorm_driver_sqlite": "gorm.io/driver/sqlite",
+                "io_gorm_gorm": "gorm.io/gorm",
                 "io_ariga_atlas": "ariga.io/atlas",
                 "com_github_agext_levenshtein": "github.com/agext/levenshtein",
                 "com_github_apparentlymart_go_textseg_v13": "github.com/apparentlymart/go-textseg/v13",
@@ -1962,6 +2051,8 @@
                 "com_github_google_go_cmp": "github.com/google/go-cmp",
                 "com_github_google_uuid": "github.com/google/uuid",
                 "com_github_hashicorp_hcl_v2": "github.com/hashicorp/hcl/v2",
+                "com_github_jinzhu_inflection": "github.com/jinzhu/inflection",
+                "com_github_jinzhu_now": "github.com/jinzhu/now",
                 "com_github_mitchellh_go_wordwrap": "github.com/mitchellh/go-wordwrap",
                 "com_github_zclconf_go_cty": "github.com/zclconf/go-cty",
                 "org_golang_x_mod": "golang.org/x/mod",
@@ -2029,7 +2120,9 @@
             "com_github_joho_godotenv",
             "com_github_mattn_go_sqlite3",
             "com_github_zmb3_spotify_v2",
-            "org_golang_x_oauth2"
+            "org_golang_x_oauth2",
+            "io_gorm_driver_sqlite",
+            "io_gorm_gorm"
           ],
           "explicitRootModuleDirectDevDeps": [],
           "useAllRepos": "NO",

@@ -12,6 +12,8 @@ import (
 	"github.com/m-nny/universe/lib/discogs"
 	"github.com/m-nny/universe/lib/spotify"
 	_ "github.com/mattn/go-sqlite3"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 type App struct {
@@ -43,14 +45,22 @@ func New(ctx context.Context, username string) (*App, error) {
 	}, nil
 }
 
-func getEntClient() (*ent.Client, error) {
+func getDbPath() (string, error) {
 	databasePath := "data/ent.db"
 	databasePath, err := filepath.Abs(databasePath)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	if _, err := os.Stat(databasePath); err != nil {
 		log.Printf("err: %v", err)
+		return "", err
+	}
+	return databasePath, nil
+}
+
+func getEntClient() (*ent.Client, error) {
+	databasePath, err := getDbPath()
+	if err != nil {
 		return nil, err
 	}
 	client, err := ent.Open("sqlite3", fmt.Sprintf("file:%s?cache=shared&_fk=1", databasePath))
@@ -62,4 +72,19 @@ func getEntClient() (*ent.Client, error) {
 		return nil, fmt.Errorf("failed creating schema resources: %w", err)
 	}
 	return client, nil
+}
+
+func getGormClient() (*gorm.DB, error) {
+	databasePath, err := getDbPath()
+	if err != nil {
+		return nil, err
+	}
+	db, err := gorm.Open(sqlite.Open(databasePath), &gorm.Config{})
+	if err != nil {
+		return nil, err
+	}
+	if err := db.AutoMigrate(); err != nil {
+		return nil, err
+	}
+	return db, nil
 }
