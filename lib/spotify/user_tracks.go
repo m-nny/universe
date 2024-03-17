@@ -5,12 +5,13 @@ import (
 	"errors"
 	"log"
 
-	"github.com/m-nny/universe/ent"
-	"github.com/m-nny/universe/lib/jsoncache"
 	"github.com/zmb3/spotify/v2"
+
+	"github.com/m-nny/universe/lib/jsoncache"
+	"github.com/m-nny/universe/lib/utils/sliceutils"
 )
 
-func (s *Service) GetUserTracks(ctx context.Context, username string) ([]*ent.Track, error) {
+func (s *Service) GetUserTracks(ctx context.Context, username string) ([]*spotify.SimpleTrack, error) {
 	rawTracks, err := jsoncache.CachedExec("spotify_savedTracks", func() ([]spotify.SavedTrack, error) {
 		var rawTracks []spotify.SavedTrack
 		resp, err := s.spotify.CurrentUsersTracks(ctx,
@@ -29,5 +30,6 @@ func (s *Service) GetUserTracks(ctx context.Context, username string) ([]*ent.Tr
 	if err != nil {
 		return nil, err
 	}
-	return s.toTracksSaved(ctx, rawTracks, username)
+	// return s.toTracksSaved(ctx, rawTracks, username)
+	return sliceutils.Map(rawTracks, func(item spotify.SavedTrack) *spotify.SimpleTrack { return &item.SimpleTrack }), nil
 }

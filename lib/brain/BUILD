@@ -6,6 +6,7 @@ go_library(
         "album.go",
         "artist.go",
         "brain.go",
+        "track.go",
     ],
     importpath = "github.com/m-nny/universe/lib/brain",
     visibility = ["//visibility:public"],
@@ -20,6 +21,7 @@ go_library(
 go_test(
     name = "brain_test",
     srcs = [
+        "album_test.go",
         "artist_test.go",
         "brain_test.go",
     ],

@@ -9,6 +9,8 @@ import (
 	"github.com/m-nny/universe/lib/utils/sliceutils"
 )
 
+type AlbumId uint
+
 type Album struct {
 	gorm.Model
 	SpotifyId string
@@ -51,6 +53,7 @@ func (b *Brain) ToAlbums(sAlbums []*spotify.SimpleAlbum) ([]*Album, error) {
 	spotifyIds := sliceutils.Map(sAlbums, func(item *spotify.SimpleAlbum) string { return item.ID.String() })
 	var existingAlbums []*Album
 	if err := b.gormDb.
+		Preload("Artists").
 		Where("spotify_id IN ?", spotifyIds).
 		Find(&existingAlbums).Error; err != nil {
 		return nil, err

@@ -20,6 +20,11 @@ var (
 		Name:    "Hybrid Theory (20th Anniversary Edition)",
 		Artists: []spotify.SimpleArtist{*sArtist1},
 	}
+	sAlbum3 = &spotify.SimpleAlbum{
+		ID:      spotify.ID("spotify:nurture"),
+		Name:    "Nurture",
+		Artists: []spotify.SimpleArtist{*sArtist2},
+	}
 	bAlbum1 = &Album{
 		Model:     gorm.Model{ID: 1},
 		Name:      "Hybrid Theory",
@@ -32,6 +37,12 @@ var (
 		SpotifyId: "spotify:hybryd_theory_20",
 		Artists:   []*Artist{bArtist1},
 	}
+	bAlbum3 = &Album{
+		Model:     gorm.Model{ID: 3},
+		Name:      "Nurture",
+		SpotifyId: "spotify:nurture",
+		Artists:   []*Artist{bArtist2},
+	}
 )
 
 func TestToAlbums(t *testing.T) {
@@ -41,8 +52,8 @@ func TestToAlbums(t *testing.T) {
 			t.Fatalf("sqlite db is not clean")
 		}
 
-		want1 := []*Album{bAlbum1}
-		got1, err := brain.ToAlbums([]*spotify.SimpleAlbum{sAlbum1})
+		want1 := []*Album{bAlbum1, bAlbum2, bAlbum3}
+		got1, err := brain.ToAlbums([]*spotify.SimpleAlbum{sAlbum1, sAlbum2, sAlbum3})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -50,7 +61,7 @@ func TestToAlbums(t *testing.T) {
 			t.Errorf("ToAlbums() mismatch (-want +got):\n%s", diff)
 		}
 
-		got2, err := brain.ToAlbums([]*spotify.SimpleAlbum{sAlbum1})
+		got2, err := brain.ToAlbums([]*spotify.SimpleAlbum{sAlbum1, sAlbum2, sAlbum3})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -79,6 +90,15 @@ func TestToAlbums(t *testing.T) {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffAlbums(want2, got2); diff != "" {
+			t.Errorf("ToAlbums() mismatch (-want +got):\n%s", diff)
+		}
+
+		want3 := []*Album{bAlbum3}
+		got3, err := brain.ToAlbums([]*spotify.SimpleAlbum{sAlbum3})
+		if err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+		if diff := diffAlbums(want3, got3); diff != "" {
 			t.Errorf("ToAlbums() mismatch (-want +got):\n%s", diff)
 		}
 	})

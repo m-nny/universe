@@ -6,10 +6,11 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/zmb3/spotify/v2"
+
 	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/ent/track"
 	"github.com/m-nny/universe/lib/utils/sliceutils"
-	"github.com/zmb3/spotify/v2"
 )
 
 func (s *Service) toTracksSaved(ctx context.Context, tracks []spotify.SavedTrack, username string) ([]*ent.Track, error) {
@@ -74,4 +75,13 @@ func simplifiedTrackName(t spotify.SimpleTrack, a *ent.Album) string {
 	msg += fmt.Sprintf(" %d.  %s", t.TrackNumber, t.Name)
 	msg = strings.ToLower(msg)
 	return msg
+}
+
+func (s *Service) GetTracksById(ctx context.Context, ids []spotify.ID) ([]*spotify.SimpleTrack, error) {
+	sFullTracks, err := s.spotify.GetTracks(ctx, ids)
+	if err != nil {
+		return nil, err
+	}
+	sTracks := sliceutils.Map(sFullTracks, func(item *spotify.FullTrack) *spotify.SimpleTrack { return &item.SimpleTrack })
+	return sTracks, nil
 }

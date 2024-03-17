@@ -2,9 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 
@@ -23,7 +21,7 @@ func main() {
 		log.Fatalf("Could not init app: %v", err)
 	}
 
-	if err := demoGormAlbums(ctx, app); err != nil {
+	if err := demoGormTracks(ctx, app); err != nil {
 		log.Fatalf("%v", err)
 	}
 
@@ -84,6 +82,26 @@ func demoGormAlbums(ctx context.Context, app *discsearch.App) error {
 	return nil
 }
 
+func demoGormTracks(ctx context.Context, app *discsearch.App) error {
+	// Hybrid Theory, Hybrid Theory (20th Edition)
+	sTracks, err := app.Spotify.GetUserTracks(ctx, username)
+	sTracks = sTracks[:100]
+	if err != nil {
+		return err
+	}
+	for idx, sTrack := range sTracks {
+		log.Printf("[%d/%d] sTrack: %+v - %+v", idx+1, len(sTracks), spotify.SArtistsString(sTrack.Artists), sTrack.Name)
+	}
+	bTracks, err := app.Brain.ToTracks(sTracks)
+	if err != nil {
+		return err
+	}
+	for idx, bTrack := range bTracks {
+		log.Printf("[%d/%d] bTrack %+v", idx+1, len(sTracks), bTrack)
+	}
+	return nil
+}
+
 func getDiscogs(ctx context.Context, app *discsearch.App) error {
 	if _, err := app.Discogs.SellerInventory(ctx, "nezrathebeatmaker"); err != nil {
 		return err
@@ -113,23 +131,23 @@ func getAlbumsById(ctx context.Context, app *discsearch.App) error {
 	return nil
 }
 
-func getUserTracks(ctx context.Context, app *discsearch.App) error {
-	start := time.Now()
-	tracks, err := app.Spotify.GetUserTracks(ctx, username)
-	if err != nil {
-		return fmt.Errorf("error getting all tracks: %w", err)
-	}
-	log.Printf("getUserTracks finished in %s", time.Since(start))
-	log.Printf("found total %d tracks", len(tracks))
+// func getUserTracks(ctx context.Context, app *discsearch.App) error {
+// 	start := time.Now()
+// 	tracks, err := app.Spotify.GetUserTracks(ctx, username)
+// 	if err != nil {
+// 		return fmt.Errorf("error getting all tracks: %w", err)
+// 	}
+// 	log.Printf("getUserTracks finished in %s", time.Since(start))
+// 	log.Printf("found total %d tracks", len(tracks))
 
-	if err := getTopAlbums(ctx, app); err != nil {
-		return fmt.Errorf("error getting all tracks: %w", err)
-	}
-	if err := getTopArtists(ctx, app); err != nil {
-		return fmt.Errorf("error getting all tracks: %w", err)
-	}
-	return nil
-}
+// 	if err := getTopAlbums(ctx, app); err != nil {
+// 		return fmt.Errorf("error getting all tracks: %w", err)
+// 	}
+// 	if err := getTopArtists(ctx, app); err != nil {
+// 		return fmt.Errorf("error getting all tracks: %w", err)
+// 	}
+// 	return nil
+// }
 
 func getTopAlbums(ctx context.Context, app *discsearch.App) error {
 	const tracksNumCol = "tracks_num"
