@@ -6,9 +6,12 @@ import (
 
 	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/ent/artist"
+	"github.com/m-nny/universe/lib/utils/hitcounter"
 	"github.com/m-nny/universe/lib/utils/slices"
 	"github.com/zmb3/spotify/v2"
 )
+
+var artistHc = hitcounter.New("Artist")
 
 func (s *Service) toArtist(ctx context.Context, a spotify.SimpleArtist) (int, error) {
 	// Check if already have it
@@ -17,6 +20,7 @@ func (s *Service) toArtist(ctx context.Context, a spotify.SimpleArtist) (int, er
 		Where(artist.SpotifyId(string(a.ID))).
 		Only(ctx)
 	if err == nil {
+		artistHc.Hit()
 		return artist.ID, nil
 	}
 
@@ -28,6 +32,7 @@ func (s *Service) toArtist(ctx context.Context, a spotify.SimpleArtist) (int, er
 	if err != nil {
 		return 0, err
 	}
+	artistHc.Miss()
 	return artist.ID, nil
 }
 

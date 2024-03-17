@@ -20,6 +20,7 @@ go_library(
         "//ent/track",
         "//ent/user",
         "//lib/jsoncache",
+        "//lib/utils/hitcounter",
         "//lib/utils/slices",
         "@com_github_zmb3_spotify_v2//:spotify",
         "@com_github_zmb3_spotify_v2//auth",

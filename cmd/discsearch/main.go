@@ -21,13 +21,13 @@ func main() {
 		log.Fatalf("Could not init app: %v", err)
 	}
 
-	if err := getAlbumsById(ctx, app); err != nil {
-		log.Fatalf("%v", err)
-	}
-
-	// if err := getUserTracks(ctx, app); err != nil {
+	// if err := getAlbumsById(ctx, app); err != nil {
 	// 	log.Fatalf("%v", err)
 	// }
+
+	if err := getUserTracks(ctx, app); err != nil {
+		log.Fatalf("%v", err)
+	}
 
 	// if err := getDiscogs(ctx, app); err != nil {
 	// 	log.Fatalf("%v", err)
