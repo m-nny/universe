@@ -3,9 +3,10 @@ package brain
 import (
 	"slices"
 
-	"github.com/m-nny/universe/lib/utils/sliceutils"
 	"github.com/zmb3/spotify/v2"
 	"gorm.io/gorm"
+
+	"github.com/m-nny/universe/lib/utils/sliceutils"
 )
 
 type Artist struct {
@@ -33,6 +34,7 @@ func (b *Brain) ToArtist(sArtist *spotify.FullArtist) (*Artist, error) {
 //   - It will create new entries in DB if necessary
 //   - It will deduplicate returned artists, this may result in len(result) < len(sArtists)
 func (b *Brain) ToArtists(sArtists []*spotify.FullArtist) ([]*Artist, error) {
+	sArtists = sliceutils.Uniqe(sArtists, func(item *spotify.FullArtist) string { return item.ID.String() })
 	spotifyIds := sliceutils.Map(sArtists, func(item *spotify.FullArtist) string { return item.ID.String() })
 	var existingArtists []*Artist
 	if err := b.gormDb.
@@ -46,6 +48,10 @@ func (b *Brain) ToArtists(sArtists []*spotify.FullArtist) ([]*Artist, error) {
 			continue
 		}
 		newArtists = append(newArtists, newArtist(sArtist))
+	}
+	// All artists are already created, can exit
+	if len(newArtists) == 0 {
+		return existingArtists, nil
 	}
 	if err := b.gormDb.Create(newArtists).Error; err != nil {
 		return nil, err

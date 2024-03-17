@@ -18,7 +18,10 @@ go_library(
 
 go_test(
     name = "brain_test",
-    srcs = ["artist_test.go"],
+    srcs = [
+        "artist_test.go",
+        "brain_test.go",
+    ],
     embed = [":brain"],
     deps = [
         "@com_github_google_go_cmp//cmp",
