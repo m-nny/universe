@@ -47,7 +47,7 @@ func main() {
 func demoGormArtists(ctx context.Context, app *discsearch.App) error {
 	// Porter Robinson, Linkin Park, Linkin Park
 	artistIds := []spotify.ID{"3dz0NnIZhtKKeXZxLOxCam", "6XyY86QOPPrYVGvF9ch6wz", "6XyY86QOPPrYVGvF9ch6wz"}
-	sArtists, err := app.Spotify.GetAristById(ctx, artistIds)
+	sArtists, err := app.Spotify.GetArtistById(ctx, artistIds)
 	if err != nil {
 		return err
 	}

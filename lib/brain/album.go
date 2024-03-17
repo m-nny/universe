@@ -14,7 +14,7 @@ type Album struct {
 	Artists   []*Artist `gorm:"many2many:album_artists;"`
 }
 
-func newAlbum(sAlbum *spotify.FullAlbum, bArtists []*Artist) *Album {
+func newAlbum(sAlbum *spotify.SimpleAlbum, bArtists []*Artist) *Album {
 	return &Album{Name: sAlbum.Name, SpotifyId: sAlbum.ID.String(), Artists: bArtists}
 }
 
@@ -22,7 +22,7 @@ func newAlbum(sAlbum *spotify.FullAlbum, bArtists []*Artist) *Album {
 //   - Album.Artists is not guaranteed to be populated
 //   - NOTE: Does not debupe based on simplified name
 //   - NOTE: Does not associate Album with Artist
-func (b *Brain) ToAlbum(sAlbum *spotify.FullAlbum) (*Album, error) {
+func (b *Brain) ToAlbum(sAlbum *spotify.SimpleAlbum) (*Album, error) {
 	bArtists, err := b.ToArtists(sliceutils.MapP(sAlbum.Artists))
 	if err != nil {
 		return nil, err
@@ -37,7 +37,7 @@ func (b *Brain) ToAlbum(sAlbum *spotify.FullAlbum) (*Album, error) {
 	return &album, nil
 }
 
-func (b *Brain) ToAlbums(sAlbums []*spotify.FullAlbum) ([]*Album, error) {
+func (b *Brain) ToAlbums(sAlbums []*spotify.SimpleAlbum) ([]*Album, error) {
 	// TODO(m-nny): Batch album and artist creation
 	return sliceutils.MapErr(sAlbums, b.ToAlbum)
 }

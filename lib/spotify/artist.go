@@ -101,7 +101,7 @@ func SArtistsString(artists []spotify.SimpleArtist) string {
 	return strings.Join(s, " ")
 }
 
-func (s *Service) GetAristById(ctx context.Context, ids []spotify.ID) ([]*spotify.SimpleArtist, error) {
+func (s *Service) GetArtistById(ctx context.Context, ids []spotify.ID) ([]*spotify.SimpleArtist, error) {
 	sFullArtistArtists, err := s.spotify.GetArtists(ctx, ids...)
 	if err != nil {
 		return nil, err
