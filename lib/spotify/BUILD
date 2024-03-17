@@ -9,6 +9,7 @@ go_library(
         "token.go",
         "tracks.go",
         "user_tracks.go",
+        "utils.go",
     ],
     importpath = "github.com/m-nny/universe/lib/spotify",
     visibility = ["//visibility:public"],
