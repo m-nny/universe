@@ -9,7 +9,7 @@ import (
 
 	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/lib/discogs"
-	"github.com/m-nny/universe/lib/utils/slices"
+	"github.com/m-nny/universe/lib/utils/sliceutils"
 )
 
 func (a *App) ListingRelease(ctx context.Context, release *discogs.ListingRelease) (*ent.Album, error) {
@@ -19,7 +19,7 @@ func (a *App) ListingRelease(ctx context.Context, release *discogs.ListingReleas
 	if err != nil {
 		return nil, err
 	}
-	albums = slices.Uniqe(albums, func(item *ent.Album) string { return fmt.Sprintf("%d", item.ID) })
+	albums = sliceutils.Uniqe(albums, func(item *ent.Album) string { return fmt.Sprintf("%d", item.ID) })
 	result, err := mostSimilarAlbum(ctx, release, albums)
 	if err != nil {
 		return nil, err
@@ -59,8 +59,8 @@ func mostSimilarAlbum(ctx context.Context, m *discogs.ListingRelease, arr []*ent
 }
 
 func albumSimilarity(m *discogs.ListingRelease, a *ent.Album) int {
-	artistScores := slices.Map(a.Edges.Artists, func(e *ent.Artist) int { return similaryScore(m.Artist, e.Name) })
-	artistScore := slices.Cnt(artistScores, slices.Identity)
+	artistScores := sliceutils.Map(a.Edges.Artists, func(e *ent.Artist) int { return similaryScore(m.Artist, e.Name) })
+	artistScore := sliceutils.Cnt(artistScores, sliceutils.Identity)
 	titleScore := similaryScore(m.Title, a.Name)
 	return artistScore + titleScore
 }

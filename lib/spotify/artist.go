@@ -8,7 +8,7 @@ import (
 	"github.com/m-nny/universe/ent/artist"
 	"github.com/m-nny/universe/lib/utils/hitcounter"
 	"github.com/m-nny/universe/lib/utils/maputils"
-	"github.com/m-nny/universe/lib/utils/slices"
+	"github.com/m-nny/universe/lib/utils/sliceutils"
 	"github.com/zmb3/spotify/v2"
 )
 
@@ -49,8 +49,8 @@ func (s *Service) toArtists(ctx context.Context, rawArtists []spotify.SimpleArti
 }
 
 func (s *Service) batchToArtists(ctx context.Context, rawArtists []spotify.SimpleArtist) (map[spotify.ID]int, error) {
-	rawArtists = slices.Uniqe(rawArtists, func(item spotify.SimpleArtist) string { return item.ID.String() })
-	spotifyIds := slices.Map(rawArtists, func(item spotify.SimpleArtist) string { return item.ID.String() })
+	rawArtists = sliceutils.Uniqe(rawArtists, func(item spotify.SimpleArtist) string { return item.ID.String() })
+	spotifyIds := sliceutils.Map(rawArtists, func(item spotify.SimpleArtist) string { return item.ID.String() })
 	existingArtists, err := s.ent.Artist.Query().Where(artist.SpotifyIdIn(spotifyIds...)).All(ctx)
 	if err != nil {
 		return nil, err

@@ -22,7 +22,7 @@ go_library(
         "//lib/jsoncache",
         "//lib/utils/hitcounter",
         "//lib/utils/maputils",
-        "//lib/utils/slices",
+        "//lib/utils/sliceutils",
         "@com_github_zmb3_spotify_v2//:spotify",
         "@com_github_zmb3_spotify_v2//auth",
         "@org_golang_x_oauth2//:oauth2",

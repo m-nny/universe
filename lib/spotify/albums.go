@@ -10,7 +10,7 @@ import (
 	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/ent/album"
 	"github.com/m-nny/universe/lib/jsoncache"
-	utils "github.com/m-nny/universe/lib/utils/slices"
+	"github.com/m-nny/universe/lib/utils/sliceutils"
 	"github.com/zmb3/spotify/v2"
 )
 
@@ -29,7 +29,7 @@ func (s *Service) GetAlbumsById(ctx context.Context, ids []spotify.ID) ([]*ent.A
 	if err != nil {
 		return nil, err
 	}
-	return utils.MapCtxErr(ctx, rawAlbums, s.toAlbumFull)
+	return sliceutils.MapCtxErr(ctx, rawAlbums, s.toAlbumFull)
 }
 
 func (s *Service) toAlbumFull(ctx context.Context, a *spotify.FullAlbum) (*ent.Album, error) {
@@ -44,7 +44,7 @@ func (s *Service) toAlbumFull(ctx context.Context, a *spotify.FullAlbum) (*ent.A
 }
 
 func (s *Service) toAlbums(ctx context.Context, arr []spotify.SimpleAlbum) ([]*ent.Album, error) {
-	return utils.MapCtxErr(ctx, arr, s.toAlbum)
+	return sliceutils.MapCtxErr(ctx, arr, s.toAlbum)
 }
 
 func (s *Service) toAlbum(ctx context.Context, a spotify.SimpleAlbum) (*ent.Album, error) {
@@ -98,7 +98,7 @@ var simplifyAlbumNameRegex = func() *regexp.Regexp {
 		` Deluxe`,
 	}
 
-	regex := strings.Join(utils.Map(blocklistItems, func(s string) string {
+	regex := strings.Join(sliceutils.Map(blocklistItems, func(s string) string {
 		return fmt.Sprintf("(%s)", s)
 	}), "|")
 	return regexp.MustCompile(regex)
@@ -107,7 +107,7 @@ var simplifyAlbumNameRegex = func() *regexp.Regexp {
 // simplifiedAlbumName will return a string in form of "<artist1>, <artist2> - <album name>"
 func simplifiedAlbumName(a spotify.SimpleAlbum) string {
 	artistNames := strings.Join(
-		utils.Map(a.Artists, func(a spotify.SimpleArtist) string { return a.Name }),
+		sliceutils.Map(a.Artists, func(a spotify.SimpleArtist) string { return a.Name }),
 		", ",
 	)
 	// releaseYear := a.ReleaseDateTime().Year()

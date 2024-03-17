@@ -5,7 +5,7 @@ import (
 
 	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/lib/discogs"
-	"github.com/m-nny/universe/lib/utils/slices"
+	"github.com/m-nny/universe/lib/utils/sliceutils"
 )
 
 func (a *App) Inventory(ctx context.Context, sellerId string) ([]*ent.Album, error) {
@@ -13,7 +13,7 @@ func (a *App) Inventory(ctx context.Context, sellerId string) ([]*ent.Album, err
 	if err != nil {
 		return nil, err
 	}
-	albums, err := slices.MapCtxErr(ctx, inventory,
+	albums, err := sliceutils.MapCtxErr(ctx, inventory,
 		func(ctx context.Context, release *discogs.Listing) (*ent.Album, error) {
 			return a.ListingRelease(ctx, release.Release)
 		})

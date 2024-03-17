@@ -8,12 +8,12 @@ import (
 
 	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/ent/track"
-	utils "github.com/m-nny/universe/lib/utils/slices"
+	"github.com/m-nny/universe/lib/utils/sliceutils"
 	"github.com/zmb3/spotify/v2"
 )
 
 func (s *Service) toTracksSaved(ctx context.Context, tracks []spotify.SavedTrack, username string) ([]*ent.Track, error) {
-	return utils.MapCtxErr(ctx, tracks,
+	return sliceutils.MapCtxErr(ctx, tracks,
 		func(ctx context.Context, t spotify.SavedTrack) (*ent.Track, error) {
 			album, err := s.toAlbum(ctx, t.Album)
 			if err != nil {
@@ -24,7 +24,7 @@ func (s *Service) toTracksSaved(ctx context.Context, tracks []spotify.SavedTrack
 }
 
 func (s *Service) toTracksWithAlbum(ctx context.Context, tracks []spotify.SimpleTrack, a *ent.Album) ([]*ent.Track, error) {
-	return utils.MapCtxErr(ctx, tracks,
+	return sliceutils.MapCtxErr(ctx, tracks,
 		func(ctx context.Context, t spotify.SimpleTrack) (*ent.Track, error) {
 			return s.toTrackWithAlbum(ctx, t, a, "")
 		})
