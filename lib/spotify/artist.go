@@ -7,11 +7,15 @@ import (
 	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/ent/artist"
 	"github.com/m-nny/universe/lib/utils/hitcounter"
+	"github.com/m-nny/universe/lib/utils/maputils"
 	"github.com/m-nny/universe/lib/utils/slices"
 	"github.com/zmb3/spotify/v2"
 )
 
-var artistHc = hitcounter.New("Artist")
+var (
+	artistNaiveHc = hitcounter.New("ArtistNaive")
+	artistBatchHc = hitcounter.New("ArtistBatch")
+)
 
 func (s *Service) toArtist(ctx context.Context, a spotify.SimpleArtist) (int, error) {
 	// Check if already have it
@@ -20,7 +24,7 @@ func (s *Service) toArtist(ctx context.Context, a spotify.SimpleArtist) (int, er
 		Where(artist.SpotifyId(string(a.ID))).
 		Only(ctx)
 	if err == nil {
-		artistHc.Hit()
+		artistNaiveHc.Hit()
 		return artist.ID, nil
 	}
 
@@ -32,12 +36,16 @@ func (s *Service) toArtist(ctx context.Context, a spotify.SimpleArtist) (int, er
 	if err != nil {
 		return 0, err
 	}
-	artistHc.Miss()
+	artistNaiveHc.Miss()
 	return artist.ID, nil
 }
 
 func (s *Service) toArtists(ctx context.Context, rawArtists []spotify.SimpleArtist) ([]int, error) {
-	return slices.MapCtxErr(ctx, rawArtists, s.toArtist)
+	res, err := s.batchToArtists(ctx, rawArtists)
+	if err != nil {
+		return nil, err
+	}
+	return maputils.Values(res), nil
 }
 
 func (s *Service) batchToArtists(ctx context.Context, rawArtists []spotify.SimpleArtist) (map[spotify.ID]int, error) {
@@ -47,6 +55,7 @@ func (s *Service) batchToArtists(ctx context.Context, rawArtists []spotify.Simpl
 	if err != nil {
 		return nil, err
 	}
+	artistBatchHc.HitN(len(existingArtists))
 	res := make(map[spotify.ID]int)
 	for _, artist := range existingArtists {
 		res[spotify.ID(artist.SpotifyId)] = artist.ID
@@ -68,6 +77,7 @@ func (s *Service) batchToArtists(ctx context.Context, rawArtists []spotify.Simpl
 	if err != nil {
 		return nil, err
 	}
+	artistBatchHc.MissN(len(existingArtists))
 	for _, artist := range createdArtists {
 		res[spotify.ID(artist.SpotifyId)] = artist.ID
 	}

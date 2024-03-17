@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/m-nny/universe/ent/album"
@@ -67,10 +68,12 @@ func getAlbumsById(ctx context.Context, app *discsearch.App) error {
 }
 
 func getUserTracks(ctx context.Context, app *discsearch.App) error {
+	start := time.Now()
 	tracks, err := app.Spotify.GetUserTracks(ctx, username)
 	if err != nil {
 		return fmt.Errorf("error getting all tracks: %w", err)
 	}
+	log.Printf("getUserTracks finished in %s", time.Since(start))
 	log.Printf("found total %d tracks", len(tracks))
 
 	if err := getTopAlbums(ctx, app); err != nil {
