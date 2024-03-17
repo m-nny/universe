@@ -19,9 +19,7 @@ func newAlbum(sAlbum *spotify.SimpleAlbum, bArtists []*Artist) *Album {
 }
 
 // ToArtists returns Brain representain of a spotify album
-//   - Album.Artists is not guaranteed to be populated
 //   - NOTE: Does not debupe based on simplified name
-//   - NOTE: Does not associate Album with Artist
 func (b *Brain) ToAlbum(sAlbum *spotify.SimpleAlbum) (*Album, error) {
 	bArtists, err := b.ToArtists(sliceutils.MapP(sAlbum.Artists))
 	if err != nil {
@@ -29,6 +27,7 @@ func (b *Brain) ToAlbum(sAlbum *spotify.SimpleAlbum) (*Album, error) {
 	}
 	var album Album
 	if err := b.gormDb.
+		Preload("Artists").
 		Where(&Album{SpotifyId: sAlbum.ID.String()}).
 		Attrs(newAlbum(sAlbum, bArtists)).
 		FirstOrCreate(&album).Error; err != nil {

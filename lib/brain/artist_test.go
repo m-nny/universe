@@ -33,6 +33,10 @@ var (
 func TestToArtist(t *testing.T) {
 	t.Run("returns same ID for same spotify ID", func(t *testing.T) {
 		brain := getInmemoryBrain(t)
+		if nArtists := logAllArtists(t, brain); nArtists != 0 {
+			t.Fatalf("sqlite db is not clean")
+		}
+
 		got1, err := brain.ToArtist(sArtist1)
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
@@ -40,6 +44,7 @@ func TestToArtist(t *testing.T) {
 		if diff := diffArtist(bArtist1, got1); diff != "" {
 			t.Errorf("ToArtist() mismatch (-want +got):\n%s", diff)
 		}
+
 		got2, err := brain.ToArtist(sArtist1)
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
@@ -50,6 +55,10 @@ func TestToArtist(t *testing.T) {
 	})
 	t.Run("returns different ID for different spotify ID", func(t *testing.T) {
 		brain := getInmemoryBrain(t)
+		if nArtists := logAllArtists(t, brain); nArtists != 0 {
+			t.Fatalf("sqlite db is not clean")
+		}
+
 		got1, err := brain.ToArtist(sArtist1)
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
@@ -71,7 +80,9 @@ func TestToArtist(t *testing.T) {
 func TestToArtists(t *testing.T) {
 	t.Run("returns same ID, when called multiple times with same SpotifyId", func(t *testing.T) {
 		brain := getInmemoryBrain(t)
-		logAllArtists(t, brain)
+		if nArtists := logAllArtists(t, brain); nArtists != 0 {
+			t.Fatalf("sqlite db is not clean")
+		}
 
 		want1 := []*Artist{bArtist1, bArtist2}
 		got1, err := brain.ToArtists([]*spotify.SimpleArtist{sArtist1, sArtist2})
@@ -94,7 +105,9 @@ func TestToArtists(t *testing.T) {
 	})
 	t.Run("returns different ID for different spotify ID", func(t *testing.T) {
 		brain := getInmemoryBrain(t)
-		logAllArtists(t, brain)
+		if nArtists := logAllArtists(t, brain); nArtists != 0 {
+			t.Fatalf("sqlite db is not clean")
+		}
 
 		want1 := []*Artist{bArtist1}
 		got1, err := brain.ToArtists([]*spotify.SimpleArtist{sArtist1})
@@ -118,12 +131,14 @@ func TestToArtists(t *testing.T) {
 	})
 }
 
+var IGNORE_ARTIST_FIELDS = cmpopts.IgnoreFields(Artist{}, "Model.CreatedAt", "Model.UpdatedAt", "Model.DeletedAt")
+
 func diffArtist(want, got *Artist) string {
-	return cmp.Diff(want, got, cmpopts.IgnoreFields(Artist{}, "Model.CreatedAt", "Model.UpdatedAt", "Model.DeletedAt"))
+	return cmp.Diff(want, got, IGNORE_ARTIST_FIELDS)
 }
 
 func diffArtists(want, got []*Artist) string {
-	return cmp.Diff(want, got, cmpopts.IgnoreFields(Artist{}, "Model.CreatedAt", "Model.UpdatedAt", "Model.DeletedAt"))
+	return cmp.Diff(want, got, IGNORE_ARTIST_FIELDS)
 }
 
 func logAllArtists(tb testing.TB, brain *Brain) int {

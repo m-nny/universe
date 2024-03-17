@@ -100,7 +100,7 @@ func getAlbumsById(ctx context.Context, app *discsearch.App) error {
 	}
 	log.Print("targetAlbums:")
 	for i, album := range targetAlbums {
-		log.Printf("%2d %s", i+1, album)
+		log.Printf("%2d %+v", i+1, album)
 	}
 	log.Print()
 
