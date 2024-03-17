@@ -66,7 +66,7 @@ func demoGormArtists(ctx context.Context, app *discsearch.App) error {
 
 func demoGormAlbums(ctx context.Context, app *discsearch.App) error {
 	// Hybrid Theory, Hybrid Theory (20th Edition)
-	albumIds := []spotify.ID{"6PFPjumGRpZnBzqnDci6qJ", "28DUZ0itKISf2sr6hlseMy"}
+	albumIds := []spotify.ID{"6PFPjumGRpZnBzqnDci6qJ", "28DUZ0itKISf2sr6hlseMy", "28DUZ0itKISf2sr6hlseMy"}
 	sAlbums, err := app.Spotify.GetAlbumsById(ctx, albumIds)
 	if err != nil {
 		return err

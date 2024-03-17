@@ -1,6 +1,8 @@
 package brain
 
 import (
+	"slices"
+
 	"github.com/zmb3/spotify/v2"
 	"gorm.io/gorm"
 
@@ -18,13 +20,9 @@ func newAlbum(sAlbum *spotify.SimpleAlbum, bArtists []*Artist) *Album {
 	return &Album{Name: sAlbum.Name, SpotifyId: sAlbum.ID.String(), Artists: bArtists}
 }
 
-// ToArtists returns Brain representain of a spotify album
+// toAlbum returns Brain representain of a spotify album
 //   - NOTE: Does not debupe based on simplified name
-func (b *Brain) ToAlbum(sAlbum *spotify.SimpleAlbum) (*Album, error) {
-	bArtists, err := b.ToArtists(sliceutils.MapP(sAlbum.Artists))
-	if err != nil {
-		return nil, err
-	}
+func (b *Brain) toAlbum(sAlbum *spotify.SimpleAlbum, bArtists []*Artist) (*Album, error) {
 	var album Album
 	if err := b.gormDb.
 		Preload("Artists").
@@ -36,7 +34,42 @@ func (b *Brain) ToAlbum(sAlbum *spotify.SimpleAlbum) (*Album, error) {
 	return &album, nil
 }
 
+// ToAlbums returns Brain representain of a spotify album
+//   - It will create new entries in DB if necessary
+//   - It will deduplicate returned albums, this may result in len(result) < len(sAlbums)
+//   - NOTE: Does not debupe based on simplified name
 func (b *Brain) ToAlbums(sAlbums []*spotify.SimpleAlbum) ([]*Album, error) {
-	// TODO(m-nny): Batch album and artist creation
-	return sliceutils.MapErr(sAlbums, b.ToAlbum)
+	sAlbums = sliceutils.Uniqe(sAlbums, func(item *spotify.SimpleAlbum) string { return item.ID.String() })
+	sArtists := sliceutils.FlatMap(sAlbums, func(item *spotify.SimpleAlbum) []*spotify.SimpleArtist { return sliceutils.MapP(item.Artists) })
+	allArtists, err := b.ToArtists(sArtists)
+	if err != nil {
+		return nil, err
+	}
+	// map of spotifyId to Artist
+	bArtistMap := sliceutils.ToMap(allArtists, func(item *Artist) string { return item.SpotifyId })
+
+	spotifyIds := sliceutils.Map(sAlbums, func(item *spotify.SimpleAlbum) string { return item.ID.String() })
+	var existingAlbums []*Album
+	if err := b.gormDb.
+		Where("spotify_id IN ?", spotifyIds).
+		Find(&existingAlbums).Error; err != nil {
+		return nil, err
+	}
+
+	var newAlbums []*Album
+	for _, sAlbum := range sAlbums {
+		if slices.ContainsFunc(existingAlbums, func(item *Album) bool { return item.SpotifyId == sAlbum.ID.String() }) {
+			continue
+		}
+		bArtists := sliceutils.Map(sAlbum.Artists, func(item spotify.SimpleArtist) *Artist { return bArtistMap[item.ID.String()] })
+		newAlbums = append(newAlbums, newAlbum(sAlbum, bArtists))
+	}
+	// All artists are already created, can exit
+	if len(newAlbums) == 0 {
+		return existingAlbums, nil
+	}
+	if err := b.gormDb.Create(newAlbums).Error; err != nil {
+		return nil, err
+	}
+	return append(existingAlbums, newAlbums...), nil
 }

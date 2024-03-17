@@ -34,27 +34,28 @@ var (
 	}
 )
 
-func TestToAlbum(t *testing.T) {
+func TestToAlbums(t *testing.T) {
 	t.Run("returns same ID for same spotify ID", func(t *testing.T) {
 		brain := getInmemoryBrain(t)
 		if nAlbums := logAllAlbums(t, brain); nAlbums != 0 {
 			t.Fatalf("sqlite db is not clean")
 		}
 
-		got1, err := brain.ToAlbum(sAlbum1)
+		want1 := []*Album{bAlbum1}
+		got1, err := brain.ToAlbums([]*spotify.SimpleAlbum{sAlbum1})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
-		if diff := diffAlbum(bAlbum1, got1); diff != "" {
-			t.Errorf("ToAlbum() mismatch (-want +got):\n%s", diff)
+		if diff := diffAlbums(want1, got1); diff != "" {
+			t.Errorf("ToAlbums() mismatch (-want +got):\n%s", diff)
 		}
 
-		got2, err := brain.ToAlbum(sAlbum1)
+		got2, err := brain.ToAlbums([]*spotify.SimpleAlbum{sAlbum1})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
-		if diff := diffAlbum(bAlbum1, got2); diff != "" {
-			t.Errorf("ToAlbum() mismatch (-want +got):\n%s", diff)
+		if diff := diffAlbums(want1, got2); diff != "" {
+			t.Errorf("ToAlbums() mismatch (-want +got):\n%s", diff)
 		}
 	})
 	t.Run("returns different ID for different spotify ID", func(t *testing.T) {
@@ -63,20 +64,22 @@ func TestToAlbum(t *testing.T) {
 			t.Fatalf("sqlite db is not clean")
 		}
 
-		got1, err := brain.ToAlbum(sAlbum1)
+		want1 := []*Album{bAlbum1}
+		got1, err := brain.ToAlbums([]*spotify.SimpleAlbum{sAlbum1})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
-		if diff := diffAlbum(bAlbum1, got1); diff != "" {
-			t.Errorf("ToAlbum() mismatch (-want +got):\n%s", diff)
+		if diff := diffAlbums(want1, got1); diff != "" {
+			t.Errorf("ToAlbums() mismatch (-want +got):\n%s", diff)
 		}
 
-		got2, err := brain.ToAlbum(sAlbum2)
+		want2 := []*Album{bAlbum2}
+		got2, err := brain.ToAlbums([]*spotify.SimpleAlbum{sAlbum2})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
-		if diff := diffAlbum(bAlbum2, got2); diff != "" {
-			t.Errorf("ToAlbum() mismatch (-want +got):\n%s", diff)
+		if diff := diffAlbums(want2, got2); diff != "" {
+			t.Errorf("ToAlbums() mismatch (-want +got):\n%s", diff)
 		}
 	})
 }
