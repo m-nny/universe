@@ -16,11 +16,11 @@ type Artist struct {
 	Albums    []*Album `gorm:"many2many:album_artists;"`
 }
 
-func newArtist(sArtist *spotify.FullArtist) *Artist {
+func newArtist(sArtist *spotify.SimpleArtist) *Artist {
 	return &Artist{Name: sArtist.Name, SpotifyId: sArtist.ID.String()}
 }
 
-func (b *Brain) ToArtist(sArtist *spotify.FullArtist) (*Artist, error) {
+func (b *Brain) ToArtist(sArtist *spotify.SimpleArtist) (*Artist, error) {
 	var artist Artist
 	if err := b.gormDb.
 		Where(&Artist{SpotifyId: sArtist.ID.String()}).
@@ -34,9 +34,9 @@ func (b *Brain) ToArtist(sArtist *spotify.FullArtist) (*Artist, error) {
 // ToArtists takes list of spotify Artists and returns Brain representain of them.
 //   - It will create new entries in DB if necessary
 //   - It will deduplicate returned artists, this may result in len(result) < len(sArtists)
-func (b *Brain) ToArtists(sArtists []*spotify.FullArtist) ([]*Artist, error) {
-	sArtists = sliceutils.Uniqe(sArtists, func(item *spotify.FullArtist) string { return item.ID.String() })
-	spotifyIds := sliceutils.Map(sArtists, func(item *spotify.FullArtist) string { return item.ID.String() })
+func (b *Brain) ToArtists(sArtists []*spotify.SimpleArtist) ([]*Artist, error) {
+	sArtists = sliceutils.Uniqe(sArtists, func(item *spotify.SimpleArtist) string { return item.ID.String() })
+	spotifyIds := sliceutils.Map(sArtists, func(item *spotify.SimpleArtist) string { return item.ID.String() })
 	var existingArtists []*Artist
 	if err := b.gormDb.
 		Where("spotify_id IN ?", spotifyIds).

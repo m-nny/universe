@@ -10,6 +10,10 @@ func Map[T, R any](arr []T, fn func(item T) R) []R {
 	return res
 }
 
+func MapP[T any](arr []T) []*T {
+	return Map[T, *T](arr, func(item T) *T { return &item })
+}
+
 func MapErr[T, R any](arr []T, fn func(item T) (R, error)) ([]R, error) {
 	var res []R
 	for _, item := range arr {
