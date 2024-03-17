@@ -3,6 +3,7 @@ filegroup(
     data = ["ent.db"],
     visibility = ["//visibility:public"],
 )
+
 filegroup(
     name = "gorm_db",
     data = ["gorm.db"],

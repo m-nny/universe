@@ -44,17 +44,21 @@ func main() {
 }
 
 func demoGorm(ctx context.Context, app *discsearch.App) error {
-	artistIds := []spotify.ID{"3dz0NnIZhtKKeXZxLOxCam"}
+	artistIds := []spotify.ID{"3dz0NnIZhtKKeXZxLOxCam", "6XyY86QOPPrYVGvF9ch6wz"}
 	sArtists, err := app.Spotify.GetAristById(ctx, artistIds)
 	if err != nil {
 		return err
 	}
-	log.Printf("sArtist: %+v", sArtists[0])
-	bArtist, err := app.Brain.ToArtist(sArtists[0])
+	for idx, artist := range sArtists {
+		log.Printf("[%d/%d] sArtist: %+v", idx+1, len(sArtists), artist)
+	}
+	bArtists, err := app.Brain.ToArtists(sArtists)
 	if err != nil {
 		return err
 	}
-	log.Printf("bArtist: %+v", bArtist)
+	for idx, artist := range bArtists {
+		log.Printf("[%d/%d] bArtist %+v", idx+1, len(sArtists), artist)
+	}
 	return nil
 }
 
