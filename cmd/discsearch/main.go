@@ -23,7 +23,7 @@ func main() {
 		log.Fatalf("Could not init app: %v", err)
 	}
 
-	if err := demoGorm(ctx, app); err != nil {
+	if err := demoGormAlbums(ctx, app); err != nil {
 		log.Fatalf("%v", err)
 	}
 
@@ -44,7 +44,7 @@ func main() {
 	// }
 }
 
-func demoGorm(ctx context.Context, app *discsearch.App) error {
+func demoGormArtists(ctx context.Context, app *discsearch.App) error {
 	// Porter Robinson, Linkin Park, Linkin Park
 	artistIds := []spotify.ID{"3dz0NnIZhtKKeXZxLOxCam", "6XyY86QOPPrYVGvF9ch6wz", "6XyY86QOPPrYVGvF9ch6wz"}
 	sArtists, err := app.Spotify.GetAristById(ctx, artistIds)
@@ -60,6 +60,26 @@ func demoGorm(ctx context.Context, app *discsearch.App) error {
 	}
 	for idx, artist := range bArtists {
 		log.Printf("[%d/%d] bArtist %+v", idx+1, len(sArtists), artist)
+	}
+	return nil
+}
+
+func demoGormAlbums(ctx context.Context, app *discsearch.App) error {
+	// Hybrid Theory, Hybrid Theory (20th Edition)
+	albumIds := []spotify.ID{"6PFPjumGRpZnBzqnDci6qJ", "28DUZ0itKISf2sr6hlseMy"}
+	sAlbums, err := app.Spotify.GetAlbumsById(ctx, albumIds)
+	if err != nil {
+		return err
+	}
+	for idx, sAlbum := range sAlbums {
+		log.Printf("[%d/%d] sAlbum: %+v - %+v", idx+1, len(sAlbums), spotify.SArtistsString(sAlbum.Artists), sAlbum.Name)
+	}
+	bAlbums, err := app.Brain.ToAlbums(sAlbums)
+	if err != nil {
+		return err
+	}
+	for idx, bAlbum := range bAlbums {
+		log.Printf("[%d/%d] bAlbum %+v", idx+1, len(sAlbums), bAlbum)
 	}
 	return nil
 }

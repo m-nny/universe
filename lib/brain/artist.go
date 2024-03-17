@@ -13,6 +13,7 @@ type Artist struct {
 	gorm.Model
 	SpotifyId string
 	Name      string
+	Albums    []*Album `gorm:"many2many:album_artists;"`
 }
 
 func newArtist(sArtist *spotify.FullArtist) *Artist {

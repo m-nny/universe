@@ -10,6 +10,18 @@ func Map[T, R any](arr []T, fn func(item T) R) []R {
 	return res
 }
 
+func MapErr[T, R any](arr []T, fn func(item T) (R, error)) ([]R, error) {
+	var res []R
+	for _, item := range arr {
+		val, err := fn(item)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, val)
+	}
+	return res, nil
+}
+
 func MapCtxErr[T, R any](ctx context.Context, arr []T, fn func(ctx context.Context, item T) (R, error)) ([]R, error) {
 	var res []R
 	for _, item := range arr {

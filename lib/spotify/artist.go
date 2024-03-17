@@ -4,12 +4,13 @@ import (
 	"context"
 	"strings"
 
+	"github.com/zmb3/spotify/v2"
+
 	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/ent/artist"
 	"github.com/m-nny/universe/lib/utils/hitcounter"
 	"github.com/m-nny/universe/lib/utils/maputils"
 	"github.com/m-nny/universe/lib/utils/sliceutils"
-	"github.com/zmb3/spotify/v2"
 )
 
 var (
@@ -85,6 +86,14 @@ func (s *Service) batchToArtists(ctx context.Context, rawArtists []spotify.Simpl
 }
 
 func ArtistsString(artists []*ent.Artist) string {
+	var s []string
+	for _, a := range artists {
+		s = append(s, a.Name)
+	}
+	return strings.Join(s, " ")
+}
+
+func SArtistsString(artists []spotify.SimpleArtist) string {
 	var s []string
 	for _, a := range artists {
 		s = append(s, a.Name)

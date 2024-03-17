@@ -7,11 +7,12 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/zmb3/spotify/v2"
+
 	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/ent/album"
 	"github.com/m-nny/universe/lib/jsoncache"
 	"github.com/m-nny/universe/lib/utils/sliceutils"
-	"github.com/zmb3/spotify/v2"
 )
 
 func (s *Service) SearchAlbum(ctx context.Context, q string) ([]*ent.Album, error) {
@@ -24,12 +25,13 @@ func (s *Service) SearchAlbum(ctx context.Context, q string) ([]*ent.Album, erro
 	return s.toAlbums(ctx, results.Albums.Albums)
 }
 
-func (s *Service) GetAlbumsById(ctx context.Context, ids []spotify.ID) ([]*ent.Album, error) {
-	rawAlbums, err := s.spotify.GetAlbums(ctx, ids)
-	if err != nil {
-		return nil, err
-	}
-	return sliceutils.MapCtxErr(ctx, rawAlbums, s.toAlbumFull)
+func (s *Service) GetAlbumsById(ctx context.Context, ids []spotify.ID) ([]*spotify.FullAlbum, error) {
+	return s.spotify.GetAlbums(ctx, ids)
+	// rawAlbums, err := s.spotify.GetAlbums(ctx, ids)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// return sliceutils.MapCtxErr(ctx, rawAlbums, s.toAlbumFull)
 }
 
 func (s *Service) toAlbumFull(ctx context.Context, a *spotify.FullAlbum) (*ent.Album, error) {
