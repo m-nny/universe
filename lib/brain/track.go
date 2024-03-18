@@ -11,7 +11,7 @@ import (
 
 type Track struct {
 	gorm.Model
-	SpotifyId string
+	SpotifyId spotify.ID
 	Name      string
 	AlbumId   uint
 	Album     *Album
@@ -19,7 +19,7 @@ type Track struct {
 }
 
 func newTrack(sTrack *spotify.SimpleTrack, bAlbum *Album, bArtists []*Artist) *Track {
-	return &Track{Name: sTrack.Name, SpotifyId: sTrack.ID.String(), AlbumId: bAlbum.ID, Album: bAlbum, Artists: bArtists}
+	return &Track{Name: sTrack.Name, SpotifyId: sTrack.ID, AlbumId: bAlbum.ID, Album: bAlbum, Artists: bArtists}
 }
 
 // ToTracks returns Brain representain of a spotify tracks
@@ -27,7 +27,7 @@ func newTrack(sTrack *spotify.SimpleTrack, bAlbum *Album, bArtists []*Artist) *T
 //   - It will deduplicate returned albums, this may result in len(result) < len(sTracks)
 //   - NOTE: Does not debupe based on simplified name
 func (b *Brain) ToTracks(sTracks []*spotify.SimpleTrack) ([]*Track, error) {
-	sTracks = sliceutils.Uniqe(sTracks, func(item *spotify.SimpleTrack) string { return item.ID.String() })
+	sTracks = sliceutils.Uniqe(sTracks, func(item *spotify.SimpleTrack) spotify.ID { return item.ID })
 
 	sArtists := sliceutils.FlatMap(sTracks, func(item *spotify.SimpleTrack) []*spotify.SimpleArtist { return sliceutils.MapP(item.Artists) })
 	allArtists, err := b.ToArtists(sArtists)
@@ -35,7 +35,7 @@ func (b *Brain) ToTracks(sTracks []*spotify.SimpleTrack) ([]*Track, error) {
 		return nil, err
 	}
 	// map of spotifyId to Artist
-	bArtistMap := sliceutils.ToMap(allArtists, func(item *Artist) string { return item.SpotifyId })
+	bArtistMap := sliceutils.ToMap(allArtists, func(item *Artist) spotify.ID { return item.SpotifyId })
 
 	sAlbums := sliceutils.Map(sTracks, func(item *spotify.SimpleTrack) *spotify.SimpleAlbum { return &item.Album })
 	allAlbums, err := b.ToAlbums(sAlbums)
@@ -43,9 +43,9 @@ func (b *Brain) ToTracks(sTracks []*spotify.SimpleTrack) ([]*Track, error) {
 		return nil, err
 	}
 	// map of spotifyId to Album
-	bAlbumMap := sliceutils.ToMap(allAlbums, func(item *Album) string { return item.SpotifyId })
+	bAlbumMap := sliceutils.ToMap(allAlbums, func(item *Album) spotify.ID { return item.SpotifyId })
 
-	spotifyIds := sliceutils.Map(sTracks, func(item *spotify.SimpleTrack) string { return item.ID.String() })
+	spotifyIds := sliceutils.Map(sTracks, func(item *spotify.SimpleTrack) spotify.ID { return item.ID })
 	var existingTracks []*Track
 	if err := b.gormDb.
 		Preload("Artists").
@@ -56,11 +56,11 @@ func (b *Brain) ToTracks(sTracks []*spotify.SimpleTrack) ([]*Track, error) {
 
 	var newTracks []*Track
 	for _, sTrack := range sTracks {
-		if slices.ContainsFunc(existingTracks, func(item *Track) bool { return item.SpotifyId == sTrack.ID.String() }) {
+		if slices.ContainsFunc(existingTracks, func(item *Track) bool { return item.SpotifyId == sTrack.ID }) {
 			continue
 		}
-		bArtists := sliceutils.Map(sTrack.Artists, func(item spotify.SimpleArtist) *Artist { return bArtistMap[item.ID.String()] })
-		bAlbum := bAlbumMap[sTrack.Album.ID.String()]
+		bArtists := sliceutils.Map(sTrack.Artists, func(item spotify.SimpleArtist) *Artist { return bArtistMap[item.ID] })
+		bAlbum := bAlbumMap[sTrack.Album.ID]
 		newTracks = append(newTracks, newTrack(sTrack, bAlbum, bArtists))
 	}
 	// All artists are already created, can exit

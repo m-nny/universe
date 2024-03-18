@@ -11,19 +11,19 @@ import (
 
 var (
 	sTrack1 = &spotify.SimpleTrack{
-		ID:      spotify.ID("spotify:one_step"),
+		ID:      ("spotify:one_step"),
 		Name:    "One Step Closer",
 		Artists: []spotify.SimpleArtist{*sArtist1},
 		Album:   *sAlbum1,
 	}
 	sTrack2 = &spotify.SimpleTrack{
-		ID:      spotify.ID("spotify:in_the_end"),
+		ID:      ("spotify:in_the_end"),
 		Name:    "In the end",
 		Artists: []spotify.SimpleArtist{*sArtist1},
 		Album:   *sAlbum1,
 	}
 	sTrack3 = &spotify.SimpleTrack{
-		ID:      spotify.ID("spotify:something_comforting"),
+		ID:      ("spotify:something_comforting"),
 		Name:    "Something Comforting",
 		Artists: []spotify.SimpleArtist{*sArtist2},
 		Album:   *sAlbum2,

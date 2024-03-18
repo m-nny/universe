@@ -11,17 +11,17 @@ import (
 
 var (
 	sAlbum1 = &spotify.SimpleAlbum{
-		ID:      spotify.ID("spotify:hybrid_theory"),
+		ID:      ("spotify:hybrid_theory"),
 		Name:    "Hybrid Theory",
 		Artists: []spotify.SimpleArtist{*sArtist1},
 	}
 	sAlbum2 = &spotify.SimpleAlbum{
-		ID:      spotify.ID("spotify:hybryd_theory_20"),
+		ID:      ("spotify:hybryd_theory_20"),
 		Name:    "Hybrid Theory (20th Anniversary Edition)",
 		Artists: []spotify.SimpleArtist{*sArtist1},
 	}
 	sAlbum3 = &spotify.SimpleAlbum{
-		ID:      spotify.ID("spotify:nurture"),
+		ID:      ("spotify:nurture"),
 		Name:    "Nurture",
 		Artists: []spotify.SimpleArtist{*sArtist2},
 	}

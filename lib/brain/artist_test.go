@@ -11,11 +11,11 @@ import (
 
 var (
 	sArtist1 = &spotify.SimpleArtist{
-		ID:   spotify.ID("spotify:linkin_park"),
+		ID:   "spotify:linkin_park",
 		Name: "Linkin Park",
 	}
 	sArtist2 = &spotify.SimpleArtist{
-		ID:   spotify.ID("spotify:porter_robinson"),
+		ID:   "spotify:porter_robinson",
 		Name: "Porter Robinson",
 	}
 	bArtist1 = &Artist{
