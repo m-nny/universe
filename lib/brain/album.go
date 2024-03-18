@@ -5,6 +5,8 @@ import (
 
 	"github.com/zmb3/spotify/v2"
 	"gorm.io/gorm"
+
+	"github.com/m-nny/universe/lib/spotify/utils"
 )
 
 type AlbumId uint
@@ -25,7 +27,7 @@ func (s *Album) String() string {
 }
 
 func newAlbum(sAlbum spotify.SimpleAlbum, bArtists []*Artist) *Album {
-	return &Album{Name: sAlbum.Name, SpotifyId: sAlbum.ID, Artists: bArtists}
+	return &Album{Name: sAlbum.Name, SpotifyId: sAlbum.ID, Artists: bArtists, SimplifiedName: utils.SimplifiedAlbumName(sAlbum)}
 }
 
 // SaveAlbums returns Brain representain of a spotify album

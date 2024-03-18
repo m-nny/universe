@@ -10,7 +10,6 @@ go_library(
     importpath = "github.com/m-nny/universe/lib/spotify/utils",
     visibility = ["//visibility:public"],
     deps = [
-        "//ent",
         "//lib/utils/sliceutils",
         "@com_github_zmb3_spotify_v2//:spotify",
     ],

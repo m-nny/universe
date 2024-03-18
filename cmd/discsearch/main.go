@@ -32,12 +32,12 @@ func main() {
 	// 	log.Fatalf("%v", err)
 	// }
 
-	if err := benchGetUserTracks(ctx, app); err != nil {
+	if err := gormGetUserTracks(ctx, app); err != nil {
 		log.Fatalf("%v", err)
 	}
-	if err := benchGetUserTracks(ctx, app); err != nil {
-		log.Fatalf("%v", err)
-	}
+	// if err := benchGetUserTracks(ctx, app); err != nil {
+	// 	log.Fatalf("%v", err)
+	// }
 
 	// if err := getDiscogs(ctx, app); err != nil {
 	// 	log.Fatalf("%v", err)
@@ -134,6 +134,17 @@ func getAlbumsById(ctx context.Context, app *discsearch.App) error {
 	if err := getTopArtists(ctx, app); err != nil {
 		return err
 	}
+	return nil
+}
+
+func gormGetUserTracks(ctx context.Context, app *discsearch.App) error {
+	start := time.Now()
+	gormTracks, err := app.Spotify.GetUserTracksGorm(ctx, username)
+	if err != nil {
+		return fmt.Errorf("error getting all tracks: %w", err)
+	}
+	log.Printf("GetUserTracksGorm: finished in %s", time.Since(start))
+	log.Printf("GetUserTracksGorm found %d tracks", len(gormTracks))
 	return nil
 }
 
