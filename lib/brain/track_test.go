@@ -15,8 +15,8 @@ var (
 			SimpleTrack: spotify.SimpleTrack{
 				ID:      ("spotify:one_step"),
 				Name:    "One Step Closer",
-				Artists: []spotify.SimpleArtist{*sArtist1},
-				Album:   *sAlbum1,
+				Artists: []spotify.SimpleArtist{sArtist1},
+				Album:   sAlbum1.SimpleAlbum,
 			},
 		},
 	}
@@ -25,8 +25,8 @@ var (
 			SimpleTrack: spotify.SimpleTrack{
 				ID:      ("spotify:in_the_end"),
 				Name:    "In the end",
-				Artists: []spotify.SimpleArtist{*sArtist1},
-				Album:   *sAlbum1,
+				Artists: []spotify.SimpleArtist{sArtist1},
+				Album:   sAlbum1.SimpleAlbum,
 			},
 		},
 	}
@@ -35,8 +35,8 @@ var (
 			SimpleTrack: spotify.SimpleTrack{
 				ID:      ("spotify:something_comforting"),
 				Name:    "Something Comforting",
-				Artists: []spotify.SimpleArtist{*sArtist2},
-				Album:   *sAlbum2,
+				Artists: []spotify.SimpleArtist{sArtist2},
+				Album:   sAlbum2.SimpleAlbum,
 			},
 		},
 	}

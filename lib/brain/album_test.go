@@ -10,20 +10,26 @@ import (
 )
 
 var (
-	sAlbum1 = &spotify.SimpleAlbum{
-		ID:      ("spotify:hybrid_theory"),
-		Name:    "Hybrid Theory",
-		Artists: []spotify.SimpleArtist{*sArtist1},
+	sAlbum1 = &spotify.FullAlbum{
+		SimpleAlbum: spotify.SimpleAlbum{
+			ID:      ("spotify:hybrid_theory"),
+			Name:    "Hybrid Theory",
+			Artists: []spotify.SimpleArtist{sArtist1},
+		},
 	}
-	sAlbum2 = &spotify.SimpleAlbum{
-		ID:      ("spotify:hybryd_theory_20"),
-		Name:    "Hybrid Theory (20th Anniversary Edition)",
-		Artists: []spotify.SimpleArtist{*sArtist1},
+	sAlbum2 = &spotify.FullAlbum{
+		SimpleAlbum: spotify.SimpleAlbum{
+			ID:      ("spotify:hybryd_theory_20"),
+			Name:    "Hybrid Theory (20th Anniversary Edition)",
+			Artists: []spotify.SimpleArtist{sArtist1},
+		},
 	}
-	sAlbum3 = &spotify.SimpleAlbum{
-		ID:      ("spotify:nurture"),
-		Name:    "Nurture",
-		Artists: []spotify.SimpleArtist{*sArtist2},
+	sAlbum3 = &spotify.FullAlbum{
+		SimpleAlbum: spotify.SimpleAlbum{
+			ID:      ("spotify:nurture"),
+			Name:    "Nurture",
+			Artists: []spotify.SimpleArtist{sArtist2},
+		},
 	}
 	bAlbum1 = &Album{
 		Model:     gorm.Model{ID: 1},
@@ -53,7 +59,7 @@ func TestToAlbums(t *testing.T) {
 		}
 
 		want1 := []*Album{bAlbum1, bAlbum2, bAlbum3}
-		got1, err := brain.SaveAlbums([]*spotify.SimpleAlbum{sAlbum1, sAlbum2, sAlbum3}, nil)
+		got1, err := brain.SaveAlbums([]*spotify.FullAlbum{sAlbum1, sAlbum2, sAlbum3})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -61,7 +67,7 @@ func TestToAlbums(t *testing.T) {
 			t.Errorf("ToAlbums() mismatch (-want +got):\n%s", diff)
 		}
 
-		got2, err := brain.SaveAlbums([]*spotify.SimpleAlbum{sAlbum1, sAlbum2, sAlbum3}, nil)
+		got2, err := brain.SaveAlbums([]*spotify.FullAlbum{sAlbum1, sAlbum2, sAlbum3})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -76,7 +82,7 @@ func TestToAlbums(t *testing.T) {
 		}
 
 		want1 := []*Album{bAlbum1}
-		got1, err := brain.SaveAlbums([]*spotify.SimpleAlbum{sAlbum1}, nil)
+		got1, err := brain.SaveAlbums([]*spotify.FullAlbum{sAlbum1})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -85,7 +91,7 @@ func TestToAlbums(t *testing.T) {
 		}
 
 		want2 := []*Album{bAlbum2}
-		got2, err := brain.SaveAlbums([]*spotify.SimpleAlbum{sAlbum2}, nil)
+		got2, err := brain.SaveAlbums([]*spotify.FullAlbum{sAlbum2})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -94,7 +100,7 @@ func TestToAlbums(t *testing.T) {
 		}
 
 		want3 := []*Album{bAlbum3}
-		got3, err := brain.SaveAlbums([]*spotify.SimpleAlbum{sAlbum3}, nil)
+		got3, err := brain.SaveAlbums([]*spotify.FullAlbum{sAlbum3})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}

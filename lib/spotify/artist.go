@@ -101,11 +101,10 @@ func SArtistsString(artists []spotify.SimpleArtist) string {
 	return strings.Join(s, " ")
 }
 
-func (s *Service) GetArtistById(ctx context.Context, ids []spotify.ID) ([]*spotify.SimpleArtist, error) {
-	sFullArtistArtists, err := s.spotify.GetArtists(ctx, ids...)
+func (s *Service) GetArtistById(ctx context.Context, ids []spotify.ID) ([]*spotify.FullArtist, error) {
+	sArtists, err := s.spotify.GetArtists(ctx, ids...)
 	if err != nil {
 		return nil, err
 	}
-	sArtists := sliceutils.Map(sFullArtistArtists, func(item *spotify.FullArtist) *spotify.SimpleArtist { return &item.SimpleArtist })
 	return sArtists, nil
 }

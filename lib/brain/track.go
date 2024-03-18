@@ -1,12 +1,12 @@
 package brain
 
 import (
-	"slices"
+	"log"
 
 	"github.com/zmb3/spotify/v2"
 	"gorm.io/gorm"
 
-	"github.com/m-nny/universe/lib/utils/sliceutils"
+	lspotify "github.com/m-nny/universe/lib/spotify"
 )
 
 type Track struct {
@@ -18,7 +18,7 @@ type Track struct {
 	Artists   []*Artist `gorm:"many2many:track_artists;"`
 }
 
-func newTrack(sTrack spotify.SavedTrack, bAlbum *Album, bArtists []*Artist) *Track {
+func newTrack(sTrack spotify.SimpleTrack, bAlbum *Album, bArtists []*Artist) *Track {
 	return &Track{Name: sTrack.Name, SpotifyId: sTrack.ID, AlbumId: bAlbum.ID, Album: bAlbum, Artists: bArtists}
 }
 
@@ -26,47 +26,23 @@ func newTrack(sTrack spotify.SavedTrack, bAlbum *Album, bArtists []*Artist) *Tra
 //   - It will create new entries in DB if necessary
 //   - It will deduplicate returned albums, this may result in len(result) < len(sTracks)
 //   - NOTE: Does not debupe based on simplified name
-func (b *Brain) SaveTracks(sTracks []spotify.SavedTrack) ([]*Track, error) {
-	sTracks = sliceutils.Unique(sTracks, func(item spotify.SavedTrack) spotify.ID { return item.ID })
-	sAlbums := sliceutils.Map(sTracks, func(item spotify.SavedTrack) *spotify.SimpleAlbum { return &item.Album })
+func (b *Brain) SaveTracks(savedTracks []spotify.SavedTrack) ([]*Track, error) {
+	var sAlbums []spotify.SimpleAlbum
+	var sTracks []spotify.SimpleTrack
+	for _, sTrack := range savedTracks {
+		log.Printf("sTrack: %s", sTrack.Name)
 
-	sArtists := sliceutils.FlatMap(sTracks, func(item spotify.SavedTrack) []*spotify.SimpleArtist { return sliceutils.MapP(item.Artists) })
-	sArtists = append(sArtists, sliceutils.FlatMap(sAlbums, func(item *spotify.SimpleAlbum) []*spotify.SimpleArtist { return sliceutils.MapP(item.Artists) })...)
+		log.Printf("  sTrack.Album: %+v", sTrack.Album.Name)
+		log.Printf("  sTrack.SimpleTrack.Album: %+v", sTrack.SimpleTrack.Album.Name)
 
-	bArtistMap, err := b.toArtistsMap(sArtists)
-	if err != nil {
-		return nil, err
-	}
+		log.Printf("  sTrack.Artists: %+v", lspotify.SArtistsString(sTrack.Artists))
+		log.Printf("  sTrack.SimpleTrack.Artists: %+v", lspotify.SArtistsString(sTrack.SimpleTrack.Artists))
+		sAlbums = append(sAlbums, sTrack.Album)
 
-	bAlbumMap, err := b.toAlbumsMap(sAlbums, bArtistMap)
-	if err != nil {
-		return nil, err
+		// we are using sTrack.Album to associate it with bAlbum later
+		sTrack.SimpleTrack.Album = sTrack.Album
+		sTracks = append(sTracks, sTrack.SimpleTrack)
 	}
-
-	spotifyIds := sliceutils.Map(sTracks, func(item spotify.SavedTrack) spotify.ID { return item.ID })
-	var existingTracks []*Track
-	if err := b.gormDb.
-		Preload("Artists").
-		Where("spotify_id IN ?", spotifyIds).
-		Find(&existingTracks).Error; err != nil {
-		return nil, err
-	}
-
-	var newTracks []*Track
-	for _, sTrack := range sTracks {
-		if slices.ContainsFunc(existingTracks, func(item *Track) bool { return item.SpotifyId == sTrack.ID }) {
-			continue
-		}
-		bArtists := sliceutils.Map(sTrack.Artists, func(item spotify.SimpleArtist) *Artist { return bArtistMap[item.ID] })
-		bAlbum := bAlbumMap[sTrack.Album.ID]
-		newTracks = append(newTracks, newTrack(sTrack, bAlbum, bArtists))
-	}
-	// All artists are already created, can exit
-	if len(newTracks) == 0 {
-		return existingTracks, nil
-	}
-	if err := b.gormDb.Create(newTracks).Error; err != nil {
-		return nil, err
-	}
-	return append(existingTracks, newTracks...), nil
+	_, tracks, err := b.batchSave(sAlbums, sTracks)
+	return tracks, err
 }

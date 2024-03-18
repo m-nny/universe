@@ -2,12 +2,9 @@ package brain
 
 import (
 	"fmt"
-	"slices"
 
 	"github.com/zmb3/spotify/v2"
 	"gorm.io/gorm"
-
-	"github.com/m-nny/universe/lib/utils/sliceutils"
 )
 
 type AlbumId uint
@@ -26,71 +23,22 @@ func (s *Album) String() string {
 	return fmt.Sprintf("%s", s.Name)
 }
 
-func newAlbum(sAlbum *spotify.SimpleAlbum, bArtists []*Artist) *Album {
+func newAlbum(sAlbum spotify.SimpleAlbum, bArtists []*Artist) *Album {
 	return &Album{Name: sAlbum.Name, SpotifyId: sAlbum.ID, Artists: bArtists}
-}
-
-// toAlbum returns Brain representain of a spotify album
-//   - NOTE: Does not debupe based on simplified name
-func (b *Brain) toAlbum(sAlbum *spotify.SimpleAlbum, bArtists []*Artist) (*Album, error) {
-	var album Album
-	if err := b.gormDb.
-		Preload("Artists").
-		Where(&Album{SpotifyId: sAlbum.ID}).
-		Attrs(newAlbum(sAlbum, bArtists)).
-		FirstOrCreate(&album).Error; err != nil {
-		return nil, err
-	}
-	return &album, nil
 }
 
 // SaveAlbums returns Brain representain of a spotify album
 //   - It will create new entries in DB if necessary
 //   - It will deduplicate returned albums, this may result in len(result) < len(sAlbums)
 //   - NOTE: Does not debupe based on simplified name
-func (b *Brain) SaveAlbums(sAlbums []*spotify.SimpleAlbum, bArtistMap map[spotify.ID]*Artist) ([]*Album, error) {
-	sAlbums = sliceutils.Unique(sAlbums, func(item *spotify.SimpleAlbum) spotify.ID { return item.ID })
-
-	if bArtistMap == nil {
-		var err error
-		sArtists := sliceutils.FlatMap(sAlbums, func(item *spotify.SimpleAlbum) []*spotify.SimpleArtist { return sliceutils.MapP(item.Artists) })
-		bArtistMap, err = b.toArtistsMap(sArtists)
-		if err != nil {
-			return nil, err
-		}
+func (b *Brain) SaveAlbums(fullAlbums []*spotify.FullAlbum) ([]*Album, error) {
+	var sAlbums []spotify.SimpleAlbum
+	var sTracks []spotify.SimpleTrack
+	for _, sAlbum := range fullAlbums {
+		// sAlbum.SimpleAlbum.Artists = sAlbum.Artists
+		sAlbums = append(sAlbums, sAlbum.SimpleAlbum)
+		sTracks = append(sTracks, sAlbum.Tracks.Tracks...)
 	}
-
-	spotifyIds := sliceutils.Map(sAlbums, func(item *spotify.SimpleAlbum) spotify.ID { return item.ID })
-	var existingAlbums []*Album
-	if err := b.gormDb.
-		Preload("Artists").
-		Where("spotify_id IN ?", spotifyIds).
-		Find(&existingAlbums).Error; err != nil {
-		return nil, err
-	}
-
-	var newAlbums []*Album
-	for _, sAlbum := range sAlbums {
-		if slices.ContainsFunc(existingAlbums, func(item *Album) bool { return item.SpotifyId == sAlbum.ID }) {
-			continue
-		}
-		bArtists := sliceutils.Map(sAlbum.Artists, func(item spotify.SimpleArtist) *Artist { return bArtistMap[item.ID] })
-		newAlbums = append(newAlbums, newAlbum(sAlbum, bArtists))
-	}
-	// All artists are already created, can exit
-	if len(newAlbums) == 0 {
-		return existingAlbums, nil
-	}
-	if err := b.gormDb.Create(newAlbums).Error; err != nil {
-		return nil, err
-	}
-	return append(existingAlbums, newAlbums...), nil
-}
-
-func (b *Brain) toAlbumsMap(sAlbums []*spotify.SimpleAlbum, bArtistMap map[spotify.ID]*Artist) (map[spotify.ID]*Album, error) {
-	bAlbums, err := b.SaveAlbums(sAlbums, bArtistMap)
-	if err != nil {
-		return nil, err
-	}
-	return sliceutils.ToMap(bAlbums, func(item *Album) spotify.ID { return item.SpotifyId }), nil
+	albums, _, err := b.batchSave(sAlbums, sTracks)
+	return albums, err
 }
