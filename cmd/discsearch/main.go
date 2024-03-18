@@ -52,7 +52,7 @@ func demoGormArtists(ctx context.Context, app *discsearch.App) error {
 	for idx, artist := range sArtists {
 		log.Printf("[%d/%d] sArtist: %+v", idx+1, len(sArtists), artist)
 	}
-	bArtists, err := app.Brain.ToArtists(sArtists)
+	bArtists, err := app.Brain.SaveArtists(sArtists)
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func demoGormAlbums(ctx context.Context, app *discsearch.App) error {
 	for idx, sAlbum := range sAlbums {
 		log.Printf("[%d/%d] sAlbum: %+v - %+v", idx+1, len(sAlbums), spotify.SArtistsString(sAlbum.Artists), sAlbum.Name)
 	}
-	bAlbums, err := app.Brain.ToAlbums(sAlbums, nil)
+	bAlbums, err := app.Brain.SaveAlbums(sAlbums, nil)
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func demoGormTracks(ctx context.Context, app *discsearch.App) error {
 	for idx, sTrack := range sTracks {
 		log.Printf("[%d/%d] sTrack: %s - %s - %+s", idx+1, len(sTracks), spotify.SArtistsString(sTrack.Artists), sTrack.Album.Name, sTrack.Name)
 	}
-	bTracks, err := app.Brain.ToTracks(sTracks)
+	bTracks, err := app.Brain.SaveTracks(sTracks)
 	if err != nil {
 		return err
 	}

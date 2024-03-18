@@ -50,7 +50,7 @@ func (s *Service) toArtists(ctx context.Context, rawArtists []spotify.SimpleArti
 }
 
 func (s *Service) batchToArtists(ctx context.Context, rawArtists []spotify.SimpleArtist) (map[spotify.ID]int, error) {
-	rawArtists = sliceutils.Uniqe(rawArtists, func(item spotify.SimpleArtist) string { return item.ID.String() })
+	rawArtists = sliceutils.Unique(rawArtists, func(item spotify.SimpleArtist) string { return item.ID.String() })
 	spotifyIds := sliceutils.Map(rawArtists, func(item spotify.SimpleArtist) string { return item.ID.String() })
 	existingArtists, err := s.ent.Artist.Query().Where(artist.SpotifyIdIn(spotifyIds...)).All(ctx)
 	if err != nil {

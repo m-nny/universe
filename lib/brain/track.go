@@ -18,19 +18,19 @@ type Track struct {
 	Artists   []*Artist `gorm:"many2many:track_artists;"`
 }
 
-func newTrack(sTrack *spotify.SimpleTrack, bAlbum *Album, bArtists []*Artist) *Track {
+func newTrack(sTrack spotify.SavedTrack, bAlbum *Album, bArtists []*Artist) *Track {
 	return &Track{Name: sTrack.Name, SpotifyId: sTrack.ID, AlbumId: bAlbum.ID, Album: bAlbum, Artists: bArtists}
 }
 
-// ToTracks returns Brain representain of a spotify tracks
+// SaveTracks returns Brain representain of a spotify tracks
 //   - It will create new entries in DB if necessary
 //   - It will deduplicate returned albums, this may result in len(result) < len(sTracks)
 //   - NOTE: Does not debupe based on simplified name
-func (b *Brain) ToTracks(sTracks []*spotify.SimpleTrack) ([]*Track, error) {
-	sTracks = sliceutils.Uniqe(sTracks, func(item *spotify.SimpleTrack) spotify.ID { return item.ID })
-	sAlbums := sliceutils.Map(sTracks, func(item *spotify.SimpleTrack) *spotify.SimpleAlbum { return &item.Album })
+func (b *Brain) SaveTracks(sTracks []spotify.SavedTrack) ([]*Track, error) {
+	sTracks = sliceutils.Unique(sTracks, func(item spotify.SavedTrack) spotify.ID { return item.ID })
+	sAlbums := sliceutils.Map(sTracks, func(item spotify.SavedTrack) *spotify.SimpleAlbum { return &item.Album })
 
-	sArtists := sliceutils.FlatMap(sTracks, func(item *spotify.SimpleTrack) []*spotify.SimpleArtist { return sliceutils.MapP(item.Artists) })
+	sArtists := sliceutils.FlatMap(sTracks, func(item spotify.SavedTrack) []*spotify.SimpleArtist { return sliceutils.MapP(item.Artists) })
 	sArtists = append(sArtists, sliceutils.FlatMap(sAlbums, func(item *spotify.SimpleAlbum) []*spotify.SimpleArtist { return sliceutils.MapP(item.Artists) })...)
 
 	bArtistMap, err := b.toArtistsMap(sArtists)
@@ -43,7 +43,7 @@ func (b *Brain) ToTracks(sTracks []*spotify.SimpleTrack) ([]*Track, error) {
 		return nil, err
 	}
 
-	spotifyIds := sliceutils.Map(sTracks, func(item *spotify.SimpleTrack) spotify.ID { return item.ID })
+	spotifyIds := sliceutils.Map(sTracks, func(item spotify.SavedTrack) spotify.ID { return item.ID })
 	var existingTracks []*Track
 	if err := b.gormDb.
 		Preload("Artists").

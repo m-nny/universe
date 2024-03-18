@@ -44,12 +44,12 @@ func (b *Brain) toAlbum(sAlbum *spotify.SimpleAlbum, bArtists []*Artist) (*Album
 	return &album, nil
 }
 
-// ToAlbums returns Brain representain of a spotify album
+// SaveAlbums returns Brain representain of a spotify album
 //   - It will create new entries in DB if necessary
 //   - It will deduplicate returned albums, this may result in len(result) < len(sAlbums)
 //   - NOTE: Does not debupe based on simplified name
-func (b *Brain) ToAlbums(sAlbums []*spotify.SimpleAlbum, bArtistMap map[spotify.ID]*Artist) ([]*Album, error) {
-	sAlbums = sliceutils.Uniqe(sAlbums, func(item *spotify.SimpleAlbum) spotify.ID { return item.ID })
+func (b *Brain) SaveAlbums(sAlbums []*spotify.SimpleAlbum, bArtistMap map[spotify.ID]*Artist) ([]*Album, error) {
+	sAlbums = sliceutils.Unique(sAlbums, func(item *spotify.SimpleAlbum) spotify.ID { return item.ID })
 
 	if bArtistMap == nil {
 		var err error
@@ -88,7 +88,7 @@ func (b *Brain) ToAlbums(sAlbums []*spotify.SimpleAlbum, bArtistMap map[spotify.
 }
 
 func (b *Brain) toAlbumsMap(sAlbums []*spotify.SimpleAlbum, bArtistMap map[spotify.ID]*Artist) (map[spotify.ID]*Album, error) {
-	bAlbums, err := b.ToAlbums(sAlbums, bArtistMap)
+	bAlbums, err := b.SaveAlbums(sAlbums, bArtistMap)
 	if err != nil {
 		return nil, err
 	}

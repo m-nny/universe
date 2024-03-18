@@ -19,7 +19,7 @@ func (a *App) ListingRelease(ctx context.Context, release *discogs.ListingReleas
 	if err != nil {
 		return nil, err
 	}
-	albums = sliceutils.Uniqe(albums, func(item *ent.Album) string { return fmt.Sprintf("%d", item.ID) })
+	albums = sliceutils.Unique(albums, func(item *ent.Album) string { return fmt.Sprintf("%d", item.ID) })
 	result, err := mostSimilarAlbum(ctx, release, albums)
 	if err != nil {
 		return nil, err

@@ -46,7 +46,7 @@ func MapCtxErr[T, R any](ctx context.Context, arr []T, fn func(ctx context.Conte
 	return res, nil
 }
 
-func Uniqe[T any, K comparable](arr []T, fn func(item T) K) []T {
+func Unique[T any, K comparable](arr []T, fn func(item T) K) []T {
 	var result []T
 	has := make(map[K]bool)
 	for _, item := range arr {

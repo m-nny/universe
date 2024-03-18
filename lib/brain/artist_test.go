@@ -85,7 +85,7 @@ func TestToArtists(t *testing.T) {
 		}
 
 		want1 := []*Artist{bArtist1, bArtist2}
-		got1, err := brain.ToArtists([]*spotify.SimpleArtist{sArtist1, sArtist2})
+		got1, err := brain.SaveArtists([]*spotify.SimpleArtist{sArtist1, sArtist2})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -94,7 +94,7 @@ func TestToArtists(t *testing.T) {
 		}
 		logAllArtists(t, brain)
 
-		got2, err := brain.ToArtists([]*spotify.SimpleArtist{sArtist1, sArtist2})
+		got2, err := brain.SaveArtists([]*spotify.SimpleArtist{sArtist1, sArtist2})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -110,7 +110,7 @@ func TestToArtists(t *testing.T) {
 		}
 
 		want1 := []*Artist{bArtist1}
-		got1, err := brain.ToArtists([]*spotify.SimpleArtist{sArtist1})
+		got1, err := brain.SaveArtists([]*spotify.SimpleArtist{sArtist1})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -120,7 +120,7 @@ func TestToArtists(t *testing.T) {
 		logAllArtists(t, brain)
 
 		want2 := []*Artist{bArtist1, bArtist2}
-		got2, err := brain.ToArtists([]*spotify.SimpleArtist{sArtist1, sArtist1, sArtist2, sArtist2})
+		got2, err := brain.SaveArtists([]*spotify.SimpleArtist{sArtist1, sArtist1, sArtist2, sArtist2})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}

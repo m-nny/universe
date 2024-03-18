@@ -31,18 +31,20 @@ func (b *Brain) ToArtist(sArtist *spotify.SimpleArtist) (*Artist, error) {
 	return &artist, nil
 }
 
-// ToArtists takes list of spotify Artists and returns Brain representain of them.
+// SaveArtists takes list of spotify Artists and returns Brain representain of them.
 //   - It will create new entries in DB if necessary
 //   - It will deduplicate returned artists, this may result in len(result) < len(sArtists)
-func (b *Brain) ToArtists(sArtists []*spotify.SimpleArtist) ([]*Artist, error) {
-	sArtists = sliceutils.Uniqe(sArtists, func(item *spotify.SimpleArtist) spotify.ID { return item.ID })
+func (b *Brain) SaveArtists(sArtists []*spotify.SimpleArtist) ([]*Artist, error) {
+	sArtists = sliceutils.Unique(sArtists, func(item *spotify.SimpleArtist) spotify.ID { return item.ID })
 	spotifyIds := sliceutils.Map(sArtists, func(item *spotify.SimpleArtist) spotify.ID { return item.ID })
+
 	var existingArtists []*Artist
 	if err := b.gormDb.
 		Where("spotify_id IN ?", spotifyIds).
 		Find(&existingArtists).Error; err != nil {
 		return nil, err
 	}
+
 	var newArtists []*Artist
 	for _, sArtist := range sArtists {
 		if slices.ContainsFunc(existingArtists, func(item *Artist) bool { return item.SpotifyId == sArtist.ID }) {
@@ -61,7 +63,7 @@ func (b *Brain) ToArtists(sArtists []*spotify.SimpleArtist) ([]*Artist, error) {
 }
 
 func (b *Brain) toArtistsMap(sArtists []*spotify.SimpleArtist) (map[spotify.ID]*Artist, error) {
-	bArtists, err := b.ToArtists(sArtists)
+	bArtists, err := b.SaveArtists(sArtists)
 	if err != nil {
 		return nil, err
 	}
