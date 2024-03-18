@@ -9,7 +9,7 @@ import (
 	"github.com/m-nny/universe/lib/utils/sliceutils"
 )
 
-func (b *Brain) batchSave(sAlbums []spotify.SimpleAlbum, sTracks []spotify.SimpleTrack) ([]*Album, []*Track, error) {
+func (b *Brain) batchSaveAlbumTracks(sAlbums []spotify.SimpleAlbum, sTracks []spotify.SimpleTrack) ([]*Album, []*Track, error) {
 	sAlbums = sliceutils.Unique(sAlbums, func(item spotify.SimpleAlbum) spotify.ID { return item.ID })
 	sTracks = sliceutils.Unique(sTracks, func(item spotify.SimpleTrack) spotify.ID { return item.ID })
 

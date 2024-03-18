@@ -14,7 +14,7 @@ type Brain struct {
 	gormDb *gorm.DB
 }
 
-func New(databasePath string) (*Brain, error) {
+func New(databasePath string, enableLogging bool) (*Brain, error) {
 	gormDb, err := gorm.Open(sqlite.Open(databasePath), &gorm.Config{})
 	if err != nil {
 		return nil, err
@@ -22,7 +22,9 @@ func New(databasePath string) (*Brain, error) {
 	if err := gormDb.AutoMigrate(&Artist{}, &Album{}, &Track{}); err != nil {
 		return nil, err
 	}
-	gormDb.Logger = getLogger()
+	if enableLogging {
+		gormDb.Logger = getLogger()
+	}
 	return &Brain{gormDb: gormDb}, nil
 }
 

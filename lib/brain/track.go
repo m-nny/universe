@@ -43,6 +43,6 @@ func (b *Brain) SaveTracks(savedTracks []spotify.SavedTrack) ([]*Track, error) {
 		sTrack.SimpleTrack.Album = sTrack.Album
 		sTracks = append(sTracks, sTrack.SimpleTrack)
 	}
-	_, tracks, err := b.batchSave(sAlbums, sTracks)
+	_, tracks, err := b.batchSaveAlbumTracks(sAlbums, sTracks)
 	return tracks, err
 }

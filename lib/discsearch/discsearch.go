@@ -8,11 +8,12 @@ import (
 	"path/filepath"
 
 	"github.com/joho/godotenv"
+	_ "github.com/mattn/go-sqlite3"
+
 	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/lib/brain"
 	"github.com/m-nny/universe/lib/discogs"
 	"github.com/m-nny/universe/lib/spotify"
-	_ "github.com/mattn/go-sqlite3"
 )
 
 type App struct {
@@ -84,5 +85,5 @@ func getGormClient() (*brain.Brain, error) {
 	if err != nil {
 		return nil, err
 	}
-	return brain.New(databasePath)
+	return brain.New(databasePath /*enableLogging=*/, true)
 }
