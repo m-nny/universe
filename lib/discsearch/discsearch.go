@@ -31,7 +31,11 @@ func New(ctx context.Context, username string) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	spotify, err := spotify.New(ctx, ent, username)
+	brain, err := getBrain()
+	if err != nil {
+		return nil, err
+	}
+	spotify, err := spotify.New(ctx, ent, brain, username)
 	if err != nil {
 		return nil, err
 	}
@@ -39,15 +43,11 @@ func New(ctx context.Context, username string) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	gormDb, err := getGormClient()
-	if err != nil {
-		return nil, err
-	}
 	return &App{
 		Ent:     ent,
 		Spotify: spotify,
 		Discogs: discogs,
-		Brain:   gormDb,
+		Brain:   brain,
 	}, nil
 }
 
@@ -80,10 +80,10 @@ func getEntClient() (*ent.Client, error) {
 	return client, nil
 }
 
-func getGormClient() (*brain.Brain, error) {
+func getBrain() (*brain.Brain, error) {
 	databasePath, err := getDbPath("gorm")
 	if err != nil {
 		return nil, err
 	}
-	return brain.New(databasePath /*enableLogging=*/, true)
+	return brain.New(databasePath /*enableLogging=*/, false)
 }

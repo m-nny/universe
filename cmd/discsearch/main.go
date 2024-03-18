@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 
@@ -21,17 +23,20 @@ func main() {
 		log.Fatalf("Could not init app: %v", err)
 	}
 
-	if err := demoGormTracks(ctx, app); err != nil {
-		log.Fatalf("%v", err)
-	}
+	// if err := demoGormTracks(ctx, app); err != nil {
+	// 	log.Fatalf("%v", err)
+	// }
 
 	// if err := getAlbumsById(ctx, app); err != nil {
 	// 	log.Fatalf("%v", err)
 	// }
 
-	// if err := getUserTracks(ctx, app); err != nil {
-	// 	log.Fatalf("%v", err)
-	// }
+	if err := benchGetUserTracks(ctx, app); err != nil {
+		log.Fatalf("%v", err)
+	}
+	if err := benchGetUserTracks(ctx, app); err != nil {
+		log.Fatalf("%v", err)
+	}
 
 	// if err := getDiscogs(ctx, app); err != nil {
 	// 	log.Fatalf("%v", err)
@@ -131,23 +136,24 @@ func getAlbumsById(ctx context.Context, app *discsearch.App) error {
 	return nil
 }
 
-// func getUserTracks(ctx context.Context, app *discsearch.App) error {
-// 	start := time.Now()
-// 	tracks, err := app.Spotify.GetUserTracks(ctx, username)
-// 	if err != nil {
-// 		return fmt.Errorf("error getting all tracks: %w", err)
-// 	}
-// 	log.Printf("getUserTracks finished in %s", time.Since(start))
-// 	log.Printf("found total %d tracks", len(tracks))
+func benchGetUserTracks(ctx context.Context, app *discsearch.App) error {
+	start := time.Now()
+	entTracks, err := app.Spotify.GetUserTracksEnt(ctx, username)
+	if err != nil {
+		return fmt.Errorf("error getting all tracks: %w", err)
+	}
+	log.Printf("GetUserTracksEnt: finished in %s", time.Since(start))
+	log.Printf("GetUserTracksEnt found %d tracks", len(entTracks))
 
-// 	if err := getTopAlbums(ctx, app); err != nil {
-// 		return fmt.Errorf("error getting all tracks: %w", err)
-// 	}
-// 	if err := getTopArtists(ctx, app); err != nil {
-// 		return fmt.Errorf("error getting all tracks: %w", err)
-// 	}
-// 	return nil
-// }
+	start = time.Now()
+	gormTracks, err := app.Spotify.GetUserTracksGorm(ctx, username)
+	if err != nil {
+		return fmt.Errorf("error getting all tracks: %w", err)
+	}
+	log.Printf("GetUserTracksGorm: finished in %s", time.Since(start))
+	log.Printf("GetUserTracksGorm found %d tracks", len(gormTracks))
+	return nil
+}
 
 func getTopAlbums(ctx context.Context, app *discsearch.App) error {
 	const tracksNumCol = "tracks_num"

@@ -1,12 +1,10 @@
 package brain
 
 import (
-	"log"
+	"strings"
 
 	"github.com/zmb3/spotify/v2"
 	"gorm.io/gorm"
-
-	lspotify "github.com/m-nny/universe/lib/spotify"
 )
 
 type Track struct {
@@ -30,13 +28,6 @@ func (b *Brain) SaveTracks(savedTracks []spotify.SavedTrack) ([]*Track, error) {
 	var sAlbums []spotify.SimpleAlbum
 	var sTracks []spotify.SimpleTrack
 	for _, sTrack := range savedTracks {
-		log.Printf("sTrack: %s", sTrack.Name)
-
-		log.Printf("  sTrack.Album: %+v", sTrack.Album.Name)
-		log.Printf("  sTrack.SimpleTrack.Album: %+v", sTrack.SimpleTrack.Album.Name)
-
-		log.Printf("  sTrack.Artists: %+v", lspotify.SArtistsString(sTrack.Artists))
-		log.Printf("  sTrack.SimpleTrack.Artists: %+v", lspotify.SArtistsString(sTrack.SimpleTrack.Artists))
 		sAlbums = append(sAlbums, sTrack.Album)
 
 		// we are using sTrack.Album to associate it with bAlbum later
@@ -45,4 +36,12 @@ func (b *Brain) SaveTracks(savedTracks []spotify.SavedTrack) ([]*Track, error) {
 	}
 	_, tracks, err := b.batchSaveAlbumTracks(sAlbums, sTracks)
 	return tracks, err
+}
+
+func SArtistsString(artists []spotify.SimpleArtist) string {
+	var s []string
+	for _, a := range artists {
+		s = append(s, a.Name)
+	}
+	return strings.Join(s, " ")
 }

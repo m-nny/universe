@@ -12,7 +12,6 @@ go_library(
     importpath = "github.com/m-nny/universe/lib/brain",
     visibility = ["//visibility:public"],
     deps = [
-        "//lib/spotify",
         "//lib/utils/sliceutils",
         "@com_github_zmb3_spotify_v2//:spotify",
         "@io_gorm_driver_sqlite//:sqlite",

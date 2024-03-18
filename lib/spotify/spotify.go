@@ -5,15 +5,18 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/m-nny/universe/ent"
 	"github.com/zmb3/spotify/v2"
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
+
+	"github.com/m-nny/universe/ent"
+	"github.com/m-nny/universe/lib/brain"
 )
 
 type ID = spotify.ID
 
 type Service struct {
 	ent     *ent.Client
+	brain   *brain.Brain
 	spotify *spotify.Client
 }
 
@@ -41,7 +44,7 @@ func LoadConfig() (*Config, error) {
 	return c, nil
 }
 
-func New(ctx context.Context, ent *ent.Client, username string) (*Service, error) {
+func New(ctx context.Context, ent *ent.Client, brain *brain.Brain, username string) (*Service, error) {
 	config, err := LoadConfig()
 	if err != nil {
 		return nil, err
@@ -59,6 +62,7 @@ func New(ctx context.Context, ent *ent.Client, username string) (*Service, error
 	client := spotify.New(auth.Client(ctx, token))
 	return &Service{
 		ent:     ent,
+		brain:   brain,
 		spotify: client,
 	}, nil
 }

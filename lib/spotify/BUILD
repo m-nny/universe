@@ -19,6 +19,7 @@ go_library(
         "//ent/artist",
         "//ent/track",
         "//ent/user",
+        "//lib/brain",
         "//lib/jsoncache",
         "//lib/utils/hitcounter",
         "//lib/utils/maputils",
