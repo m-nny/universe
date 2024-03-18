@@ -11,9 +11,10 @@ type AlbumId uint
 
 type Album struct {
 	gorm.Model
-	SpotifyId spotify.ID
-	Name      string
-	Artists   []*Artist `gorm:"many2many:album_artists;"`
+	SpotifyId      spotify.ID
+	Name           string
+	Artists        []*Artist `gorm:"many2many:album_artists;"`
+	SimplifiedName string
 }
 
 func (s *Album) String() string {

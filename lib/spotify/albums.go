@@ -2,16 +2,14 @@ package spotify
 
 import (
 	"context"
-	"fmt"
-	"regexp"
 	"slices"
-	"strings"
 
 	"github.com/zmb3/spotify/v2"
 
 	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/ent/album"
 	"github.com/m-nny/universe/lib/jsoncache"
+	"github.com/m-nny/universe/lib/spotify/utils"
 	"github.com/m-nny/universe/lib/utils/sliceutils"
 )
 
@@ -54,7 +52,7 @@ func (s *Service) toAlbums(ctx context.Context, arr []spotify.SimpleAlbum) ([]*e
 }
 
 func (s *Service) toAlbum(ctx context.Context, a spotify.SimpleAlbum) (*ent.Album, error) {
-	simplifiedName := simplifiedAlbumName(a)
+	simplifiedName := utils.SimplifiedAlbumName(a)
 	album, err := s.ent.Album.
 		Query().
 		Where(album.Similar(string(a.ID), simplifiedName)).
@@ -82,44 +80,4 @@ func (s *Service) _newAlbum(ctx context.Context, a spotify.SimpleAlbum, simplifi
 		SetSimplifiedName(simplifiedName).
 		SetSpotifyIds([]string{string(a.ID)}).
 		Save(ctx)
-}
-
-var simplifyAlbumNameRegex = func() *regexp.Regexp {
-	blocklistItems := []string{
-		` \((\d{4} )?Remastered( Version)?\)`,
-		` \(Bonus Edition\)`,
-		` \(Collector's Edition\)`,
-		` \(Deluxe Edition\)`,
-		` \(Deluxe Version\)`,
-		` \(Deluxe\)`,
-		` \(Expanded Edition\)`,
-		` \(Explicit Version\)`,
-		` \(Extended Edition\)`,
-		` \(Special Edition\)`,
-		` \(Standard Version\)`,
-		` \(The Complete Edition\)`,
-		` \(Tour Edition\)`,
-		` \(Wembley Edition\)`,
-		` \(20th Anniversary Edition\)`,
-		` Deluxe`,
-	}
-
-	regex := strings.Join(sliceutils.Map(blocklistItems, func(s string) string {
-		return fmt.Sprintf("(%s)", s)
-	}), "|")
-	return regexp.MustCompile(regex)
-}()
-
-// simplifiedAlbumName will return a string in form of "<artist1>, <artist2> - <album name>"
-func simplifiedAlbumName(a spotify.SimpleAlbum) string {
-	artistNames := strings.Join(
-		sliceutils.Map(a.Artists, func(a spotify.SimpleArtist) string { return a.Name }),
-		", ",
-	)
-	// releaseYear := a.ReleaseDateTime().Year()
-	// albumName := strings.ReplaceAll(a.Name, "(Deluxe Edition)", "")
-	albumName := simplifyAlbumNameRegex.ReplaceAllString(a.Name, "")
-	msg := fmt.Sprintf("%s - %s", artistNames, albumName)
-	msg = strings.ToLower(msg)
-	return msg
 }

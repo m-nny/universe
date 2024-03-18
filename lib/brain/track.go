@@ -1,8 +1,6 @@
 package brain
 
 import (
-	"strings"
-
 	"github.com/zmb3/spotify/v2"
 	"gorm.io/gorm"
 )
@@ -36,12 +34,4 @@ func (b *Brain) SaveTracks(savedTracks []spotify.SavedTrack) ([]*Track, error) {
 	}
 	_, tracks, err := b.batchSaveAlbumTracks(sAlbums, sTracks)
 	return tracks, err
-}
-
-func SArtistsString(artists []spotify.SimpleArtist) string {
-	var s []string
-	for _, a := range artists {
-		s = append(s, a.Name)
-	}
-	return strings.Join(s, " ")
 }

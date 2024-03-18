@@ -2,7 +2,6 @@ package spotify
 
 import (
 	"context"
-	"strings"
 
 	"github.com/zmb3/spotify/v2"
 
@@ -85,21 +84,6 @@ func (s *Service) batchToArtists(ctx context.Context, rawArtists []spotify.Simpl
 	return res, nil
 }
 
-func ArtistsString(artists []*ent.Artist) string {
-	var s []string
-	for _, a := range artists {
-		s = append(s, a.Name)
-	}
-	return strings.Join(s, " ")
-}
-
-func SArtistsString(artists []spotify.SimpleArtist) string {
-	var s []string
-	for _, a := range artists {
-		s = append(s, a.Name)
-	}
-	return strings.Join(s, " ")
-}
 
 func (s *Service) GetArtistById(ctx context.Context, ids []spotify.ID) ([]*spotify.FullArtist, error) {
 	sArtists, err := s.spotify.GetArtists(ctx, ids...)

@@ -2,14 +2,13 @@ package spotify
 
 import (
 	"context"
-	"fmt"
 	"slices"
-	"strings"
 
 	"github.com/zmb3/spotify/v2"
 
 	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/ent/track"
+	"github.com/m-nny/universe/lib/spotify/utils"
 	"github.com/m-nny/universe/lib/utils/sliceutils"
 )
 
@@ -32,7 +31,7 @@ func (s *Service) toTracksWithAlbum(ctx context.Context, tracks []spotify.Simple
 }
 
 func (s *Service) toTrackWithAlbum(ctx context.Context, t spotify.SimpleTrack, a *ent.Album, username string) (*ent.Track, error) {
-	simplifiedName := simplifiedTrackName(t, a)
+	simplifiedName := utils.SimplifiedTrackName(t, a.SimplifiedName)
 	track, err := s.ent.Track.
 		Query().
 		Where(track.Similar(string(t.ID), simplifiedName)).
@@ -65,16 +64,6 @@ func (s *Service) _newTrack(ctx context.Context, t spotify.SimpleTrack, album *e
 		track.AddSavedByIDs(username)
 	}
 	return track.Save(ctx)
-}
-
-// simplifiedTrackName will return a string in form of
-//
-//	"<artist1>, <artist2> - <album name> [<album release year] - <track_num>. <track_name>"
-func simplifiedTrackName(t spotify.SimpleTrack, a *ent.Album) string {
-	msg := a.SimplifiedName
-	msg += fmt.Sprintf(" %d.  %s", t.TrackNumber, t.Name)
-	msg = strings.ToLower(msg)
-	return msg
 }
 
 func (s *Service) GetTracksById(ctx context.Context, ids []spotify.ID) ([]*spotify.SimpleTrack, error) {

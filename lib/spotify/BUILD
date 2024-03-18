@@ -21,6 +21,7 @@ go_library(
         "//ent/user",
         "//lib/brain",
         "//lib/jsoncache",
+        "//lib/spotify/utils",
         "//lib/utils/hitcounter",
         "//lib/utils/maputils",
         "//lib/utils/sliceutils",

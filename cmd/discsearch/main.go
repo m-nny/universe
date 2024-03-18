@@ -12,6 +12,7 @@ import (
 	"github.com/m-nny/universe/ent/artist"
 	"github.com/m-nny/universe/lib/discsearch"
 	"github.com/m-nny/universe/lib/spotify"
+	spotifyutils "github.com/m-nny/universe/lib/spotify/utils"
 )
 
 const username = "m-nny"
@@ -75,7 +76,7 @@ func demoGormAlbums(ctx context.Context, app *discsearch.App) error {
 		return err
 	}
 	for idx, sAlbum := range sAlbums {
-		log.Printf("[%d/%d] sAlbum: %+v - %+v", idx+1, len(sAlbums), spotify.SArtistsString(sAlbum.Artists), sAlbum.Name)
+		log.Printf("[%d/%d] sAlbum: %+v - %+v", idx+1, len(sAlbums), spotifyutils.SArtistsString(sAlbum.Artists), sAlbum.Name)
 	}
 	bAlbums, err := app.Brain.SaveAlbums(sAlbums)
 	if err != nil {
@@ -95,7 +96,7 @@ func demoGormTracks(ctx context.Context, app *discsearch.App) error {
 		return err
 	}
 	for idx, sTrack := range sTracks {
-		log.Printf("[%d/%d] sTrack: %s - %s - %+s", idx+1, len(sTracks), spotify.SArtistsString(sTrack.Artists), sTrack.Album.Name, sTrack.Name)
+		log.Printf("[%d/%d] sTrack: %s - %s - %+s", idx+1, len(sTracks), spotifyutils.SArtistsString(sTrack.Artists), sTrack.Album.Name, sTrack.Name)
 	}
 	bTracks, err := app.Brain.SaveTracks(sTracks)
 	if err != nil {
