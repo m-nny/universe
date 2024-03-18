@@ -28,15 +28,16 @@ func newTrack(sTrack *spotify.SimpleTrack, bAlbum *Album, bArtists []*Artist) *T
 //   - NOTE: Does not debupe based on simplified name
 func (b *Brain) ToTracks(sTracks []*spotify.SimpleTrack) ([]*Track, error) {
 	sTracks = sliceutils.Uniqe(sTracks, func(item *spotify.SimpleTrack) spotify.ID { return item.ID })
+	sAlbums := sliceutils.Map(sTracks, func(item *spotify.SimpleTrack) *spotify.SimpleAlbum { return &item.Album })
 
 	sArtists := sliceutils.FlatMap(sTracks, func(item *spotify.SimpleTrack) []*spotify.SimpleArtist { return sliceutils.MapP(item.Artists) })
+	sArtists = append(sArtists, sliceutils.FlatMap(sAlbums, func(item *spotify.SimpleAlbum) []*spotify.SimpleArtist { return sliceutils.MapP(item.Artists) })...)
 
 	bArtistMap, err := b.toArtistsMap(sArtists)
 	if err != nil {
 		return nil, err
 	}
 
-	sAlbums := sliceutils.Map(sTracks, func(item *spotify.SimpleTrack) *spotify.SimpleAlbum { return &item.Album })
 	bAlbumMap, err := b.toAlbumsMap(sAlbums, bArtistMap)
 	if err != nil {
 		return nil, err
