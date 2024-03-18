@@ -72,7 +72,7 @@ func demoGormAlbums(ctx context.Context, app *discsearch.App) error {
 	for idx, sAlbum := range sAlbums {
 		log.Printf("[%d/%d] sAlbum: %+v - %+v", idx+1, len(sAlbums), spotify.SArtistsString(sAlbum.Artists), sAlbum.Name)
 	}
-	bAlbums, err := app.Brain.ToAlbums(sAlbums)
+	bAlbums, err := app.Brain.ToAlbums(sAlbums, nil)
 	if err != nil {
 		return err
 	}

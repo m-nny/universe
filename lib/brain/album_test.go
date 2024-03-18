@@ -53,7 +53,7 @@ func TestToAlbums(t *testing.T) {
 		}
 
 		want1 := []*Album{bAlbum1, bAlbum2, bAlbum3}
-		got1, err := brain.ToAlbums([]*spotify.SimpleAlbum{sAlbum1, sAlbum2, sAlbum3})
+		got1, err := brain.ToAlbums([]*spotify.SimpleAlbum{sAlbum1, sAlbum2, sAlbum3}, nil)
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -61,7 +61,7 @@ func TestToAlbums(t *testing.T) {
 			t.Errorf("ToAlbums() mismatch (-want +got):\n%s", diff)
 		}
 
-		got2, err := brain.ToAlbums([]*spotify.SimpleAlbum{sAlbum1, sAlbum2, sAlbum3})
+		got2, err := brain.ToAlbums([]*spotify.SimpleAlbum{sAlbum1, sAlbum2, sAlbum3}, nil)
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -76,7 +76,7 @@ func TestToAlbums(t *testing.T) {
 		}
 
 		want1 := []*Album{bAlbum1}
-		got1, err := brain.ToAlbums([]*spotify.SimpleAlbum{sAlbum1})
+		got1, err := brain.ToAlbums([]*spotify.SimpleAlbum{sAlbum1}, nil)
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -85,7 +85,7 @@ func TestToAlbums(t *testing.T) {
 		}
 
 		want2 := []*Album{bAlbum2}
-		got2, err := brain.ToAlbums([]*spotify.SimpleAlbum{sAlbum2})
+		got2, err := brain.ToAlbums([]*spotify.SimpleAlbum{sAlbum2}, nil)
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -94,7 +94,7 @@ func TestToAlbums(t *testing.T) {
 		}
 
 		want3 := []*Album{bAlbum3}
-		got3, err := brain.ToAlbums([]*spotify.SimpleAlbum{sAlbum3})
+		got3, err := brain.ToAlbums([]*spotify.SimpleAlbum{sAlbum3}, nil)
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}

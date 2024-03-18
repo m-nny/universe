@@ -48,15 +48,17 @@ func (b *Brain) toAlbum(sAlbum *spotify.SimpleAlbum, bArtists []*Artist) (*Album
 //   - It will create new entries in DB if necessary
 //   - It will deduplicate returned albums, this may result in len(result) < len(sAlbums)
 //   - NOTE: Does not debupe based on simplified name
-func (b *Brain) ToAlbums(sAlbums []*spotify.SimpleAlbum) ([]*Album, error) {
+func (b *Brain) ToAlbums(sAlbums []*spotify.SimpleAlbum, bArtistMap map[spotify.ID]*Artist) ([]*Album, error) {
 	sAlbums = sliceutils.Uniqe(sAlbums, func(item *spotify.SimpleAlbum) spotify.ID { return item.ID })
-	sArtists := sliceutils.FlatMap(sAlbums, func(item *spotify.SimpleAlbum) []*spotify.SimpleArtist { return sliceutils.MapP(item.Artists) })
-	allArtists, err := b.ToArtists(sArtists)
-	if err != nil {
-		return nil, err
+
+	if bArtistMap == nil {
+		var err error
+		sArtists := sliceutils.FlatMap(sAlbums, func(item *spotify.SimpleAlbum) []*spotify.SimpleArtist { return sliceutils.MapP(item.Artists) })
+		bArtistMap, err = b.toArtistsMap(sArtists)
+		if err != nil {
+			return nil, err
+		}
 	}
-	// map of spotifyId to Artist
-	bArtistMap := sliceutils.ToMap(allArtists, func(item *Artist) spotify.ID { return item.SpotifyId })
 
 	spotifyIds := sliceutils.Map(sAlbums, func(item *spotify.SimpleAlbum) spotify.ID { return item.ID })
 	var existingAlbums []*Album
@@ -83,4 +85,12 @@ func (b *Brain) ToAlbums(sAlbums []*spotify.SimpleAlbum) ([]*Album, error) {
 		return nil, err
 	}
 	return append(existingAlbums, newAlbums...), nil
+}
+
+func (b *Brain) toAlbumsMap(sAlbums []*spotify.SimpleAlbum, bArtistMap map[spotify.ID]*Artist) (map[spotify.ID]*Album, error) {
+	bAlbums, err := b.ToAlbums(sAlbums, bArtistMap)
+	if err != nil {
+		return nil, err
+	}
+	return sliceutils.ToMap(bAlbums, func(item *Album) spotify.ID { return item.SpotifyId }), nil
 }

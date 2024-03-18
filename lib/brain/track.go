@@ -30,20 +30,17 @@ func (b *Brain) ToTracks(sTracks []*spotify.SimpleTrack) ([]*Track, error) {
 	sTracks = sliceutils.Uniqe(sTracks, func(item *spotify.SimpleTrack) spotify.ID { return item.ID })
 
 	sArtists := sliceutils.FlatMap(sTracks, func(item *spotify.SimpleTrack) []*spotify.SimpleArtist { return sliceutils.MapP(item.Artists) })
-	allArtists, err := b.ToArtists(sArtists)
+
+	bArtistMap, err := b.toArtistsMap(sArtists)
 	if err != nil {
 		return nil, err
 	}
-	// map of spotifyId to Artist
-	bArtistMap := sliceutils.ToMap(allArtists, func(item *Artist) spotify.ID { return item.SpotifyId })
 
 	sAlbums := sliceutils.Map(sTracks, func(item *spotify.SimpleTrack) *spotify.SimpleAlbum { return &item.Album })
-	allAlbums, err := b.ToAlbums(sAlbums)
+	bAlbumMap, err := b.toAlbumsMap(sAlbums, bArtistMap)
 	if err != nil {
 		return nil, err
 	}
-	// map of spotifyId to Album
-	bAlbumMap := sliceutils.ToMap(allAlbums, func(item *Album) spotify.ID { return item.SpotifyId })
 
 	spotifyIds := sliceutils.Map(sTracks, func(item *spotify.SimpleTrack) spotify.ID { return item.ID })
 	var existingTracks []*Track

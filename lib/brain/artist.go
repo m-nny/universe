@@ -59,3 +59,11 @@ func (b *Brain) ToArtists(sArtists []*spotify.SimpleArtist) ([]*Artist, error) {
 	}
 	return append(existingArtists, newArtists...), nil
 }
+
+func (b *Brain) toArtistsMap(sArtists []*spotify.SimpleArtist) (map[spotify.ID]*Artist, error) {
+	bArtists, err := b.ToArtists(sArtists)
+	if err != nil {
+		return nil, err
+	}
+	return sliceutils.ToMap(bArtists, func(item *Artist) spotify.ID { return item.SpotifyId }), nil
+}
