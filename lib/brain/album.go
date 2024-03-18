@@ -1,6 +1,7 @@
 package brain
 
 import (
+	"fmt"
 	"slices"
 
 	"github.com/zmb3/spotify/v2"
@@ -16,6 +17,13 @@ type Album struct {
 	SpotifyId string
 	Name      string
 	Artists   []*Artist `gorm:"many2many:album_artists;"`
+}
+
+func (s *Album) String() string {
+	if s == nil {
+		return "<nil>"
+	}
+	return fmt.Sprintf("%s", s.Name)
 }
 
 func newAlbum(sAlbum *spotify.SimpleAlbum, bArtists []*Artist) *Album {

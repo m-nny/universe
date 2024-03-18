@@ -24,6 +24,7 @@ go_test(
         "album_test.go",
         "artist_test.go",
         "brain_test.go",
+        "track_test.go",
     ],
     embed = [":brain"],
     deps = [

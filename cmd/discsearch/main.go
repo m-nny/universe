@@ -85,19 +85,19 @@ func demoGormAlbums(ctx context.Context, app *discsearch.App) error {
 func demoGormTracks(ctx context.Context, app *discsearch.App) error {
 	// Hybrid Theory, Hybrid Theory (20th Edition)
 	sTracks, err := app.Spotify.GetUserTracks(ctx, username)
-	sTracks = sTracks[:100]
+	sTracks = sTracks[:10]
 	if err != nil {
 		return err
 	}
 	for idx, sTrack := range sTracks {
-		log.Printf("[%d/%d] sTrack: %+v - %+v", idx+1, len(sTracks), spotify.SArtistsString(sTrack.Artists), sTrack.Name)
+		log.Printf("[%d/%d] sTrack: %s - %s - %+s", idx+1, len(sTracks), spotify.SArtistsString(sTrack.Artists), sTrack.Album.Name, sTrack.Name)
 	}
 	bTracks, err := app.Brain.ToTracks(sTracks)
 	if err != nil {
 		return err
 	}
 	for idx, bTrack := range bTracks {
-		log.Printf("[%d/%d] bTrack %+v", idx+1, len(sTracks), bTrack)
+		log.Printf("[%d/%d] bTrack: %+v - %s (%d) - %+v", idx+1, len(sTracks), bTrack.Artists, bTrack.Album, bTrack.AlbumId, bTrack.Name)
 	}
 	return nil
 }

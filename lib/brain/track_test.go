@@ -22,6 +22,12 @@ var (
 		Artists: []spotify.SimpleArtist{*sArtist1},
 		Album:   *sAlbum1,
 	}
+	sTrack3 = &spotify.SimpleTrack{
+		ID:      spotify.ID("spotify:something_comforting"),
+		Name:    "Something Comforting",
+		Artists: []spotify.SimpleArtist{*sArtist2},
+		Album:   *sAlbum2,
+	}
 	bTrack1 = &Track{
 		Model:     gorm.Model{ID: 1},
 		Name:      "One Step Closer",
@@ -38,6 +44,14 @@ var (
 		Album:     bAlbum1,
 		AlbumId:   bAlbum1.ID,
 	}
+	bTrack3 = &Track{
+		Model:     gorm.Model{ID: 3},
+		Name:      "Something Comforting",
+		SpotifyId: "spotify:something_comforting",
+		Artists:   []*Artist{bArtist2},
+		Album:     bAlbum2,
+		AlbumId:   bAlbum2.ID,
+	}
 )
 
 func TestToTracks(t *testing.T) {
@@ -47,8 +61,8 @@ func TestToTracks(t *testing.T) {
 			t.Fatalf("sqlite db is not clean")
 		}
 
-		want1 := []*Track{bTrack1}
-		got1, err := brain.ToTracks([]*spotify.SimpleTrack{sTrack1})
+		want1 := []*Track{bTrack1, bTrack2}
+		got1, err := brain.ToTracks([]*spotify.SimpleTrack{sTrack1, sTrack2})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -56,7 +70,7 @@ func TestToTracks(t *testing.T) {
 			t.Errorf("ToTracks() mismatch (-want +got):\n%s", diff)
 		}
 
-		got2, err := brain.ToTracks([]*spotify.SimpleTrack{sTrack1})
+		got2, err := brain.ToTracks([]*spotify.SimpleTrack{sTrack1, sTrack2})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}

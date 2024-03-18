@@ -31,5 +31,8 @@ func (s *Service) GetUserTracks(ctx context.Context, username string) ([]*spotif
 		return nil, err
 	}
 	// return s.toTracksSaved(ctx, rawTracks, username)
-	return sliceutils.Map(rawTracks, func(item spotify.SavedTrack) *spotify.SimpleTrack { return &item.SimpleTrack }), nil
+	return sliceutils.Map(rawTracks, func(item spotify.SavedTrack) *spotify.SimpleTrack {
+		item.SimpleTrack.Album = item.Album
+		return &item.SimpleTrack
+	}), nil
 }
