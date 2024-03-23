@@ -9,6 +9,7 @@ import (
 type brainIndex struct {
 	artistsMap      map[spotify.ID]*Artist
 	metaAlbumMap    map[string]*MetaAlbum
+	metaTrackMap    map[string]*MetaTrack
 	spotifyAlbumMap map[spotify.ID]*SpotifyAlbum
 	spotifyTrackMap map[spotify.ID]*SpotifyTrack
 }
@@ -17,6 +18,7 @@ func newBrainIndex() *brainIndex {
 	return &brainIndex{
 		artistsMap:      make(map[spotify.ID]*Artist),
 		metaAlbumMap:    make(map[string]*MetaAlbum),
+		metaTrackMap:    make(map[string]*MetaTrack),
 		spotifyAlbumMap: make(map[spotify.ID]*SpotifyAlbum),
 		spotifyTrackMap: make(map[spotify.ID]*SpotifyTrack),
 	}
@@ -47,6 +49,37 @@ func (ai *brainIndex) AddSpotifyAlbums(bSpotifyAlbums []*SpotifyAlbum) *brainInd
 func (ai *brainIndex) GetSpotifyAlbum(sAlbum spotify.SimpleAlbum) (*SpotifyAlbum, bool) {
 	bSpotifyAlbum, ok := ai.spotifyAlbumMap[sAlbum.ID]
 	return bSpotifyAlbum, ok
+}
+
+// MetaTracks
+func (ai *brainIndex) AddMetaTracks(bMetaTracks []*MetaTrack) *brainIndex {
+	for _, bTrack := range bMetaTracks {
+		ai.metaTrackMap[bTrack.SimplifiedName] = bTrack
+	}
+	return ai
+}
+
+func (ai *brainIndex) GetMetaTrack(sTrack spotify.SimpleTrack) (*MetaTrack, bool) {
+	bMetaAlbum, ok := ai.GetMetaAlbum(sTrack.Album)
+	if !ok {
+		return nil, false
+	}
+	simpName := utils.SimplifiedTrackName(sTrack, bMetaAlbum.SimplifiedName)
+	bMetaTrack, ok := ai.metaTrackMap[simpName]
+	return bMetaTrack, ok
+}
+
+func (ai *brainIndex) TrackSimplifiedName(sTrack spotify.SimpleTrack) (string, bool) {
+	bMetaAlbum, ok := ai.GetMetaAlbum(sTrack.Album)
+	if !ok {
+		return "", false
+	}
+	return utils.SimplifiedTrackName(sTrack, bMetaAlbum.SimplifiedName), true
+}
+
+func (ai *brainIndex) MustTrackSimplifiedName(sTrack spotify.SimpleTrack) string {
+	simpName, _ := ai.TrackSimplifiedName(sTrack)
+	return simpName
 }
 
 // SpotifyTracks

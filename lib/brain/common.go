@@ -116,6 +116,49 @@ func upsertSpotifyAlbums(b *Brain, sAlbums []spotify.SimpleAlbum, bi *brainIndex
 	return append(existingSpotifyAlbums, newAlbums...), nil
 }
 
+func upsertMetaTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*MetaTrack, error) {
+	sTracks = sliceutils.Unique(sTracks, bi.MustTrackSimplifiedName)
+	var trackSimps []string
+	for _, sTrack := range sTracks {
+		simpName, ok := bi.TrackSimplifiedName(sTrack)
+		if !ok {
+			log.Printf("WTF sTrack: %v", sTrack)
+			return nil, fmt.Errorf("could not get simplified name for %s, but it should be there", sTrack.Name)
+		}
+		trackSimps = append(trackSimps, simpName)
+	}
+
+	var existingMetaTracks []*MetaTrack
+	if err := b.gormDb.
+		Where("simplified_name IN ?", trackSimps).
+		Find(&existingMetaTracks).Error; err != nil {
+		return nil, err
+	}
+	bi.AddMetaTracks(existingMetaTracks)
+
+	// var newMetaTracks []*MetaTrack
+	var newTracks []*MetaTrack
+	for _, sTrack := range sTracks {
+		if _, ok := bi.GetMetaTrack(sTrack); ok {
+			continue
+		}
+		bMetaAlbum, ok := bi.GetMetaAlbum(sTrack.Album)
+		if !ok {
+			log.Printf("WTF sTrack: %v", sTrack)
+			return nil, fmt.Errorf("could not find meta album for %s, but it should be there", sTrack.Name)
+		}
+		newTracks = append(newTracks, newMetaTrack(sTrack, bMetaAlbum))
+	}
+	if len(newTracks) == 0 {
+		return existingMetaTracks, nil
+	}
+	if err := b.gormDb.Create(newTracks).Error; err != nil {
+		return nil, err
+	}
+	bi.AddMetaTracks(newTracks)
+	return append(existingMetaTracks, newTracks...), nil
+}
+
 func upsertSpotifyTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*SpotifyTrack, error) {
 	var existingTracks []*SpotifyTrack
 	if err := b.gormDb.
@@ -139,9 +182,14 @@ func upsertSpotifyTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex
 		bSpotifyAlbum, ok := bi.GetSpotifyAlbum(sTrack.Album)
 		if !ok {
 			log.Printf("WTF sTrack: %v", sTrack)
-			return nil, fmt.Errorf("could not find album for %s, but it should be there", sTrack.Name)
+			return nil, fmt.Errorf("could not find spotify album for %s, but it should be there", sTrack.Name)
 		}
-		newTracks = append(newTracks, newSpotifyTrack(sTrack, bSpotifyAlbum, bArtists))
+		bMetaTrack, ok := bi.GetMetaTrack(sTrack)
+		if !ok {
+			log.Printf("WTF sTrack: %v", sTrack)
+			return nil, fmt.Errorf("could not find meta track for %s, but it should be there", sTrack.Name)
+		}
+		newTracks = append(newTracks, newSpotifyTrack(sTrack, bSpotifyAlbum, bArtists, bMetaTrack))
 	}
 	if len(newTracks) > 0 {
 		if err := b.gormDb.Create(newTracks).Error; err != nil {
@@ -183,6 +231,9 @@ func (b *Brain) batchSaveAlbumTracks(sAlbums []spotify.SimpleAlbum, sTracks []sp
 		return nil, nil, err
 	}
 
+	if _, err := upsertMetaTracks(b, sTracks, bi); err != nil {
+		return nil, nil, err
+	}
 	allTracks, err := upsertSpotifyTracks(b, sTracks, bi)
 	if err != nil {
 		return nil, nil, err

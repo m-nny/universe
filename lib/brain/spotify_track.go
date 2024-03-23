@@ -11,15 +11,19 @@ type SpotifyTrack struct {
 	SpotifyAlbumId uint
 	SpotifyAlbum   *SpotifyAlbum
 	Artists        []*Artist `gorm:"many2many:track_artists;"`
+	MetaTrackId    uint
+	MetaTrack      *MetaTrack
 }
 
-func newSpotifyTrack(sTrack spotify.SimpleTrack, bSpotifyAlbum *SpotifyAlbum, bArtists []*Artist) *SpotifyTrack {
+func newSpotifyTrack(sTrack spotify.SimpleTrack, bSpotifyAlbum *SpotifyAlbum, bArtists []*Artist, bMetaTrack *MetaTrack) *SpotifyTrack {
 	return &SpotifyTrack{
 		Name:           sTrack.Name,
 		SpotifyId:      sTrack.ID,
 		SpotifyAlbumId: bSpotifyAlbum.ID,
 		SpotifyAlbum:   bSpotifyAlbum,
 		Artists:        bArtists,
+		MetaTrackId:    bMetaTrack.ID,
+		MetaTrack:      bMetaTrack,
 	}
 }
 

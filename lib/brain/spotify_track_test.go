@@ -46,6 +46,7 @@ var (
 		Artists:        []*Artist{bArtist1},
 		SpotifyAlbum:   bAlbum1,
 		SpotifyAlbumId: bAlbum1.ID,
+		MetaTrackId:    1,
 	}
 	bTrack2 = &SpotifyTrack{
 		ID:             2,
@@ -54,6 +55,7 @@ var (
 		Artists:        []*Artist{bArtist1},
 		SpotifyAlbum:   bAlbum1,
 		SpotifyAlbumId: bAlbum1.ID,
+		MetaTrackId:    2,
 	}
 	bTrack3 = &SpotifyTrack{
 		ID:             3,
@@ -62,6 +64,7 @@ var (
 		Artists:        []*Artist{bArtist2},
 		SpotifyAlbum:   bAlbum2,
 		SpotifyAlbumId: bAlbum2.ID,
+		MetaTrackId:    3,
 	}
 )
 
@@ -115,7 +118,7 @@ func TestSaveTracks(t *testing.T) {
 	})
 }
 
-var IGNORE_TRACK_FIELDS = cmpopts.IgnoreFields(SpotifyTrack{}, "SpotifyAlbum")
+var IGNORE_TRACK_FIELDS = cmpopts.IgnoreFields(SpotifyTrack{}, "SpotifyAlbum", "MetaTrack")
 
 func diffTrack(want, got *SpotifyTrack) string {
 	return cmp.Diff(want, got, IGNORE_ALBUM_FIELDS, IGNORE_TRACK_FIELDS)
