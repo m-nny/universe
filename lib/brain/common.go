@@ -16,7 +16,7 @@ import (
 //   - It will deduplicate returned albums base on spotify.ID, this may result in len(result) < len(sAlbums)
 //   - NOTE: it does not store all spotify.IDs of duplicated at the moment
 //   - NOTE: Does not debupe based on simplified name
-func (b *Brain) batchSaveAlbumTracks(sAlbums []spotify.SimpleAlbum, sTracks []spotify.SimpleTrack) ([]*Album, []*Track, error) {
+func (b *Brain) batchSaveAlbumTracks(sAlbums []spotify.SimpleAlbum, sTracks []spotify.SimpleTrack) ([]*SpotifyAlbum, []*Track, error) {
 	sAlbums = sliceutils.Unique(sAlbums, utils.SimplifiedAlbumName)
 	sTracks = sliceutils.Unique(sTracks, func(item spotify.SimpleTrack) spotify.ID { return item.ID })
 
@@ -39,7 +39,7 @@ func (b *Brain) batchSaveAlbumTracks(sAlbums []spotify.SimpleAlbum, sTracks []sp
 		albumSIds = append(albumSIds, sAlbum.ID)
 		albumSimpNames = append(albumSimpNames, utils.SimplifiedAlbumName(sAlbum))
 	}
-	var existingAlbums []*Album
+	var existingAlbums []*SpotifyAlbum
 	if err := b.gormDb.
 		Preload("Artists").
 		Where("spotify_id IN ?", albumSIds).
@@ -49,13 +49,13 @@ func (b *Brain) batchSaveAlbumTracks(sAlbums []spotify.SimpleAlbum, sTracks []sp
 	}
 	ai := newAlbumIndex(existingAlbums)
 
-	var newAlbums []*Album
+	var newAlbums []*SpotifyAlbum
 	for _, sAlbum := range sAlbums {
 		if _, ok := ai.Get(sAlbum); ok {
 			continue
 		}
 		bArtists := sliceutils.Map(sAlbum.Artists, func(item spotify.SimpleArtist) *Artist { return bArtistMap[item.ID] })
-		newAlbums = append(newAlbums, newAlbum(sAlbum, bArtists))
+		newAlbums = append(newAlbums, newSpotifyAlbum(sAlbum, bArtists))
 	}
 	if len(newAlbums) > 0 {
 		if err := b.gormDb.Create(newAlbums).Error; err != nil {

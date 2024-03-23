@@ -13,7 +13,7 @@ type Artist struct {
 	gorm.Model
 	SpotifyId spotify.ID
 	Name      string
-	Albums    []*Album `gorm:"many2many:album_artists;"`
+	Albums    []*SpotifyAlbum `gorm:"many2many:spotify_album_artists;"`
 }
 
 func newArtist(sArtist spotify.SimpleArtist) *Artist {

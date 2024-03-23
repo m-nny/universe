@@ -10,11 +10,11 @@ type Track struct {
 	SpotifyId spotify.ID
 	Name      string
 	AlbumId   uint
-	Album     *Album
+	Album     *SpotifyAlbum
 	Artists   []*Artist `gorm:"many2many:track_artists;"`
 }
 
-func newTrack(sTrack spotify.SimpleTrack, bAlbum *Album, bArtists []*Artist) *Track {
+func newTrack(sTrack spotify.SimpleTrack, bAlbum *SpotifyAlbum, bArtists []*Artist) *Track {
 	return &Track{Name: sTrack.Name, SpotifyId: sTrack.ID, AlbumId: bAlbum.ID, Album: bAlbum, Artists: bArtists}
 }
 

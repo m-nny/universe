@@ -31,19 +31,19 @@ var (
 			Artists: []spotify.SimpleArtist{sArtist2},
 		},
 	}
-	bAlbum1 = &Album{
+	bAlbum1 = &SpotifyAlbum{
 		Model:     gorm.Model{ID: 1},
 		Name:      "Hybrid Theory",
 		SpotifyId: "spotify:hybrid_theory",
 		Artists:   []*Artist{bArtist1},
 	}
-	bAlbum2 = &Album{
+	bAlbum2 = &SpotifyAlbum{
 		Model:     gorm.Model{ID: 2},
 		Name:      "Hybrid Theory (20th Anniversary Edition)",
 		SpotifyId: "spotify:hybryd_theory_20",
 		Artists:   []*Artist{bArtist1},
 	}
-	bAlbum3 = &Album{
+	bAlbum3 = &SpotifyAlbum{
 		Model:     gorm.Model{ID: 3},
 		Name:      "Nurture",
 		SpotifyId: "spotify:nurture",
@@ -58,7 +58,7 @@ func TestToAlbums(t *testing.T) {
 			t.Fatalf("sqlite db is not clean")
 		}
 
-		want1 := []*Album{bAlbum1, bAlbum2, bAlbum3}
+		want1 := []*SpotifyAlbum{bAlbum1, bAlbum2, bAlbum3}
 		got1, err := brain.SaveAlbums([]*spotify.FullAlbum{sAlbum1, sAlbum2, sAlbum3})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
@@ -81,7 +81,7 @@ func TestToAlbums(t *testing.T) {
 			t.Fatalf("sqlite db is not clean")
 		}
 
-		want1 := []*Album{bAlbum1}
+		want1 := []*SpotifyAlbum{bAlbum1}
 		got1, err := brain.SaveAlbums([]*spotify.FullAlbum{sAlbum1})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
@@ -90,7 +90,7 @@ func TestToAlbums(t *testing.T) {
 			t.Errorf("ToAlbums() mismatch (-want +got):\n%s", diff)
 		}
 
-		want2 := []*Album{bAlbum2}
+		want2 := []*SpotifyAlbum{bAlbum2}
 		got2, err := brain.SaveAlbums([]*spotify.FullAlbum{sAlbum2})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
@@ -99,7 +99,7 @@ func TestToAlbums(t *testing.T) {
 			t.Errorf("ToAlbums() mismatch (-want +got):\n%s", diff)
 		}
 
-		want3 := []*Album{bAlbum3}
+		want3 := []*SpotifyAlbum{bAlbum3}
 		got3, err := brain.SaveAlbums([]*spotify.FullAlbum{sAlbum3})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
@@ -110,18 +110,18 @@ func TestToAlbums(t *testing.T) {
 	})
 }
 
-var IGNORE_ALBUM_FIELDS = cmpopts.IgnoreFields(Album{}, "Model.CreatedAt", "Model.UpdatedAt", "Model.DeletedAt")
+var IGNORE_ALBUM_FIELDS = cmpopts.IgnoreFields(SpotifyAlbum{}, "Model.CreatedAt", "Model.UpdatedAt", "Model.DeletedAt")
 
-func diffAlbum(want, got *Album) string {
+func diffAlbum(want, got *SpotifyAlbum) string {
 	return cmp.Diff(want, got, IGNORE_ALBUM_FIELDS, IGNORE_ARTIST_FIELDS)
 }
 
-func diffAlbums(want, got []*Album) string {
+func diffAlbums(want, got []*SpotifyAlbum) string {
 	return cmp.Diff(want, got, IGNORE_ALBUM_FIELDS, IGNORE_ARTIST_FIELDS)
 }
 
 func logAllAlbums(tb testing.TB, brain *Brain) int {
-	var allAlbums []Album
+	var allAlbums []SpotifyAlbum
 	if err := brain.gormDb.Find(&allAlbums).Error; err != nil {
 		tb.Fatalf("err: %v", err)
 	}
