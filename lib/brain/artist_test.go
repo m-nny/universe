@@ -4,9 +4,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/zmb3/spotify/v2"
-	"gorm.io/gorm"
 )
 
 var (
@@ -19,12 +17,12 @@ var (
 		Name: "Porter Robinson",
 	}
 	bArtist1 = &Artist{
-		Model:     gorm.Model{ID: 1},
+		ID:        1,
 		Name:      "Linkin Park",
 		SpotifyId: "spotify:linkin_park",
 	}
 	bArtist2 = &Artist{
-		Model:     gorm.Model{ID: 2},
+		ID:        2,
 		Name:      "Porter Robinson",
 		SpotifyId: "spotify:porter_robinson",
 	}
@@ -84,14 +82,12 @@ func Test_saveArtists(t *testing.T) {
 	})
 }
 
-var IGNORE_ARTIST_FIELDS = cmpopts.IgnoreFields(Artist{}, "Model.CreatedAt", "Model.UpdatedAt", "Model.DeletedAt")
-
 func diffArtist(want, got *Artist) string {
-	return cmp.Diff(want, got, IGNORE_ARTIST_FIELDS)
+	return cmp.Diff(want, got)
 }
 
 func diffArtists(want, got []*Artist) string {
-	return cmp.Diff(want, got, IGNORE_ARTIST_FIELDS)
+	return cmp.Diff(want, got)
 }
 
 func logAllArtists(tb testing.TB, brain *Brain) int {

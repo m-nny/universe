@@ -3,15 +3,13 @@ package brain
 import (
 	"fmt"
 
-	"gorm.io/gorm"
-
 	"github.com/zmb3/spotify/v2"
 
 	"github.com/m-nny/universe/lib/spotify/utils"
 )
 
 type MetaAlbum struct {
-	gorm.Model
+	ID             uint `gorm:"primarykey"`
 	SimplifiedName string
 }
 

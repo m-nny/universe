@@ -2,13 +2,12 @@ package brain
 
 import (
 	"github.com/zmb3/spotify/v2"
-	"gorm.io/gorm"
 
 	"github.com/m-nny/universe/lib/utils/sliceutils"
 )
 
 type Artist struct {
-	gorm.Model
+	ID        uint `gorm:"primarykey"`
 	SpotifyId spotify.ID
 	Name      string
 	Albums    []*SpotifyAlbum `gorm:"many2many:spotify_album_artists;"`

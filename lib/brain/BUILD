@@ -3,9 +3,9 @@ load("@rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "brain",
     srcs = [
-        "albumIndex.go",
         "artist.go",
         "brain.go",
+        "brainIndex.go",
         "common.go",
         "meta_album.go",
         "spotify_album.go",
@@ -36,6 +36,5 @@ go_test(
         "@com_github_google_go_cmp//cmp",
         "@com_github_google_go_cmp//cmp/cmpopts",
         "@com_github_zmb3_spotify_v2//:spotify",
-        "@io_gorm_gorm//:gorm",
     ],
 )

@@ -4,13 +4,12 @@ import (
 	"fmt"
 
 	"github.com/zmb3/spotify/v2"
-	"gorm.io/gorm"
 
 	"github.com/m-nny/universe/lib/spotify/utils"
 )
 
 type SpotifyAlbum struct {
-	gorm.Model
+	ID             uint `gorm:"primarykey"`
 	SpotifyId      spotify.ID
 	Name           string
 	Artists        []*Artist `gorm:"many2many:spotify_album_artists;"`

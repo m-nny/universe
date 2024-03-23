@@ -6,7 +6,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/zmb3/spotify/v2"
-	"gorm.io/gorm"
 )
 
 var (
@@ -41,28 +40,28 @@ var (
 		},
 	}
 	bTrack1 = &Track{
-		Model:     gorm.Model{ID: 1},
-		Name:      "One Step Closer",
-		SpotifyId: "spotify:one_step",
-		Artists:   []*Artist{bArtist1},
-		Album:     bAlbum1,
-		AlbumId:   bAlbum1.ID,
+		ID:             1,
+		Name:           "One Step Closer",
+		SpotifyId:      "spotify:one_step",
+		Artists:        []*Artist{bArtist1},
+		SpotifyAlbum:   bAlbum1,
+		SpotifyAlbumId: bAlbum1.ID,
 	}
 	bTrack2 = &Track{
-		Model:     gorm.Model{ID: 2},
-		Name:      "In the end",
-		SpotifyId: "spotify:in_the_end",
-		Artists:   []*Artist{bArtist1},
-		Album:     bAlbum1,
-		AlbumId:   bAlbum1.ID,
+		ID:             2,
+		Name:           "In the end",
+		SpotifyId:      "spotify:in_the_end",
+		Artists:        []*Artist{bArtist1},
+		SpotifyAlbum:   bAlbum1,
+		SpotifyAlbumId: bAlbum1.ID,
 	}
 	bTrack3 = &Track{
-		Model:     gorm.Model{ID: 3},
-		Name:      "Something Comforting",
-		SpotifyId: "spotify:something_comforting",
-		Artists:   []*Artist{bArtist2},
-		Album:     bAlbum2,
-		AlbumId:   bAlbum2.ID,
+		ID:             3,
+		Name:           "Something Comforting",
+		SpotifyId:      "spotify:something_comforting",
+		Artists:        []*Artist{bArtist2},
+		SpotifyAlbum:   bAlbum2,
+		SpotifyAlbumId: bAlbum2.ID,
 	}
 )
 
@@ -116,14 +115,14 @@ func TestSaveTracks(t *testing.T) {
 	})
 }
 
-var IGNORE_TRACK_FIELDS = cmpopts.IgnoreFields(Track{}, "Model.CreatedAt", "Model.UpdatedAt", "Model.DeletedAt", "Album")
+var IGNORE_TRACK_FIELDS = cmpopts.IgnoreFields(Track{}, "SpotifyAlbum")
 
 func diffTrack(want, got *Track) string {
-	return cmp.Diff(want, got, IGNORE_ALBUM_FIELDS, IGNORE_ARTIST_FIELDS, IGNORE_TRACK_FIELDS)
+	return cmp.Diff(want, got, IGNORE_ALBUM_FIELDS, IGNORE_TRACK_FIELDS)
 }
 
 func diffTracks(want, got []*Track) string {
-	return cmp.Diff(want, got, IGNORE_ALBUM_FIELDS, IGNORE_ARTIST_FIELDS, IGNORE_TRACK_FIELDS)
+	return cmp.Diff(want, got, IGNORE_ALBUM_FIELDS, IGNORE_TRACK_FIELDS)
 }
 
 func logAllTracks(tb testing.TB, brain *Brain) int {

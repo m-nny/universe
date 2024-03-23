@@ -6,7 +6,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/zmb3/spotify/v2"
-	"gorm.io/gorm"
 )
 
 var (
@@ -32,7 +31,7 @@ var (
 		},
 	}
 	bAlbum1 = &SpotifyAlbum{
-		Model:          gorm.Model{ID: 1},
+		ID:             1,
 		Name:           "Hybrid Theory",
 		SpotifyId:      "spotify:hybrid_theory",
 		Artists:        []*Artist{bArtist1},
@@ -40,7 +39,7 @@ var (
 		MetaAlbumId:    1,
 	}
 	bAlbum2 = &SpotifyAlbum{
-		Model:          gorm.Model{ID: 2},
+		ID:             2,
 		Name:           "Hybrid Theory (20th Anniversary Edition)",
 		SpotifyId:      "spotify:hybryd_theory_20",
 		Artists:        []*Artist{bArtist1},
@@ -48,7 +47,7 @@ var (
 		MetaAlbumId:    1,
 	}
 	bAlbum3 = &SpotifyAlbum{
-		Model:          gorm.Model{ID: 3},
+		ID:             3,
 		Name:           "Nurture",
 		SpotifyId:      "spotify:nurture",
 		Artists:        []*Artist{bArtist2},
@@ -116,14 +115,14 @@ func TestToAlbums(t *testing.T) {
 	})
 }
 
-var IGNORE_ALBUM_FIELDS = cmpopts.IgnoreFields(SpotifyAlbum{}, "Model.CreatedAt", "Model.UpdatedAt", "Model.DeletedAt", "MetaAlbum")
+var IGNORE_ALBUM_FIELDS = cmpopts.IgnoreFields(SpotifyAlbum{}, "MetaAlbum")
 
 func diffAlbum(want, got *SpotifyAlbum) string {
-	return cmp.Diff(want, got, IGNORE_ALBUM_FIELDS, IGNORE_ARTIST_FIELDS)
+	return cmp.Diff(want, got, IGNORE_ALBUM_FIELDS)
 }
 
 func diffAlbums(want, got []*SpotifyAlbum) string {
-	return cmp.Diff(want, got, IGNORE_ALBUM_FIELDS, IGNORE_ARTIST_FIELDS)
+	return cmp.Diff(want, got, IGNORE_ALBUM_FIELDS)
 }
 
 func logAllAlbums(tb testing.TB, brain *Brain) int {

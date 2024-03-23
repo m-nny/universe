@@ -2,20 +2,25 @@ package brain
 
 import (
 	"github.com/zmb3/spotify/v2"
-	"gorm.io/gorm"
 )
 
 type Track struct {
-	gorm.Model
-	SpotifyId spotify.ID
-	Name      string
-	AlbumId   uint
-	Album     *SpotifyAlbum
-	Artists   []*Artist `gorm:"many2many:track_artists;"`
+	ID             uint `gorm:"primarykey"`
+	SpotifyId      spotify.ID
+	Name           string
+	SpotifyAlbumId uint
+	SpotifyAlbum   *SpotifyAlbum
+	Artists        []*Artist `gorm:"many2many:track_artists;"`
 }
 
-func newTrack(sTrack spotify.SimpleTrack, bAlbum *SpotifyAlbum, bArtists []*Artist) *Track {
-	return &Track{Name: sTrack.Name, SpotifyId: sTrack.ID, AlbumId: bAlbum.ID, Album: bAlbum, Artists: bArtists}
+func newTrack(sTrack spotify.SimpleTrack, bSpotifyAlbum *SpotifyAlbum, bArtists []*Artist) *Track {
+	return &Track{
+		Name:           sTrack.Name,
+		SpotifyId:      sTrack.ID,
+		SpotifyAlbumId: bSpotifyAlbum.ID,
+		SpotifyAlbum:   bSpotifyAlbum,
+		Artists:        bArtists,
+	}
 }
 
 // SaveTracks returns Brain representain of a spotify tracks
