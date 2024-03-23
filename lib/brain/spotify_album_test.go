@@ -37,6 +37,7 @@ var (
 		SpotifyId:      "spotify:hybrid_theory",
 		Artists:        []*Artist{bArtist1},
 		SimplifiedName: "linkin park - hybrid theory",
+		MetaAlbumId:    1,
 	}
 	bAlbum2 = &SpotifyAlbum{
 		Model:          gorm.Model{ID: 2},
@@ -44,6 +45,7 @@ var (
 		SpotifyId:      "spotify:hybryd_theory_20",
 		Artists:        []*Artist{bArtist1},
 		SimplifiedName: "linkin park - hybrid theory",
+		MetaAlbumId:    1,
 	}
 	bAlbum3 = &SpotifyAlbum{
 		Model:          gorm.Model{ID: 3},
@@ -51,6 +53,7 @@ var (
 		SpotifyId:      "spotify:nurture",
 		Artists:        []*Artist{bArtist2},
 		SimplifiedName: "porter robinson - nurture",
+		MetaAlbumId:    2,
 	}
 )
 
@@ -113,7 +116,7 @@ func TestToAlbums(t *testing.T) {
 	})
 }
 
-var IGNORE_ALBUM_FIELDS = cmpopts.IgnoreFields(SpotifyAlbum{}, "Model.CreatedAt", "Model.UpdatedAt", "Model.DeletedAt")
+var IGNORE_ALBUM_FIELDS = cmpopts.IgnoreFields(SpotifyAlbum{}, "Model.CreatedAt", "Model.UpdatedAt", "Model.DeletedAt", "MetaAlbum")
 
 func diffAlbum(want, got *SpotifyAlbum) string {
 	return cmp.Diff(want, got, IGNORE_ALBUM_FIELDS, IGNORE_ARTIST_FIELDS)

@@ -26,3 +26,7 @@ func (b *Brain) SaveArtists(sArtists []*spotify.FullArtist) ([]*Artist, error) {
 	sSimpleArtists := sliceutils.Map(sArtists, func(item *spotify.FullArtist) spotify.SimpleArtist { return item.SimpleArtist })
 	return upsertArtists(b, sSimpleArtists, bi)
 }
+
+func (b *Brain) _saveArtists(sArtists []spotify.SimpleArtist) ([]*Artist, error) {
+	return upsertArtists(b, sArtists, newBrainIndex())
+}
