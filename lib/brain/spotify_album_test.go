@@ -32,22 +32,25 @@ var (
 		},
 	}
 	bAlbum1 = &SpotifyAlbum{
-		Model:     gorm.Model{ID: 1},
-		Name:      "Hybrid Theory",
-		SpotifyId: "spotify:hybrid_theory",
-		Artists:   []*Artist{bArtist1},
+		Model:          gorm.Model{ID: 1},
+		Name:           "Hybrid Theory",
+		SpotifyId:      "spotify:hybrid_theory",
+		Artists:        []*Artist{bArtist1},
+		SimplifiedName: "linkin park - hybrid theory",
 	}
 	bAlbum2 = &SpotifyAlbum{
-		Model:     gorm.Model{ID: 2},
-		Name:      "Hybrid Theory (20th Anniversary Edition)",
-		SpotifyId: "spotify:hybryd_theory_20",
-		Artists:   []*Artist{bArtist1},
+		Model:          gorm.Model{ID: 2},
+		Name:           "Hybrid Theory (20th Anniversary Edition)",
+		SpotifyId:      "spotify:hybryd_theory_20",
+		Artists:        []*Artist{bArtist1},
+		SimplifiedName: "linkin park - hybrid theory",
 	}
 	bAlbum3 = &SpotifyAlbum{
-		Model:     gorm.Model{ID: 3},
-		Name:      "Nurture",
-		SpotifyId: "spotify:nurture",
-		Artists:   []*Artist{bArtist2},
+		Model:          gorm.Model{ID: 3},
+		Name:           "Nurture",
+		SpotifyId:      "spotify:nurture",
+		Artists:        []*Artist{bArtist2},
+		SimplifiedName: "porter robinson - nurture",
 	}
 )
 

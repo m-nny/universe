@@ -3,11 +3,11 @@ load("@rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "brain",
     srcs = [
-        "album.go",
         "albumIndex.go",
         "artist.go",
         "brain.go",
         "common.go",
+        "spotify_album.go",
         "track.go",
     ],
     importpath = "github.com/m-nny/universe/lib/brain",
@@ -25,9 +25,9 @@ go_library(
 go_test(
     name = "brain_test",
     srcs = [
-        "album_test.go",
         "artist_test.go",
         "brain_test.go",
+        "spotify_album_test.go",
         "track_test.go",
     ],
     embed = [":brain"],

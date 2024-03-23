@@ -7,7 +7,6 @@ import (
 
 	"github.com/zmb3/spotify/v2"
 
-	"github.com/m-nny/universe/lib/spotify/utils"
 	"github.com/m-nny/universe/lib/utils/sliceutils"
 )
 
@@ -17,7 +16,7 @@ import (
 //   - NOTE: it does not store all spotify.IDs of duplicated at the moment
 //   - NOTE: Does not debupe based on simplified name
 func (b *Brain) batchSaveAlbumTracks(sAlbums []spotify.SimpleAlbum, sTracks []spotify.SimpleTrack) ([]*SpotifyAlbum, []*Track, error) {
-	sAlbums = sliceutils.Unique(sAlbums, utils.SimplifiedAlbumName)
+	sAlbums = sliceutils.Unique(sAlbums, func(item spotify.SimpleAlbum) spotify.ID { return item.ID })
 	sTracks = sliceutils.Unique(sTracks, func(item spotify.SimpleTrack) spotify.ID { return item.ID })
 
 	var sArtists []spotify.SimpleArtist
@@ -34,16 +33,13 @@ func (b *Brain) batchSaveAlbumTracks(sAlbums []spotify.SimpleAlbum, sTracks []sp
 	}
 
 	var albumSIds []spotify.ID
-	var albumSimpNames []string
 	for _, sAlbum := range sAlbums {
 		albumSIds = append(albumSIds, sAlbum.ID)
-		albumSimpNames = append(albumSimpNames, utils.SimplifiedAlbumName(sAlbum))
 	}
 	var existingAlbums []*SpotifyAlbum
 	if err := b.gormDb.
 		Preload("Artists").
 		Where("spotify_id IN ?", albumSIds).
-		Or("simplified_name in ?", albumSimpNames).
 		Find(&existingAlbums).Error; err != nil {
 		return nil, nil, err
 	}
