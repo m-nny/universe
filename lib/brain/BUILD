@@ -7,6 +7,7 @@ go_library(
         "artist.go",
         "brain.go",
         "common.go",
+        "meta_album.go",
         "spotify_album.go",
         "track.go",
     ],

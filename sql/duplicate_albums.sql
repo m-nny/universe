@@ -6,8 +6,8 @@ SELECT
     B.simplified_name as b_simplified_name,
     A.spotify_id as a_spotify_id,
     B.spotify_id as b_spotify_id
-FROM albums as A
-INNER JOIN albums AS B
+FROM spotify_albums as A
+INNER JOIN spotify_albums AS B
 ON (
     a.id < b.id AND
     B.name LIKE (A.name || '%') AND
@@ -21,4 +21,4 @@ WHERE NOT (
     -- B.Name LIKE '% Reconfigured' OR
     FALSE
 )
-ORDER BY A.simplified_name, A.Name
+ORDER BY A.simplified_name, A.Name, A.spotify_id, B.spotify_id

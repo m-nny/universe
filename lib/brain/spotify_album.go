@@ -15,6 +15,8 @@ type SpotifyAlbum struct {
 	Name           string
 	Artists        []*Artist `gorm:"many2many:spotify_album_artists;"`
 	SimplifiedName string
+	MetaAlbumId    uint
+	MetaAlbum      *MetaAlbum
 }
 
 func (s *SpotifyAlbum) String() string {
@@ -24,8 +26,15 @@ func (s *SpotifyAlbum) String() string {
 	return fmt.Sprintf("%s", s.Name)
 }
 
-func newSpotifyAlbum(sAlbum spotify.SimpleAlbum, bArtists []*Artist) *SpotifyAlbum {
-	return &SpotifyAlbum{Name: sAlbum.Name, SpotifyId: sAlbum.ID, Artists: bArtists, SimplifiedName: utils.SimplifiedAlbumName(sAlbum)}
+func newSpotifyAlbum(sAlbum spotify.SimpleAlbum, bArtists []*Artist, bMetaAlbum *MetaAlbum) *SpotifyAlbum {
+	return &SpotifyAlbum{
+		Name:           sAlbum.Name,
+		SpotifyId:      sAlbum.ID,
+		Artists:        bArtists,
+		SimplifiedName: utils.SimplifiedAlbumName(sAlbum),
+		MetaAlbumId:    bMetaAlbum.ID,
+		MetaAlbum:      bMetaAlbum,
+	}
 }
 
 // SaveAlbums returns Brain representain of a spotify album
