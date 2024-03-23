@@ -10,6 +10,7 @@ type brainIndex struct {
 	artistsMap      map[spotify.ID]*Artist
 	metaAlbumMap    map[string]*MetaAlbum
 	spotifyAlbumMap map[spotify.ID]*SpotifyAlbum
+	spotifyTrackMap map[spotify.ID]*SpotifyTrack
 }
 
 func newBrainIndex() *brainIndex {
@@ -17,9 +18,11 @@ func newBrainIndex() *brainIndex {
 		artistsMap:      make(map[spotify.ID]*Artist),
 		metaAlbumMap:    make(map[string]*MetaAlbum),
 		spotifyAlbumMap: make(map[spotify.ID]*SpotifyAlbum),
+		spotifyTrackMap: make(map[spotify.ID]*SpotifyTrack),
 	}
 }
 
+// MetaAlbums
 func (ai *brainIndex) AddMetaAlbums(bMetaAlbums []*MetaAlbum) *brainIndex {
 	for _, bAlbum := range bMetaAlbums {
 		ai.metaAlbumMap[bAlbum.SimplifiedName] = bAlbum
@@ -33,6 +36,7 @@ func (ai *brainIndex) GetMetaAlbum(sAlbum spotify.SimpleAlbum) (*MetaAlbum, bool
 	return bMetaAlbum, ok
 }
 
+// SpotifyAlbums
 func (ai *brainIndex) AddSpotifyAlbums(bSpotifyAlbums []*SpotifyAlbum) *brainIndex {
 	for _, bAlbum := range bSpotifyAlbums {
 		ai.spotifyAlbumMap[bAlbum.SpotifyId] = bAlbum
@@ -45,6 +49,20 @@ func (ai *brainIndex) GetSpotifyAlbum(sAlbum spotify.SimpleAlbum) (*SpotifyAlbum
 	return bSpotifyAlbum, ok
 }
 
+// SpotifyTracks
+func (ai *brainIndex) AddSpotifyTracks(bSpotifyTracks []*SpotifyTrack) *brainIndex {
+	for _, bTrack := range bSpotifyTracks {
+		ai.spotifyTrackMap[bTrack.SpotifyId] = bTrack
+	}
+	return ai
+}
+
+func (ai *brainIndex) GetSpotifyTrack(sTrack spotify.SimpleTrack) (*SpotifyTrack, bool) {
+	bSpotifyTrack, ok := ai.spotifyTrackMap[sTrack.ID]
+	return bSpotifyTrack, ok
+}
+
+// Artist
 func (ai *brainIndex) AddArtists(bArtists []*Artist) *brainIndex {
 	for _, bArtist := range bArtists {
 		ai.artistsMap[bArtist.SpotifyId] = bArtist

@@ -3,7 +3,6 @@ package brain
 import (
 	"fmt"
 	"log"
-	"slices"
 
 	"github.com/zmb3/spotify/v2"
 
@@ -117,7 +116,7 @@ func upsertSpotifyAlbums(b *Brain, sAlbums []spotify.SimpleAlbum, bi *brainIndex
 	return append(existingSpotifyAlbums, newAlbums...), nil
 }
 
-func upsertTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*SpotifyTrack, error) {
+func upsertSpotifyTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*SpotifyTrack, error) {
 	var existingTracks []*SpotifyTrack
 	if err := b.gormDb.
 		Preload("Artists").
@@ -125,10 +124,11 @@ func upsertTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*S
 		Find(&existingTracks).Error; err != nil {
 		return nil, err
 	}
+	bi.AddSpotifyTracks(existingTracks)
 
 	var newTracks []*SpotifyTrack
 	for _, sTrack := range sTracks {
-		if slices.ContainsFunc(existingTracks, func(item *SpotifyTrack) bool { return item.SpotifyId == sTrack.ID }) {
+		if _, ok := bi.GetSpotifyTrack(sTrack); ok {
 			continue
 		}
 		bArtists, ok := bi.GetArtists(sTrack.Artists)
@@ -148,8 +148,8 @@ func upsertTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*S
 			return nil, err
 		}
 	}
-	allTracks := append(existingTracks, newTracks...)
-	return allTracks, nil
+	bi.AddSpotifyTracks(newTracks)
+	return append(existingTracks, newTracks...), nil
 }
 
 // batchSaveAlbumTracks returns Brain representain of a spotify albums and tracks
@@ -183,7 +183,7 @@ func (b *Brain) batchSaveAlbumTracks(sAlbums []spotify.SimpleAlbum, sTracks []sp
 		return nil, nil, err
 	}
 
-	allTracks, err := upsertTracks(b, sTracks, bi)
+	allTracks, err := upsertSpotifyTracks(b, sTracks, bi)
 	if err != nil {
 		return nil, nil, err
 	}
