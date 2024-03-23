@@ -9,7 +9,7 @@ go_library(
         "common.go",
         "meta_album.go",
         "spotify_album.go",
-        "track.go",
+        "spotify_track.go",
     ],
     importpath = "github.com/m-nny/universe/lib/brain",
     visibility = ["//visibility:public"],
@@ -29,7 +29,7 @@ go_test(
         "artist_test.go",
         "brain_test.go",
         "spotify_album_test.go",
-        "track_test.go",
+        "spotify_track_test.go",
     ],
     embed = [":brain"],
     deps = [

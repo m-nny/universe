@@ -117,8 +117,8 @@ func upsertSpotifyAlbums(b *Brain, sAlbums []spotify.SimpleAlbum, bi *brainIndex
 	return append(existingSpotifyAlbums, newAlbums...), nil
 }
 
-func upsertTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*Track, error) {
-	var existingTracks []*Track
+func upsertTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*SpotifyTrack, error) {
+	var existingTracks []*SpotifyTrack
 	if err := b.gormDb.
 		Preload("Artists").
 		Where("spotify_id IN ?", sliceutils.Map(sTracks, func(item spotify.SimpleTrack) spotify.ID { return item.ID })).
@@ -126,9 +126,9 @@ func upsertTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*T
 		return nil, err
 	}
 
-	var newTracks []*Track
+	var newTracks []*SpotifyTrack
 	for _, sTrack := range sTracks {
-		if slices.ContainsFunc(existingTracks, func(item *Track) bool { return item.SpotifyId == sTrack.ID }) {
+		if slices.ContainsFunc(existingTracks, func(item *SpotifyTrack) bool { return item.SpotifyId == sTrack.ID }) {
 			continue
 		}
 		bArtists, ok := bi.GetArtists(sTrack.Artists)
@@ -141,7 +141,7 @@ func upsertTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*T
 			log.Printf("WTF sTrack: %v", sTrack)
 			return nil, fmt.Errorf("could not find album for %s, but it should be there", sTrack.Name)
 		}
-		newTracks = append(newTracks, newTrack(sTrack, bSpotifyAlbum, bArtists))
+		newTracks = append(newTracks, newSpotifyTrack(sTrack, bSpotifyAlbum, bArtists))
 	}
 	if len(newTracks) > 0 {
 		if err := b.gormDb.Create(newTracks).Error; err != nil {
@@ -157,7 +157,7 @@ func upsertTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*T
 //   - It will deduplicate returned albums base on spotify.ID, this may result in len(result) < len(sAlbums)
 //   - NOTE: it does not store all spotify.IDs of duplicated at the moment
 //   - NOTE: Does not debupe based on simplified name
-func (b *Brain) batchSaveAlbumTracks(sAlbums []spotify.SimpleAlbum, sTracks []spotify.SimpleTrack) ([]*SpotifyAlbum, []*Track, error) {
+func (b *Brain) batchSaveAlbumTracks(sAlbums []spotify.SimpleAlbum, sTracks []spotify.SimpleTrack) ([]*SpotifyAlbum, []*SpotifyTrack, error) {
 	sAlbums = sliceutils.Unique(sAlbums, func(item spotify.SimpleAlbum) spotify.ID { return item.ID })
 	sTracks = sliceutils.Unique(sTracks, func(item spotify.SimpleTrack) spotify.ID { return item.ID })
 

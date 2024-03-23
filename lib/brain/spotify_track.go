@@ -4,7 +4,7 @@ import (
 	"github.com/zmb3/spotify/v2"
 )
 
-type Track struct {
+type SpotifyTrack struct {
 	ID             uint `gorm:"primarykey"`
 	SpotifyId      spotify.ID
 	Name           string
@@ -13,8 +13,8 @@ type Track struct {
 	Artists        []*Artist `gorm:"many2many:track_artists;"`
 }
 
-func newTrack(sTrack spotify.SimpleTrack, bSpotifyAlbum *SpotifyAlbum, bArtists []*Artist) *Track {
-	return &Track{
+func newSpotifyTrack(sTrack spotify.SimpleTrack, bSpotifyAlbum *SpotifyAlbum, bArtists []*Artist) *SpotifyTrack {
+	return &SpotifyTrack{
 		Name:           sTrack.Name,
 		SpotifyId:      sTrack.ID,
 		SpotifyAlbumId: bSpotifyAlbum.ID,
@@ -27,7 +27,7 @@ func newTrack(sTrack spotify.SimpleTrack, bSpotifyAlbum *SpotifyAlbum, bArtists 
 //   - It will create new entries in DB if necessary
 //   - It will deduplicate returned albums, this may result in len(result) < len(sTracks)
 //   - NOTE: Does not debupe based on simplified name
-func (b *Brain) SaveTracks(savedTracks []spotify.SavedTrack) ([]*Track, error) {
+func (b *Brain) SaveTracks(savedTracks []spotify.SavedTrack) ([]*SpotifyTrack, error) {
 	var sAlbums []spotify.SimpleAlbum
 	var sTracks []spotify.SimpleTrack
 	for _, sTrack := range savedTracks {

@@ -39,7 +39,7 @@ var (
 			},
 		},
 	}
-	bTrack1 = &Track{
+	bTrack1 = &SpotifyTrack{
 		ID:             1,
 		Name:           "One Step Closer",
 		SpotifyId:      "spotify:one_step",
@@ -47,7 +47,7 @@ var (
 		SpotifyAlbum:   bAlbum1,
 		SpotifyAlbumId: bAlbum1.ID,
 	}
-	bTrack2 = &Track{
+	bTrack2 = &SpotifyTrack{
 		ID:             2,
 		Name:           "In the end",
 		SpotifyId:      "spotify:in_the_end",
@@ -55,7 +55,7 @@ var (
 		SpotifyAlbum:   bAlbum1,
 		SpotifyAlbumId: bAlbum1.ID,
 	}
-	bTrack3 = &Track{
+	bTrack3 = &SpotifyTrack{
 		ID:             3,
 		Name:           "Something Comforting",
 		SpotifyId:      "spotify:something_comforting",
@@ -72,7 +72,7 @@ func TestSaveTracks(t *testing.T) {
 			t.Fatalf("sqlite db is not clean")
 		}
 
-		want1 := []*Track{bTrack1, bTrack2}
+		want1 := []*SpotifyTrack{bTrack1, bTrack2}
 		got1, err := brain.SaveTracks([]spotify.SavedTrack{sTrack1, sTrack2})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
@@ -95,7 +95,7 @@ func TestSaveTracks(t *testing.T) {
 			t.Fatalf("sqlite db is not clean")
 		}
 
-		want1 := []*Track{bTrack1}
+		want1 := []*SpotifyTrack{bTrack1}
 		got1, err := brain.SaveTracks([]spotify.SavedTrack{sTrack1})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
@@ -104,7 +104,7 @@ func TestSaveTracks(t *testing.T) {
 			t.Errorf("SaveTracks() mismatch (-want +got):\n%s", diff)
 		}
 
-		want2 := []*Track{bTrack2}
+		want2 := []*SpotifyTrack{bTrack2}
 		got2, err := brain.SaveTracks([]spotify.SavedTrack{sTrack2})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
@@ -115,18 +115,18 @@ func TestSaveTracks(t *testing.T) {
 	})
 }
 
-var IGNORE_TRACK_FIELDS = cmpopts.IgnoreFields(Track{}, "SpotifyAlbum")
+var IGNORE_TRACK_FIELDS = cmpopts.IgnoreFields(SpotifyTrack{}, "SpotifyAlbum")
 
-func diffTrack(want, got *Track) string {
+func diffTrack(want, got *SpotifyTrack) string {
 	return cmp.Diff(want, got, IGNORE_ALBUM_FIELDS, IGNORE_TRACK_FIELDS)
 }
 
-func diffTracks(want, got []*Track) string {
+func diffTracks(want, got []*SpotifyTrack) string {
 	return cmp.Diff(want, got, IGNORE_ALBUM_FIELDS, IGNORE_TRACK_FIELDS)
 }
 
 func logAllTracks(tb testing.TB, brain *Brain) int {
-	var allTracks []Track
+	var allTracks []SpotifyTrack
 	if err := brain.gormDb.Find(&allTracks).Error; err != nil {
 		tb.Fatalf("err: %v", err)
 	}

@@ -34,7 +34,7 @@ func (s *Service) GetUserTracks(ctx context.Context, username string) ([]spotify
 	return rawTracks, nil
 }
 
-func (s *Service) GetUserTracksGorm(ctx context.Context, username string) ([]*brain.Track, error) {
+func (s *Service) GetUserTracksGorm(ctx context.Context, username string) ([]*brain.SpotifyTrack, error) {
 	savedTracks, err := s.GetUserTracks(ctx, username)
 	if err != nil {
 		return nil, err
