@@ -9,8 +9,8 @@ import (
 	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/ent/album"
 	"github.com/m-nny/universe/lib/jsoncache"
-	"github.com/m-nny/universe/lib/spotify/utils"
 	"github.com/m-nny/universe/lib/utils/sliceutils"
+	utils "github.com/m-nny/universe/lib/utils/spotifyutils"
 )
 
 func (s *Service) SearchAlbum(ctx context.Context, q string) ([]*ent.Album, error) {

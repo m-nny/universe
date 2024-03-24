@@ -10,7 +10,7 @@ go_library(
         "//ent/artist",
         "//lib/discsearch",
         "//lib/spotify",
-        "//lib/spotify/utils",
+        "//lib/utils/spotifyutils",
         "@io_entgo_ent//dialect/sql",
     ],
 )

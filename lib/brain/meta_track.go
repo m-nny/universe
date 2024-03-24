@@ -5,7 +5,7 @@ import (
 
 	"github.com/zmb3/spotify/v2"
 
-	"github.com/m-nny/universe/lib/spotify/utils"
+	utils "github.com/m-nny/universe/lib/utils/spotifyutils"
 )
 
 type MetaTrack struct {

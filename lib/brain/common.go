@@ -6,8 +6,8 @@ import (
 
 	"github.com/zmb3/spotify/v2"
 
-	"github.com/m-nny/universe/lib/spotify/utils"
 	"github.com/m-nny/universe/lib/utils/sliceutils"
+	utils "github.com/m-nny/universe/lib/utils/spotifyutils"
 )
 
 func upsertArtists(b *Brain, sArtists []spotify.SimpleArtist, bi *brainIndex) ([]*Artist, error) {

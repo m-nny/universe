@@ -8,8 +8,8 @@ import (
 
 	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/ent/track"
-	"github.com/m-nny/universe/lib/spotify/utils"
 	"github.com/m-nny/universe/lib/utils/sliceutils"
+	utils "github.com/m-nny/universe/lib/utils/spotifyutils"
 )
 
 func (s *Service) ToTracksSaved(ctx context.Context, tracks []spotify.SavedTrack, username string) ([]*ent.Track, error) {

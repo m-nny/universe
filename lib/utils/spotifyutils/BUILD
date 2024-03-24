@@ -1,13 +1,13 @@
 load("@rules_go//go:def.bzl", "go_library")
 
 go_library(
-    name = "utils",
+    name = "spotifyutils",
     srcs = [
         "album.go",
         "artist.go",
         "track.go",
     ],
-    importpath = "github.com/m-nny/universe/lib/spotify/utils",
+    importpath = "github.com/m-nny/universe/lib/utils/spotifyutils",
     visibility = ["//visibility:public"],
     deps = [
         "//lib/utils/sliceutils",

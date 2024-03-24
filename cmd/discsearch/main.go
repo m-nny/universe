@@ -12,7 +12,7 @@ import (
 	"github.com/m-nny/universe/ent/artist"
 	"github.com/m-nny/universe/lib/discsearch"
 	"github.com/m-nny/universe/lib/spotify"
-	spotifyutils "github.com/m-nny/universe/lib/spotify/utils"
+	"github.com/m-nny/universe/lib/utils/spotifyutils"
 )
 
 const username = "m-nny"
