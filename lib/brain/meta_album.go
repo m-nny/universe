@@ -11,6 +11,7 @@ import (
 type MetaAlbum struct {
 	ID             uint `gorm:"primarykey"`
 	SimplifiedName string
+	Artists        []*Artist `gorm:"many2many:meta_album_artists;"`
 }
 
 func (s *MetaAlbum) String() string {
@@ -20,8 +21,11 @@ func (s *MetaAlbum) String() string {
 	return fmt.Sprintf("%s", s.SimplifiedName)
 }
 
-func newMetaAlbum(sAlbum spotify.SimpleAlbum) *MetaAlbum {
-	return &MetaAlbum{SimplifiedName: utils.SimplifiedAlbumName(sAlbum)}
+func newMetaAlbum(sAlbum spotify.SimpleAlbum, bArtists []*Artist) *MetaAlbum {
+	return &MetaAlbum{
+		SimplifiedName: utils.SimplifiedAlbumName(sAlbum),
+		Artists:        bArtists,
+	}
 }
 
 func (b *Brain) MetaAlbumCount() (int, error) {

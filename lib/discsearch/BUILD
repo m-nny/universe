@@ -4,8 +4,8 @@ go_library(
     name = "discsearch",
     srcs = [
         "discsearch.go",
+        "listing_release.go",
         "marketplace.go",
-        "master.go",
     ],
     data = [
         "//:dotenv",

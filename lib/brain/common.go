@@ -64,7 +64,12 @@ func upsertMetaAlbums(b *Brain, sAlbums []spotify.SimpleAlbum, bi *brainIndex) (
 		if _, ok := bi.GetMetaAlbum(sAlbum); ok {
 			continue
 		}
-		newAlbums = append(newAlbums, newMetaAlbum(sAlbum))
+		bArtists, ok := bi.GetArtists(sAlbum.Artists)
+		if !ok {
+			log.Printf("WTF sAlbum: %v", sAlbum)
+			return nil, fmt.Errorf("could not get artists for %s, but it should be there", sAlbum.Name)
+		}
+		newAlbums = append(newAlbums, newMetaAlbum(sAlbum, bArtists))
 	}
 	if len(newAlbums) == 0 {
 		return existingMetaAlbums, nil
