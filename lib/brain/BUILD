@@ -31,8 +31,8 @@ go_test(
     srcs = [
         "artist_test.go",
         "brain_test.go",
-        "spotify_album_test.go",
-        "spotify_track_test.go",
+        "meta_album_test.go",
+        "meta_track_test.go",
     ],
     embed = [":brain"],
     deps = [

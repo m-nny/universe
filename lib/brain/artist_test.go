@@ -8,20 +8,20 @@ import (
 )
 
 var (
-	sArtist1 = spotify.SimpleArtist{
+	sArtistLP = spotify.SimpleArtist{
 		ID:   "spotify:linkin_park",
 		Name: "Linkin Park",
 	}
-	sArtist2 = spotify.SimpleArtist{
+	sArtistPR = spotify.SimpleArtist{
 		ID:   "spotify:porter_robinson",
 		Name: "Porter Robinson",
 	}
-	bArtist1 = &Artist{
+	bArtistLP = &Artist{
 		ID:        1,
 		Name:      "Linkin Park",
 		SpotifyId: "spotify:linkin_park",
 	}
-	bArtist2 = &Artist{
+	bArtistPR = &Artist{
 		ID:        2,
 		Name:      "Porter Robinson",
 		SpotifyId: "spotify:porter_robinson",
@@ -35,8 +35,8 @@ func Test_saveArtists(t *testing.T) {
 			t.Fatalf("sqlite db is not clean")
 		}
 
-		want1 := []*Artist{bArtist1, bArtist2}
-		got1, err := brain._saveArtists([]spotify.SimpleArtist{sArtist1, sArtist2})
+		want1 := []*Artist{bArtistLP, bArtistPR}
+		got1, err := brain._saveArtists([]spotify.SimpleArtist{sArtistLP, sArtistPR})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -45,7 +45,7 @@ func Test_saveArtists(t *testing.T) {
 		}
 		logAllArtists(t, brain)
 
-		got2, err := brain._saveArtists([]spotify.SimpleArtist{sArtist1, sArtist2})
+		got2, err := brain._saveArtists([]spotify.SimpleArtist{sArtistLP, sArtistPR})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -60,8 +60,8 @@ func Test_saveArtists(t *testing.T) {
 			t.Fatalf("sqlite db is not clean")
 		}
 
-		want1 := []*Artist{bArtist1}
-		got1, err := brain._saveArtists([]spotify.SimpleArtist{sArtist1})
+		want1 := []*Artist{bArtistLP}
+		got1, err := brain._saveArtists([]spotify.SimpleArtist{sArtistLP})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -70,8 +70,8 @@ func Test_saveArtists(t *testing.T) {
 		}
 		logAllArtists(t, brain)
 
-		want2 := []*Artist{bArtist1, bArtist2}
-		got2, err := brain._saveArtists([]spotify.SimpleArtist{sArtist1, sArtist1, sArtist2, sArtist2})
+		want2 := []*Artist{bArtistLP, bArtistPR}
+		got2, err := brain._saveArtists([]spotify.SimpleArtist{sArtistLP, sArtistLP, sArtistPR, sArtistPR})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
