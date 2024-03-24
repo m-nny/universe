@@ -5,12 +5,12 @@ import (
 	"log"
 	"os"
 	"path"
-	"path/filepath"
 )
 
 var cacheDir = func() string {
-	res, _ := filepath.Abs("./data/cache")
-	return res
+	dir := "./data/cache"
+	// dir, _ = filepath.Abs(dir)
+	return dir
 }()
 
 func cacheFile(key string) string {

@@ -7,6 +7,7 @@ go_library(
         "brain.go",
         "brainIndex.go",
         "common.go",
+        "discogs_release.go",
         "meta_album.go",
         "meta_track.go",
         "spotify_album.go",
@@ -16,6 +17,7 @@ go_library(
     importpath = "github.com/m-nny/universe/lib/brain",
     visibility = ["//visibility:public"],
     deps = [
+        "//lib/discogs",
         "//lib/utils/sliceutils",
         "//lib/utils/spotifyutils",
         "@com_github_zmb3_spotify_v2//:spotify",
