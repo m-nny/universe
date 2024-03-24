@@ -10,7 +10,6 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/mattn/go-sqlite3"
 
-	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/lib/brain"
 	"github.com/m-nny/universe/lib/discogs"
 	"github.com/m-nny/universe/lib/spotify"
@@ -56,22 +55,6 @@ func getDbPath(db string) (string, error) {
 		return "", err
 	}
 	return databasePath, nil
-}
-
-func getEntClient() (*ent.Client, error) {
-	databasePath, err := getDbPath("ent")
-	if err != nil {
-		return nil, err
-	}
-	client, err := ent.Open("sqlite3", fmt.Sprintf("file:%s?cache=shared&_fk=1", databasePath))
-	if err != nil {
-		return nil, fmt.Errorf("failed opening connection to sqlite: %w", err)
-	}
-	// Run the auto migration tool.
-	if err := client.Schema.Create(context.Background()); err != nil {
-		return nil, fmt.Errorf("failed creating schema resources: %w", err)
-	}
-	return client, nil
 }
 
 func getBrain() (*brain.Brain, error) {

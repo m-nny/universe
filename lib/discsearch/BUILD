@@ -15,7 +15,6 @@ go_library(
     importpath = "github.com/m-nny/universe/lib/discsearch",
     visibility = ["//visibility:public"],
     deps = [
-        "//ent",
         "//lib/brain",
         "//lib/discogs",
         "//lib/spotify",
