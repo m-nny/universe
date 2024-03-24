@@ -177,18 +177,18 @@ func benchGetUserTracks(ctx context.Context, app *discsearch.App) error {
 	log.Printf("==========================")
 	log.Printf("ent.ToTracksSaved")
 	start = time.Now()
-	entTracks, err := app.Spotify.ToTracksSaved(ctx, userTracks, username)
+	entTracks, err := app.SpotifyEnt.ToTracksSaved(ctx, userTracks, username)
 	if err != nil {
 		return fmt.Errorf("error getting all tracks: %w", err)
 	}
 	log.Printf("finished in %s", time.Since(start))
 	log.Printf("returned %d tracks", len(entTracks))
-	entTrackCnt, err := app.Spotify.EntTrackCount(ctx)
+	entTrackCnt, err := app.SpotifyEnt.EntTrackCount(ctx)
 	if err != nil {
 		return err
 	}
 	log.Printf("track cnt in db: %d", entTrackCnt)
-	entAlbumCnt, err := app.Spotify.EntAlbumCount(ctx)
+	entAlbumCnt, err := app.SpotifyEnt.EntAlbumCount(ctx)
 	if err != nil {
 		return err
 	}

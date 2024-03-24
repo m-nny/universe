@@ -15,7 +15,6 @@ import (
 type ID = spotify.ID
 
 type Service struct {
-	ent     *ent.Client
 	brain   *brain.Brain
 	spotify *spotify.Client
 }
@@ -61,7 +60,6 @@ func New(ctx context.Context, ent *ent.Client, brain *brain.Brain, username stri
 	}
 	client := spotify.New(auth.Client(ctx, token))
 	return &Service{
-		ent:     ent,
 		brain:   brain,
 		spotify: client,
 	}, nil
