@@ -1,6 +1,7 @@
 package brain
 
 import (
+	"context"
 	"encoding/json"
 
 	"golang.org/x/oauth2"
@@ -32,7 +33,7 @@ func newUser(username string, spotifyToken *oauth2.Token) (*User, error) {
 	}, nil
 }
 
-func (b *Brain) GetSpotifyToken(username string) (*oauth2.Token, error) {
+func (b *Brain) GetSpotifyToken(ctx context.Context, username string) (*oauth2.Token, error) {
 	var user User
 	if err := b.gormDb.Where("username = ?", username).First(&user).Error; err != nil {
 		return nil, err
@@ -40,7 +41,7 @@ func (b *Brain) GetSpotifyToken(username string) (*oauth2.Token, error) {
 	return user.SpotifyToken()
 }
 
-func (b *Brain) StoreSpotifyToken(username string, spotifyToken *oauth2.Token) error {
+func (b *Brain) StoreSpotifyToken(ctx context.Context, username string, spotifyToken *oauth2.Token) error {
 	user, err := newUser(username, spotifyToken)
 	if err != nil {
 		return err

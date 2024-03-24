@@ -43,7 +43,7 @@ func LoadConfig() (*Config, error) {
 	return c, nil
 }
 
-func New(ctx context.Context, tokenStorage token.TokenStorage, brain *brain.Brain, username string) (*Service, error) {
+func New(ctx context.Context, brain *brain.Brain, username string) (*Service, error) {
 	config, err := LoadConfig()
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func New(ctx context.Context, tokenStorage token.TokenStorage, brain *brain.Brai
 		spotifyauth.WithRedirectURL(config.RedirectUrl),
 		spotifyauth.WithScopes(spotifyauth.ScopeUserLibraryRead),
 	)
-	token, err := token.GetToken(ctx, auth, ":3000", tokenStorage, username)
+	token, err := token.GetToken(ctx, auth, ":3000", brain, username)
 	if err != nil {
 		return nil, err
 	}

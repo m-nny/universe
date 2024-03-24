@@ -9,6 +9,7 @@ import (
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 
 	"github.com/m-nny/universe/ent"
+	"github.com/m-nny/universe/lib/spotify/token"
 )
 
 type ID = spotify.ID
@@ -53,7 +54,8 @@ func New(ctx context.Context, ent *ent.Client, username string) (*Service, error
 		spotifyauth.WithRedirectURL(config.RedirectUrl),
 		spotifyauth.WithScopes(spotifyauth.ScopeUserLibraryRead),
 	)
-	token, err := getTokenCached(ctx, auth, ent, username)
+	tokenStorage := token.NewEntTokenStorage(ent)
+	token, err := token.GetToken(ctx, auth, ":3000", tokenStorage, username)
 	if err != nil {
 		return nil, err
 	}
