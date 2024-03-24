@@ -7,7 +7,6 @@ import (
 
 	"github.com/zmb3/spotify/v2"
 
-	"github.com/m-nny/universe/lib/brain"
 	"github.com/m-nny/universe/lib/jsoncache"
 )
 
@@ -31,12 +30,4 @@ func (s *Service) GetUserTracks(ctx context.Context, username string) ([]spotify
 		return nil, err
 	}
 	return rawTracks, nil
-}
-
-func (s *Service) GetUserTracksGorm(ctx context.Context, username string) ([]*brain.SpotifyTrack, error) {
-	savedTracks, err := s.GetUserTracks(ctx, username)
-	if err != nil {
-		return nil, err
-	}
-	return s.brain.SaveTracks(savedTracks)
 }

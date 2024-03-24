@@ -32,24 +32,6 @@ func newSpotifyTrack(sTrack spotify.SimpleTrack, bSpotifyAlbum *SpotifyAlbum, bA
 	}
 }
 
-// SaveTracks returns Brain representain of a spotify tracks
-//   - It will create new entries in DB if necessary
-//   - It will deduplicate returned albums, this may result in len(result) < len(sTracks)
-//   - NOTE: Does not debupe based on simplified name
-func (b *Brain) SaveTracks(savedTracks []spotify.SavedTrack) ([]*SpotifyTrack, error) {
-	var sAlbums []spotify.SimpleAlbum
-	var sTracks []spotify.SimpleTrack
-	for _, sTrack := range savedTracks {
-		sAlbums = append(sAlbums, sTrack.Album)
-
-		// we are using sTrack.Album to associate it with bAlbum later
-		sTrack.SimpleTrack.Album = sTrack.Album
-		sTracks = append(sTracks, sTrack.SimpleTrack)
-	}
-	_, tracks, err := b.batchSaveAlbumTracks(sAlbums, sTracks)
-	return tracks, err
-}
-
 func upsertSpotifyTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*SpotifyTrack, error) {
 	var existingTracks []*SpotifyTrack
 	if err := b.gormDb.

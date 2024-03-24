@@ -7,24 +7,23 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/m-nny/universe/ent"
+	"github.com/m-nny/universe/lib/brain"
 	"github.com/m-nny/universe/lib/discogs"
 	"github.com/m-nny/universe/lib/utils/sliceutils"
 )
 
-func (a *App) ListingRelease(ctx context.Context, release discogs.ListingRelease) (*ent.Album, error) {
+func (a *App) ListingRelease(ctx context.Context, release discogs.ListingRelease) (*brain.MetaAlbum, error) {
 	q := sanitizeQ(fmt.Sprintf("%s %s", release.Artist, release.Title))
 	log.Printf("q: %v", q)
-	salbums, err := a.Spotify.SearchAlbum(ctx, q)
+	sAlbums, err := a.Spotify.SearchAlbum(ctx, q)
 	if err != nil {
 		return nil, err
 	}
-	albums, err := a.SpotifyEnt.ToAlbums(ctx, salbums)
+	bAlbums, err := a.Brain.SaveSimpleAlbums(sAlbums)
 	if err != nil {
 		return nil, err
 	}
-	albums = sliceutils.Unique(albums, func(item *ent.Album) string { return fmt.Sprintf("%d", item.ID) })
-	result, err := mostSimilarAlbum(ctx, release, albums)
+	result, err := mostSimilarAlbum(release, bAlbums)
 	if err != nil {
 		return nil, err
 	}
@@ -43,29 +42,25 @@ func sanitizeQ(q string) string {
 	return sanitizeRgx.ReplaceAllString(q, "")
 }
 
-func mostSimilarAlbum(ctx context.Context, dRelease discogs.ListingRelease, eAlbums []*ent.Album) (*ent.Album, error) {
-	var result *ent.Album
+func mostSimilarAlbum(dRelease discogs.ListingRelease, bAlbums []*brain.MetaAlbum) (*brain.MetaAlbum, error) {
+	var result *brain.MetaAlbum
 	maxScore := 0
-	for _, eAlbum := range eAlbums {
-		if len(eAlbum.Edges.Artists) == 0 {
-			artists, err := eAlbum.QueryArtists().All(ctx)
-			if err != nil {
-				return nil, err
-			}
-			eAlbum.Edges.Artists = artists
+	for _, bAlbum := range bAlbums {
+		if len(bAlbum.Artists) == 0 {
+			return nil, fmt.Errorf("Albums should have artists populated")
 		}
-		score := albumSimilarity(dRelease, eAlbum)
+		score := albumSimilarity(dRelease, bAlbum)
 		if score > maxScore {
 			maxScore = score
-			result = eAlbum
+			result = bAlbum
 		}
 	}
 	return result, nil
 }
 
-func albumSimilarity(dRelease discogs.ListingRelease, eAlbum *ent.Album) int {
-	artistScore := sliceutils.Sum(eAlbum.Edges.Artists, func(e *ent.Artist) int { return similaryScore(dRelease.Artist, e.Name) })
-	titleScore := similaryScore(dRelease.Title, eAlbum.Name)
+func albumSimilarity(dRelease discogs.ListingRelease, eAlbum *brain.MetaAlbum) int {
+	artistScore := sliceutils.Sum(eAlbum.Artists, func(e *brain.Artist) int { return similaryScore(dRelease.Artist, e.Name) })
+	titleScore := similaryScore(dRelease.Title, eAlbum.AnyName)
 	return artistScore + titleScore
 }
 

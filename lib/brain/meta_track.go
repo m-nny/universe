@@ -15,6 +15,7 @@ type MetaTrack struct {
 	SimplifiedName string
 	MetaAlbumID    uint
 	MetaAlbum      *MetaAlbum
+	Artists        []*Artist `gorm:"many2many:meta_track_artists;"`
 }
 
 func (s *MetaTrack) String() string {
@@ -24,7 +25,7 @@ func (s *MetaTrack) String() string {
 	return fmt.Sprintf("%s", s.SimplifiedName)
 }
 
-func newMetaTrack(sTrack spotify.SimpleTrack, bMetaAlbum *MetaAlbum) *MetaTrack {
+func newMetaTrack(sTrack spotify.SimpleTrack, bMetaAlbum *MetaAlbum, bArtists []*Artist) *MetaTrack {
 	return &MetaTrack{
 		SimplifiedName: utils.SimplifiedTrackName(sTrack, bMetaAlbum.SimplifiedName),
 		MetaAlbumID:    bMetaAlbum.ID,
@@ -69,7 +70,12 @@ func upsertMetaTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex) (
 			log.Printf("WTF sTrack: %v", sTrack)
 			return nil, fmt.Errorf("could not find meta album for %s, but it should be there", sTrack.Name)
 		}
-		newTracks = append(newTracks, newMetaTrack(sTrack, bMetaAlbum))
+		bArtists, ok := bi.GetArtists(sTrack.Artists)
+		if !ok {
+			log.Printf("WTF sTrack: %v", sTrack)
+			return nil, fmt.Errorf("could not find meta album for %s, but it should be there", sTrack.Name)
+		}
+		newTracks = append(newTracks, newMetaTrack(sTrack, bMetaAlbum, bArtists))
 	}
 	if len(newTracks) == 0 {
 		return existingMetaTracks, nil
@@ -79,4 +85,24 @@ func upsertMetaTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex) (
 	}
 	bi.AddMetaTracks(newTracks)
 	return append(existingMetaTracks, newTracks...), nil
+}
+
+// SaveTracks returns Brain representain of a spotify tracks
+//   - It will create new entries in DB if necessary
+//   - It will deduplicate returned albums, this may result in len(result) < len(sTracks)
+//   - NOTE: Does not debupe based on simplified name
+func (b *Brain) SaveTracks(savedTracks []spotify.SavedTrack) ([]*MetaTrack, error) {
+	var sAlbums []spotify.SimpleAlbum
+	var sTracks []spotify.SimpleTrack
+	for _, sFullTrack := range savedTracks {
+		sAlbums = append(sAlbums, sFullTrack.Album)
+
+		// we are using sTrack.Album to associate it with bAlbum later
+		sTrack := sFullTrack.SimpleTrack
+		sTrack.Album = sFullTrack.Album
+
+		sTracks = append(sTracks, sTrack)
+	}
+	_, tracks, err := b.batchSaveAlbumTracks(sAlbums, sTracks)
+	return tracks, err
 }

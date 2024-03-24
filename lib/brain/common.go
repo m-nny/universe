@@ -11,7 +11,7 @@ import (
 //   - It will deduplicate returned albums base on spotify.ID, this may result in len(result) < len(sAlbums)
 //   - NOTE: it does not store all spotify.IDs of duplicated at the moment
 //   - NOTE: Does not debupe based on simplified name
-func (b *Brain) batchSaveAlbumTracks(sAlbums []spotify.SimpleAlbum, sTracks []spotify.SimpleTrack) ([]*SpotifyAlbum, []*SpotifyTrack, error) {
+func (b *Brain) batchSaveAlbumTracks(sAlbums []spotify.SimpleAlbum, sTracks []spotify.SimpleTrack) ([]*MetaAlbum, []*MetaTrack, error) {
 	sAlbums = sliceutils.Unique(sAlbums, func(item spotify.SimpleAlbum) spotify.ID { return item.ID })
 	sTracks = sliceutils.Unique(sTracks, func(item spotify.SimpleTrack) spotify.ID { return item.ID })
 
@@ -29,20 +29,20 @@ func (b *Brain) batchSaveAlbumTracks(sAlbums []spotify.SimpleAlbum, sTracks []sp
 		return nil, nil, err
 	}
 
-	if _, err := upsertMetaAlbums(b, sAlbums, bi); err != nil {
+	metaAlbums, err := upsertMetaAlbums(b, sAlbums, bi)
+	if err != nil {
 		return nil, nil, err
 	}
-	allAlbums, err := upsertSpotifyAlbums(b, sAlbums, bi)
-	if err != nil {
+	if _, err := upsertSpotifyAlbums(b, sAlbums, bi); err != nil {
 		return nil, nil, err
 	}
 
-	if _, err := upsertMetaTracks(b, sTracks, bi); err != nil {
-		return nil, nil, err
-	}
-	allTracks, err := upsertSpotifyTracks(b, sTracks, bi)
+	metaTracks, err := upsertMetaTracks(b, sTracks, bi)
 	if err != nil {
 		return nil, nil, err
 	}
-	return allAlbums, allTracks, nil
+	if _, err := upsertSpotifyTracks(b, sTracks, bi); err != nil {
+		return nil, nil, err
+	}
+	return metaAlbums, metaTracks, nil
 }
