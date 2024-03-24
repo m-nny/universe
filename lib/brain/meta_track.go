@@ -30,6 +30,7 @@ func newMetaTrack(sTrack spotify.SimpleTrack, bMetaAlbum *MetaAlbum, bArtists []
 		SimplifiedName: utils.SimplifiedTrackName(sTrack, bMetaAlbum.SimplifiedName),
 		MetaAlbumID:    bMetaAlbum.ID,
 		MetaAlbum:      bMetaAlbum,
+		Artists:        bArtists,
 	}
 }
 
@@ -53,6 +54,7 @@ func upsertMetaTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex) (
 
 	var existingMetaTracks []*MetaTrack
 	if err := b.gormDb.
+		Preload("Artists").
 		Where("simplified_name IN ?", trackSimps).
 		Find(&existingMetaTracks).Error; err != nil {
 		return nil, err
@@ -95,12 +97,16 @@ func (b *Brain) SaveTracks(savedTracks []spotify.SavedTrack) ([]*MetaTrack, erro
 	var sAlbums []spotify.SimpleAlbum
 	var sTracks []spotify.SimpleTrack
 	for _, sFullTrack := range savedTracks {
-		sAlbums = append(sAlbums, sFullTrack.Album)
+		sAlbum := sFullTrack.Album
+		if sAlbum.ID == "" {
+			sAlbum = sFullTrack.SimpleTrack.Album
+		}
 
 		// we are using sTrack.Album to associate it with bAlbum later
 		sTrack := sFullTrack.SimpleTrack
-		sTrack.Album = sFullTrack.Album
+		sTrack.Album = sAlbum
 
+		sAlbums = append(sAlbums, sAlbum)
 		sTracks = append(sTracks, sTrack)
 	}
 	_, tracks, err := b.batchSaveAlbumTracks(sAlbums, sTracks)

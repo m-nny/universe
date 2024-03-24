@@ -1,6 +1,7 @@
 package brain
 
 import (
+	"log"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -9,65 +10,59 @@ import (
 )
 
 var (
-	sTrack1 = spotify.SavedTrack{
+	sTrackOS = spotify.SavedTrack{
 		FullTrack: spotify.FullTrack{
 			SimpleTrack: spotify.SimpleTrack{
-				ID:          ("spotify:one_step"),
+				ID:          "spotify:one_step",
 				Name:        "One Step Closer",
 				TrackNumber: 2,
 				Artists:     []spotify.SimpleArtist{sArtistLP},
-				Album:       sAlbumHT.SimpleAlbum,
 			},
+			Album: sAlbumHT.SimpleAlbum,
 		},
 	}
-	sTrack2 = spotify.SavedTrack{
+	sTrackITE = spotify.SavedTrack{
 		FullTrack: spotify.FullTrack{
 			SimpleTrack: spotify.SimpleTrack{
-				ID:          ("spotify:in_the_end"),
+				ID:          "spotify:in_the_end",
 				Name:        "In the end",
 				TrackNumber: 8,
 				Artists:     []spotify.SimpleArtist{sArtistLP},
-				Album:       sAlbumHT.SimpleAlbum,
 			},
+			Album: sAlbumHT.SimpleAlbum,
 		},
 	}
-	sTrack3 = spotify.SavedTrack{
+	sTrackSC = spotify.SavedTrack{
 		FullTrack: spotify.FullTrack{
 			SimpleTrack: spotify.SimpleTrack{
-				ID:          ("spotify:something_comforting"),
+				ID:          "spotify:something_comforting",
 				Name:        "Something Comforting",
 				TrackNumber: 11,
 				Artists:     []spotify.SimpleArtist{sArtistPR},
-				Album:       sAlbumN.SimpleAlbum,
 			},
+			Album: sAlbumN.SimpleAlbum,
 		},
 	}
-	bTrack1 = &MetaTrack{
-		ID: 1,
-		// Name:           "One Step Closer",
-		// SpotifyId:      "spotify:one_step",
-		Artists: []*Artist{bArtistLP},
-		// SpotifyAlbum:   bAlbum1,
-		// SpotifyAlbumId: bAlbum1.ID,
-		// MetaTrackId:    1,
+	bTrackOS = &MetaTrack{
+		ID:             1,
+		Artists:        []*Artist{bArtistLP},
+		SimplifiedName: bMetaAlbumHT.SimplifiedName + " - 02.  one step closer",
+		MetaAlbumID:    bMetaAlbumHT.ID,
+		MetaAlbum:      bMetaAlbumHT,
 	}
-	bTrack2 = &MetaTrack{
-		ID: 2,
-		// Name:           "In the end",
-		// SpotifyId:      "spotify:in_the_end",
-		Artists: []*Artist{bArtistLP},
-		// SpotifyAlbum:   bAlbum1,
-		// SpotifyAlbumId: bAlbum1.ID,
-		// MetaTrackId:    2,
+	bTrackITE = &MetaTrack{
+		ID:             2,
+		Artists:        []*Artist{bArtistLP},
+		SimplifiedName: bMetaAlbumHT.SimplifiedName + " - 08.  in the end",
+		MetaAlbumID:    bMetaAlbumHT.ID,
+		MetaAlbum:      bMetaAlbumHT,
 	}
-	bTrack3 = &MetaTrack{
-		ID: 3,
-		// Name:           "Something Comforting",
-		// SpotifyId:      "spotify:something_comforting",
-		Artists: []*Artist{bArtistPR},
-		// SpotifyAlbum:   bAlbum2,
-		// SpotifyAlbumId: bAlbum2.ID,
-		// MetaTrackId:    3,
+	bTrackSC = &MetaTrack{
+		ID:             3,
+		Artists:        []*Artist{bArtistPR},
+		SimplifiedName: bMetaAlbumN.SimplifiedName + " - 11.  something comforting",
+		MetaAlbumID:    bMetaAlbumN.ID,
+		MetaAlbum:      bMetaAlbumN,
 	}
 )
 
@@ -78,8 +73,8 @@ func TestSaveTracks(t *testing.T) {
 			t.Fatalf("sqlite db is not clean")
 		}
 
-		want1 := []*MetaTrack{bTrack1, bTrack2}
-		got1, err := brain.SaveTracks([]spotify.SavedTrack{sTrack1, sTrack2})
+		want1 := []*MetaTrack{bTrackOS, bTrackITE}
+		got1, err := brain.SaveTracks([]spotify.SavedTrack{sTrackOS, sTrackITE})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -87,7 +82,7 @@ func TestSaveTracks(t *testing.T) {
 			t.Errorf("SaveTracks() mismatch (-want +got):\n%s", diff)
 		}
 
-		got2, err := brain.SaveTracks([]spotify.SavedTrack{sTrack1, sTrack2})
+		got2, err := brain.SaveTracks([]spotify.SavedTrack{sTrackOS, sTrackITE})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -101,8 +96,8 @@ func TestSaveTracks(t *testing.T) {
 			t.Fatalf("sqlite db is not clean")
 		}
 
-		want1 := []*MetaTrack{bTrack1}
-		got1, err := brain.SaveTracks([]spotify.SavedTrack{sTrack1})
+		want1 := []*MetaTrack{bTrackOS}
+		got1, err := brain.SaveTracks([]spotify.SavedTrack{sTrackOS})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -110,12 +105,24 @@ func TestSaveTracks(t *testing.T) {
 			t.Errorf("SaveTracks() mismatch (-want +got):\n%s", diff)
 		}
 
-		want2 := []*MetaTrack{bTrack2}
-		got2, err := brain.SaveTracks([]spotify.SavedTrack{sTrack2})
+		want2 := []*MetaTrack{bTrackITE}
+		got2, err := brain.SaveTracks([]spotify.SavedTrack{sTrackITE})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffMetaTracks(want2, got2); diff != "" {
+			t.Errorf("SaveTracks() mismatch (-want +got):\n%s", diff)
+		}
+
+		want3 := []*MetaTrack{bTrackSC}
+		got3, err := brain.SaveTracks([]spotify.SavedTrack{sTrackSC})
+		if err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+		log.Printf("got1: %v", got1)
+		log.Printf("got2: %v", got2)
+		log.Printf("got3: %v", got3)
+		if diff := diffMetaTracks(want3, got3); diff != "" {
 			t.Errorf("SaveTracks() mismatch (-want +got):\n%s", diff)
 		}
 	})

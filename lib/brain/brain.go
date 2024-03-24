@@ -19,7 +19,7 @@ func New(databasePath string, enableLogging bool) (*Brain, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := gormDb.AutoMigrate(&Artist{}, &SpotifyAlbum{}, &MetaAlbum{}, &SpotifyTrack{}, &User{}); err != nil {
+	if err := gormDb.AutoMigrate(&Artist{}, &SpotifyAlbum{}, &MetaAlbum{}, &SpotifyTrack{}, &MetaTrack{}, &User{}); err != nil {
 		return nil, err
 	}
 	if enableLogging {

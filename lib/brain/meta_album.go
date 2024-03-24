@@ -17,13 +17,6 @@ type MetaAlbum struct {
 	Artists        []*Artist `gorm:"many2many:meta_album_artists;"`
 }
 
-func (s *MetaAlbum) String() string {
-	if s == nil {
-		return "<nil>"
-	}
-	return fmt.Sprintf("%s", s.SimplifiedName)
-}
-
 func newMetaAlbum(sAlbum spotify.SimpleAlbum, bArtists []*Artist) *MetaAlbum {
 	return &MetaAlbum{
 		SimplifiedName: utils.SimplifiedAlbumName(sAlbum),

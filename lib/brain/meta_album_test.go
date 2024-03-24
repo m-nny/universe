@@ -36,7 +36,7 @@ var (
 
 		SimplifiedName: "linkin park - hybrid theory",
 	}
-	bmetaAlbumN = &MetaAlbum{
+	bMetaAlbumN = &MetaAlbum{
 		ID:             2,
 		Artists:        []*Artist{bArtistPR},
 		SimplifiedName: "porter robinson - nurture",
@@ -50,7 +50,7 @@ func TestToAlbums(t *testing.T) {
 			t.Fatalf("sqlite db is not clean")
 		}
 
-		want1 := []*MetaAlbum{bMetaAlbumHT, bmetaAlbumN}
+		want1 := []*MetaAlbum{bMetaAlbumHT, bMetaAlbumN}
 		got1, err := brain.SaveAlbums([]*spotify.FullAlbum{sAlbumHT, sAlbumHT20, sAlbumN})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
@@ -91,7 +91,7 @@ func TestToAlbums(t *testing.T) {
 			t.Errorf("ToAlbums() mismatch (-want +got):\n%s", diff)
 		}
 
-		want3 := []*MetaAlbum{bmetaAlbumN}
+		want3 := []*MetaAlbum{bMetaAlbumN}
 		got3, err := brain.SaveAlbums([]*spotify.FullAlbum{sAlbumN})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
