@@ -41,10 +41,7 @@ func New(ctx context.Context, username string) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	spotifyEnt, err := spotify_ent.New(ctx, ent, username)
-	if err != nil {
-		return nil, err
-	}
+	spotifyEnt := spotify_ent.New(ctx, ent, username)
 	discogs, err := discogs.New()
 	if err != nil {
 		return nil, err

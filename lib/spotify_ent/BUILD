@@ -16,12 +16,11 @@ go_library(
         "//ent/artist",
         "//ent/track",
         "//lib/jsoncache",
-        "//lib/spotify/token",
+        "//lib/spotify",
         "//lib/utils/hitcounter",
         "//lib/utils/maputils",
         "//lib/utils/sliceutils",
         "//lib/utils/spotifyutils",
         "@com_github_zmb3_spotify_v2//:spotify",
-        "@com_github_zmb3_spotify_v2//auth",
     ],
 )

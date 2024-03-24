@@ -15,7 +15,11 @@ import (
 func (a *App) ListingRelease(ctx context.Context, release *discogs.ListingRelease) (*ent.Album, error) {
 	q := sanitizeQ(fmt.Sprintf("%s %s", release.Artist, release.Title))
 	log.Printf("q: %v", q)
-	albums, err := a.SpotifyEnt.SearchAlbum(ctx, q)
+	salbums, err := a.Spotify.SearchAlbum(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+	albums, err := a.SpotifyEnt.ToAlbums(ctx, salbums)
 	if err != nil {
 		return nil, err
 	}
