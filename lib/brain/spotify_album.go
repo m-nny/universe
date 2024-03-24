@@ -47,3 +47,43 @@ func (b *Brain) SaveAlbums(fullAlbums []*spotify.FullAlbum) ([]*SpotifyAlbum, er
 	albums, _, err := b.batchSaveAlbumTracks(sAlbums, sTracks)
 	return albums, err
 }
+
+func upsertSpotifyAlbums(b *Brain, sAlbums []spotify.SimpleAlbum, bi *brainIndex) ([]*SpotifyAlbum, error) {
+	var albumSIds []spotify.ID
+	for _, sAlbum := range sAlbums {
+		albumSIds = append(albumSIds, sAlbum.ID)
+	}
+	var existingSpotifyAlbums []*SpotifyAlbum
+	if err := b.gormDb.
+		Preload("Artists").
+		Where("spotify_id IN ?", albumSIds).
+		Find(&existingSpotifyAlbums).Error; err != nil {
+		return nil, err
+	}
+	bi.AddSpotifyAlbums(existingSpotifyAlbums)
+
+	var newAlbums []*SpotifyAlbum
+	for _, sAlbum := range sAlbums {
+		if _, ok := bi.GetSpotifyAlbum(sAlbum); ok {
+			continue
+		}
+		bArtists, ok := bi.GetArtists(sAlbum.Artists)
+		if !ok {
+			return nil, fmt.Errorf("bArtist not found")
+		}
+		bMetaAlbum, ok := bi.GetMetaAlbum(sAlbum)
+		if !ok {
+			return nil, fmt.Errorf("bMetaAlbum not found")
+		}
+		newAlbums = append(newAlbums, newSpotifyAlbum(sAlbum, bArtists, bMetaAlbum))
+	}
+	if len(newAlbums) == 0 {
+		return existingSpotifyAlbums, nil
+	}
+	if err := b.gormDb.Create(newAlbums).Error; err != nil {
+		return nil, err
+	}
+	bi.AddSpotifyAlbums(newAlbums)
+
+	return append(existingSpotifyAlbums, newAlbums...), nil
+}

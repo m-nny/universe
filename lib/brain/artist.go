@@ -29,3 +29,36 @@ func (b *Brain) SaveArtists(sArtists []*spotify.FullArtist) ([]*Artist, error) {
 func (b *Brain) _saveArtists(sArtists []spotify.SimpleArtist) ([]*Artist, error) {
 	return upsertArtists(b, sArtists, newBrainIndex())
 }
+
+func upsertArtists(b *Brain, sArtists []spotify.SimpleArtist, bi *brainIndex) ([]*Artist, error) {
+	sArtists = sliceutils.Unique(sArtists, func(item spotify.SimpleArtist) spotify.ID { return item.ID })
+	var spotifyIds []spotify.ID
+	for _, sAlbum := range sArtists {
+		spotifyIds = append(spotifyIds, sAlbum.ID)
+	}
+
+	var existingArtists []*Artist
+	if err := b.gormDb.
+		Where("spotify_id IN ?", spotifyIds).
+		Find(&existingArtists).Error; err != nil {
+		return nil, err
+	}
+	bi.AddArtists(existingArtists)
+
+	var newArtists []*Artist
+	for _, sArtist := range sArtists {
+		if _, ok := bi.GetArtist(sArtist); ok {
+			continue
+		}
+		newArtists = append(newArtists, newArtist(sArtist))
+	}
+	// All artists are already created, can exit
+	if len(newArtists) == 0 {
+		return existingArtists, nil
+	}
+	if err := b.gormDb.Create(newArtists).Error; err != nil {
+		return nil, err
+	}
+	bi.AddArtists(newArtists)
+	return append(existingArtists, newArtists...), nil
+}
