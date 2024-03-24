@@ -29,3 +29,9 @@ func newMetaTrack(sTrack spotify.SimpleTrack, bMetaAlbum *MetaAlbum) *MetaTrack 
 		MetaAlbum:      bMetaAlbum,
 	}
 }
+
+func (b *Brain) MetaTrackCount() (int, error) {
+	var count int64
+	err := b.gormDb.Model(&MetaTrack{}).Count(&count).Error
+	return int(count), err
+}

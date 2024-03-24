@@ -12,7 +12,7 @@ import (
 	"github.com/m-nny/universe/lib/utils/sliceutils"
 )
 
-func (s *Service) toTracksSaved(ctx context.Context, tracks []spotify.SavedTrack, username string) ([]*ent.Track, error) {
+func (s *Service) ToTracksSaved(ctx context.Context, tracks []spotify.SavedTrack, username string) ([]*ent.Track, error) {
 	return sliceutils.MapCtxErr(ctx, tracks,
 		func(ctx context.Context, t spotify.SavedTrack) (*ent.Track, error) {
 			album, err := s.toAlbum(ctx, t.Album)
@@ -21,6 +21,14 @@ func (s *Service) toTracksSaved(ctx context.Context, tracks []spotify.SavedTrack
 			}
 			return s.toTrackWithAlbum(ctx, t.SimpleTrack, album, username)
 		})
+}
+
+func (s *Service) EntTrackCount(ctx context.Context) (int, error) {
+	return s.ent.Track.Query().Count(ctx)
+}
+
+func (s *Service) EntAlbumCount(ctx context.Context) (int, error) {
+	return s.ent.Album.Query().Count(ctx)
 }
 
 func (s *Service) toTracksWithAlbum(ctx context.Context, tracks []spotify.SimpleTrack, a *ent.Album) ([]*ent.Track, error) {

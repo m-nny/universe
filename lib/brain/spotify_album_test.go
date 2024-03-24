@@ -31,28 +31,25 @@ var (
 		},
 	}
 	bAlbum1 = &SpotifyAlbum{
-		ID:             1,
-		Name:           "Hybrid Theory",
-		SpotifyId:      "spotify:hybrid_theory",
-		Artists:        []*Artist{bArtist1},
-		SimplifiedName: "linkin park - hybrid theory",
-		MetaAlbumId:    1,
+		ID:          1,
+		Name:        "Hybrid Theory",
+		SpotifyId:   "spotify:hybrid_theory",
+		Artists:     []*Artist{bArtist1},
+		MetaAlbumId: 1,
 	}
 	bAlbum2 = &SpotifyAlbum{
-		ID:             2,
-		Name:           "Hybrid Theory (20th Anniversary Edition)",
-		SpotifyId:      "spotify:hybryd_theory_20",
-		Artists:        []*Artist{bArtist1},
-		SimplifiedName: "linkin park - hybrid theory",
-		MetaAlbumId:    1,
+		ID:          2,
+		Name:        "Hybrid Theory (20th Anniversary Edition)",
+		SpotifyId:   "spotify:hybryd_theory_20",
+		Artists:     []*Artist{bArtist1},
+		MetaAlbumId: 1,
 	}
 	bAlbum3 = &SpotifyAlbum{
-		ID:             3,
-		Name:           "Nurture",
-		SpotifyId:      "spotify:nurture",
-		Artists:        []*Artist{bArtist2},
-		SimplifiedName: "porter robinson - nurture",
-		MetaAlbumId:    2,
+		ID:          3,
+		Name:        "Nurture",
+		SpotifyId:   "spotify:nurture",
+		Artists:     []*Artist{bArtist2},
+		MetaAlbumId: 2,
 	}
 )
 

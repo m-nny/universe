@@ -47,5 +47,5 @@ func (s *Service) GetUserTracksEnt(ctx context.Context, username string) ([]*ent
 	if err != nil {
 		return nil, err
 	}
-	return s.toTracksSaved(ctx, savedTracks, username)
+	return s.ToTracksSaved(ctx, savedTracks, username)
 }

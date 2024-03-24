@@ -4,18 +4,15 @@ import (
 	"fmt"
 
 	"github.com/zmb3/spotify/v2"
-
-	"github.com/m-nny/universe/lib/spotify/utils"
 )
 
 type SpotifyAlbum struct {
-	ID             uint `gorm:"primarykey"`
-	SpotifyId      spotify.ID
-	Name           string
-	Artists        []*Artist `gorm:"many2many:spotify_album_artists;"`
-	SimplifiedName string
-	MetaAlbumId    uint
-	MetaAlbum      *MetaAlbum
+	ID          uint `gorm:"primarykey"`
+	SpotifyId   spotify.ID
+	Name        string
+	Artists     []*Artist `gorm:"many2many:spotify_album_artists;"`
+	MetaAlbumId uint
+	MetaAlbum   *MetaAlbum
 }
 
 func (s *SpotifyAlbum) String() string {
@@ -27,12 +24,11 @@ func (s *SpotifyAlbum) String() string {
 
 func newSpotifyAlbum(sAlbum spotify.SimpleAlbum, bArtists []*Artist, bMetaAlbum *MetaAlbum) *SpotifyAlbum {
 	return &SpotifyAlbum{
-		Name:           sAlbum.Name,
-		SpotifyId:      sAlbum.ID,
-		Artists:        bArtists,
-		SimplifiedName: utils.SimplifiedAlbumName(sAlbum),
-		MetaAlbumId:    bMetaAlbum.ID,
-		MetaAlbum:      bMetaAlbum,
+		Name:        sAlbum.Name,
+		SpotifyId:   sAlbum.ID,
+		Artists:     bArtists,
+		MetaAlbumId: bMetaAlbum.ID,
+		MetaAlbum:   bMetaAlbum,
 	}
 }
 

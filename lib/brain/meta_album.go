@@ -23,3 +23,9 @@ func (s *MetaAlbum) String() string {
 func newMetaAlbum(sAlbum spotify.SimpleAlbum) *MetaAlbum {
 	return &MetaAlbum{SimplifiedName: utils.SimplifiedAlbumName(sAlbum)}
 }
+
+func (b *Brain) MetaAlbumCount() (int, error) {
+	var count int64
+	err := b.gormDb.Model(&MetaAlbum{}).Count(&count).Error
+	return int(count), err
+}
