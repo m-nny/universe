@@ -14,24 +14,17 @@ import (
 	"github.com/m-nny/universe/lib/brain"
 	"github.com/m-nny/universe/lib/discogs"
 	"github.com/m-nny/universe/lib/spotify"
-	"github.com/m-nny/universe/lib/spotify_ent"
 )
 
 type App struct {
-	Ent        *ent.Client
-	Brain      *brain.Brain
-	Spotify    *spotify.Service
-	SpotifyEnt *spotify_ent.Service
-	Discogs    *discogs.Service
+	Brain   *brain.Brain
+	Spotify *spotify.Service
+	Discogs *discogs.Service
 }
 
 func New(ctx context.Context, username string) (*App, error) {
 	if err := godotenv.Load(); err != nil && !os.IsNotExist(err) {
 		return nil, fmt.Errorf("could not load .env: %v", err)
-	}
-	ent, err := getEntClient()
-	if err != nil {
-		return nil, err
 	}
 	brain, err := getBrain()
 	if err != nil {
@@ -41,17 +34,14 @@ func New(ctx context.Context, username string) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	spotifyEnt := spotify_ent.New(ctx, ent, username)
 	discogs, err := discogs.New()
 	if err != nil {
 		return nil, err
 	}
 	return &App{
-		Ent:        ent,
-		Spotify:    spotify,
-		SpotifyEnt: spotifyEnt,
-		Discogs:    discogs,
-		Brain:      brain,
+		Spotify: spotify,
+		Discogs: discogs,
+		Brain:   brain,
 	}, nil
 }
 

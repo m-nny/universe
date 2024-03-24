@@ -6,10 +6,6 @@ import (
 	"log"
 	"time"
 
-	"entgo.io/ent/dialect/sql"
-
-	"github.com/m-nny/universe/ent/album"
-	"github.com/m-nny/universe/ent/artist"
 	"github.com/m-nny/universe/lib/discsearch"
 	"github.com/m-nny/universe/lib/spotify"
 	"github.com/m-nny/universe/lib/utils/spotifyutils"
@@ -134,12 +130,12 @@ func getAlbumsById(ctx context.Context, app *discsearch.App) error {
 	}
 	log.Print()
 
-	if err := getTopAlbums(ctx, app); err != nil {
-		return err
-	}
-	if err := getTopArtists(ctx, app); err != nil {
-		return err
-	}
+	// if err := getTopAlbums(ctx, app); err != nil {
+	// 	return err
+	// }
+	// if err := getTopArtists(ctx, app); err != nil {
+	// 	return err
+	// }
 	return nil
 }
 
@@ -152,25 +148,25 @@ func benchGetUserTracks(ctx context.Context, app *discsearch.App) error {
 	}
 	log.Printf("GetUserTracks: finished in %s", time.Since(start))
 
-	log.Printf("==========================")
-	log.Printf("ent.ToTracksSaved")
-	start = time.Now()
-	entTracks, err := app.SpotifyEnt.ToTracksSaved(ctx, userTracks, username)
-	if err != nil {
-		return fmt.Errorf("error getting all tracks: %w", err)
-	}
-	log.Printf("finished in %s", time.Since(start))
-	log.Printf("returned %d tracks", len(entTracks))
-	entTrackCnt, err := app.SpotifyEnt.EntTrackCount(ctx)
-	if err != nil {
-		return err
-	}
-	log.Printf("track cnt in db: %d", entTrackCnt)
-	entAlbumCnt, err := app.SpotifyEnt.EntAlbumCount(ctx)
-	if err != nil {
-		return err
-	}
-	log.Printf("album cnt in db: %d", entAlbumCnt)
+	// log.Printf("==========================")
+	// log.Printf("ent.ToTracksSaved")
+	// start = time.Now()
+	// entTracks, err := app.SpotifyEnt.ToTracksSaved(ctx, userTracks, username)
+	// if err != nil {
+	// 	return fmt.Errorf("error getting all tracks: %w", err)
+	// }
+	// log.Printf("finished in %s", time.Since(start))
+	// log.Printf("returned %d tracks", len(entTracks))
+	// entTrackCnt, err := app.SpotifyEnt.EntTrackCount(ctx)
+	// if err != nil {
+	// 	return err
+	// }
+	// log.Printf("track cnt in db: %d", entTrackCnt)
+	// entAlbumCnt, err := app.SpotifyEnt.EntAlbumCount(ctx)
+	// if err != nil {
+	// 	return err
+	// }
+	// log.Printf("album cnt in db: %d", entAlbumCnt)
 
 	log.Printf("==========================")
 	log.Printf("brain.SaveTracks")
@@ -193,65 +189,13 @@ func benchGetUserTracks(ctx context.Context, app *discsearch.App) error {
 	}
 	log.Printf("album cnt in db: %d", brainAlbumCnt)
 
-	if entTrackCnt != brainTrackCnt {
-		return fmt.Errorf("Different ent and brain track counts: ent %d brain %d", brainTrackCnt, entTrackCnt)
-	}
+	// if entTrackCnt != brainTrackCnt {
+	// 	return fmt.Errorf("Different ent and brain track counts: ent %d brain %d", brainTrackCnt, entTrackCnt)
+	// }
 
-	if entAlbumCnt != brainAlbumCnt {
-		return fmt.Errorf("Different ent and brain album counts: ent %d brain %d", brainAlbumCnt, entAlbumCnt)
-	}
+	// if entAlbumCnt != brainAlbumCnt {
+	// 	return fmt.Errorf("Different ent and brain album counts: ent %d brain %d", brainAlbumCnt, entAlbumCnt)
+	// }
 
-	return nil
-}
-
-func getTopAlbums(ctx context.Context, app *discsearch.App) error {
-	const tracksNumCol = "tracks_num"
-	albums, err := app.Ent.Album.
-		Query().
-		Order(
-			album.ByTracksCount(
-				sql.OrderDesc(),
-				sql.OrderSelectAs(tracksNumCol),
-			),
-		).
-		Limit(10).
-		All(ctx)
-	if err != nil {
-		return err
-	}
-	log.Print("top albums:")
-	for _, album := range albums {
-		tracksNum, err := album.Value(tracksNumCol)
-		if err != nil {
-			return err
-		}
-		log.Printf("name: %s tracks_num: %d", album.Name, tracksNum)
-	}
-	return nil
-}
-
-func getTopArtists(ctx context.Context, app *discsearch.App) error {
-	const tracksNumCol = "tracks_num"
-	artists, err := app.Ent.Artist.
-		Query().
-		Order(
-			artist.ByTracksCount(
-				sql.OrderDesc(),
-				sql.OrderSelectAs(tracksNumCol),
-			),
-		).
-		Limit(10).
-		All(ctx)
-	if err != nil {
-		return err
-	}
-	log.Print("top artists:")
-	for _, artist := range artists {
-		tracksNum, err := artist.Value(tracksNumCol)
-		if err != nil {
-			return err
-		}
-		log.Printf("name: %s tracks_num: %d", artist.Name, tracksNum)
-	}
 	return nil
 }

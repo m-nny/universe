@@ -19,7 +19,6 @@ go_library(
         "//lib/brain",
         "//lib/discogs",
         "//lib/spotify",
-        "//lib/spotify_ent",
         "//lib/utils/sliceutils",
         "@com_github_joho_godotenv//:godotenv",
         "@com_github_mattn_go_sqlite3//:go-sqlite3",
