@@ -83,12 +83,3 @@ func (s *Service) batchToArtists(ctx context.Context, rawArtists []spotify.Simpl
 	}
 	return res, nil
 }
-
-
-func (s *Service) GetArtistById(ctx context.Context, ids []spotify.ID) ([]*spotify.FullArtist, error) {
-	sArtists, err := s.spotify.GetArtists(ctx, ids...)
-	if err != nil {
-		return nil, err
-	}
-	return sArtists, nil
-}

@@ -73,12 +73,3 @@ func (s *Service) _newTrack(ctx context.Context, t spotify.SimpleTrack, album *e
 	}
 	return track.Save(ctx)
 }
-
-func (s *Service) GetTracksById(ctx context.Context, ids []spotify.ID) ([]*spotify.SimpleTrack, error) {
-	sFullTracks, err := s.spotify.GetTracks(ctx, ids)
-	if err != nil {
-		return nil, err
-	}
-	sTracks := sliceutils.Map(sFullTracks, func(item *spotify.FullTrack) *spotify.SimpleTrack { return &item.SimpleTrack })
-	return sTracks, nil
-}

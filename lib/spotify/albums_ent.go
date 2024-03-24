@@ -23,19 +23,6 @@ func (s *Service) SearchAlbum(ctx context.Context, q string) ([]*ent.Album, erro
 	return s.toAlbums(ctx, results.Albums.Albums)
 }
 
-func (s *Service) GetAlbumsById(ctx context.Context, ids []spotify.ID) ([]*spotify.FullAlbum, error) {
-	sAlbums, err := s.spotify.GetAlbums(ctx, ids)
-	if err != nil {
-		return nil, err
-	}
-	return sAlbums, nil
-	// rawAlbums, err := s.spotify.GetAlbums(ctx, ids)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// return sliceutils.MapCtxErr(ctx, rawAlbums, s.toAlbumFull)
-}
-
 func (s *Service) toAlbumFull(ctx context.Context, a *spotify.FullAlbum) (*ent.Album, error) {
 	album, err := s.toAlbum(ctx, a.SimpleAlbum)
 	if err != nil {

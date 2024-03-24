@@ -7,10 +7,11 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/m-nny/universe/ent"
-	"github.com/m-nny/universe/ent/user"
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 	"golang.org/x/oauth2"
+
+	"github.com/m-nny/universe/ent"
+	"github.com/m-nny/universe/ent/user"
 )
 
 func getTokenCached(ctx context.Context, auth *spotifyauth.Authenticator, ent *ent.Client, username string) (*oauth2.Token, error) {
