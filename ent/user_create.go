@@ -85,9 +85,6 @@ func (uc *UserCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
-	if _, ok := uc.mutation.SpotifyToken(); !ok {
-		return &ValidationError{Name: "spotifyToken", err: errors.New(`ent: missing required field "User.spotifyToken"`)}
-	}
 	if v, ok := uc.mutation.ID(); ok {
 		if err := user.IDValidator(v); err != nil {
 			return &ValidationError{Name: "id", err: fmt.Errorf(`ent: validator failed for field "User.id": %w`, err)}
@@ -213,6 +210,12 @@ func (u *UserUpsert) UpdateSpotifyToken() *UserUpsert {
 	return u
 }
 
+// ClearSpotifyToken clears the value of the "spotifyToken" field.
+func (u *UserUpsert) ClearSpotifyToken() *UserUpsert {
+	u.SetNull(user.FieldSpotifyToken)
+	return u
+}
+
 // UpdateNewValues updates the mutable fields using the new values that were set on create except the ID field.
 // Using this option is equivalent to using:
 //
@@ -272,6 +275,13 @@ func (u *UserUpsertOne) SetSpotifyToken(v *oauth2.Token) *UserUpsertOne {
 func (u *UserUpsertOne) UpdateSpotifyToken() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateSpotifyToken()
+	})
+}
+
+// ClearSpotifyToken clears the value of the "spotifyToken" field.
+func (u *UserUpsertOne) ClearSpotifyToken() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearSpotifyToken()
 	})
 }
 
@@ -500,6 +510,13 @@ func (u *UserUpsertBulk) SetSpotifyToken(v *oauth2.Token) *UserUpsertBulk {
 func (u *UserUpsertBulk) UpdateSpotifyToken() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateSpotifyToken()
+	})
+}
+
+// ClearSpotifyToken clears the value of the "spotifyToken" field.
+func (u *UserUpsertBulk) ClearSpotifyToken() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.ClearSpotifyToken()
 	})
 }
 

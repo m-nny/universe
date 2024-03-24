@@ -3,6 +3,7 @@ package token
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"golang.org/x/oauth2"
 
@@ -28,6 +29,7 @@ func (e *EntTokenStorage) GetSpotifyToken(ctx context.Context, username string) 
 }
 
 func (e *EntTokenStorage) StoreSpotifyToken(ctx context.Context, username string, token *oauth2.Token) error {
+	log.Printf("Creating user: %s", username)
 	return e.ent.User.
 		Create().
 		SetID(username).

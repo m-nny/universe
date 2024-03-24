@@ -215,6 +215,14 @@ func benchGetUserTracks(ctx context.Context, app *discsearch.App) error {
 	}
 	log.Printf("album cnt in db: %d", brainAlbumCnt)
 
+	if entTrackCnt != brainTrackCnt {
+		return fmt.Errorf("Different ent and brain track counts: ent %d brain %d", brainTrackCnt, entTrackCnt)
+	}
+
+	if entAlbumCnt != brainAlbumCnt {
+		return fmt.Errorf("Different ent and brain album counts: ent %d brain %d", brainAlbumCnt, entAlbumCnt)
+	}
+
 	return nil
 }
 

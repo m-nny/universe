@@ -2217,9 +2217,22 @@ func (m *UserMutation) OldSpotifyToken(ctx context.Context) (v *oauth2.Token, er
 	return oldValue.SpotifyToken, nil
 }
 
+// ClearSpotifyToken clears the value of the "spotifyToken" field.
+func (m *UserMutation) ClearSpotifyToken() {
+	m.spotifyToken = nil
+	m.clearedFields[user.FieldSpotifyToken] = struct{}{}
+}
+
+// SpotifyTokenCleared returns if the "spotifyToken" field was cleared in this mutation.
+func (m *UserMutation) SpotifyTokenCleared() bool {
+	_, ok := m.clearedFields[user.FieldSpotifyToken]
+	return ok
+}
+
 // ResetSpotifyToken resets all changes to the "spotifyToken" field.
 func (m *UserMutation) ResetSpotifyToken() {
 	m.spotifyToken = nil
+	delete(m.clearedFields, user.FieldSpotifyToken)
 }
 
 // AddSavedTrackIDs adds the "savedTracks" edge to the Track entity by ids.
@@ -2380,7 +2393,11 @@ func (m *UserMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *UserMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(user.FieldSpotifyToken) {
+		fields = append(fields, user.FieldSpotifyToken)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -2393,6 +2410,11 @@ func (m *UserMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *UserMutation) ClearField(name string) error {
+	switch name {
+	case user.FieldSpotifyToken:
+		m.ClearSpotifyToken()
+		return nil
+	}
 	return fmt.Errorf("unknown User nullable field %s", name)
 }
 

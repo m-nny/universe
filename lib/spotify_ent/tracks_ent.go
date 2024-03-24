@@ -13,6 +13,9 @@ import (
 )
 
 func (s *Service) ToTracksSaved(ctx context.Context, tracks []spotify.SavedTrack, username string) ([]*ent.Track, error) {
+	if err := s.upsertUser(ctx, username); err != nil {
+		return nil, err
+	}
 	return sliceutils.MapCtxErr(ctx, tracks,
 		func(ctx context.Context, t spotify.SavedTrack) (*ent.Track, error) {
 			album, err := s.toAlbum(ctx, t.Album)

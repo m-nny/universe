@@ -16,7 +16,7 @@ type User struct {
 func (User) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").NotEmpty(),
-		field.JSON("spotifyToken", &oauth2.Token{}),
+		field.JSON("spotifyToken", &oauth2.Token{}).Optional(),
 	}
 }
 

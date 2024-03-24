@@ -35,6 +35,12 @@ func (uu *UserUpdate) SetSpotifyToken(o *oauth2.Token) *UserUpdate {
 	return uu
 }
 
+// ClearSpotifyToken clears the value of the "spotifyToken" field.
+func (uu *UserUpdate) ClearSpotifyToken() *UserUpdate {
+	uu.mutation.ClearSpotifyToken()
+	return uu
+}
+
 // AddSavedTrackIDs adds the "savedTracks" edge to the Track entity by IDs.
 func (uu *UserUpdate) AddSavedTrackIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddSavedTrackIDs(ids...)
@@ -115,6 +121,9 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := uu.mutation.SpotifyToken(); ok {
 		_spec.SetField(user.FieldSpotifyToken, field.TypeJSON, value)
 	}
+	if uu.mutation.SpotifyTokenCleared() {
+		_spec.ClearField(user.FieldSpotifyToken, field.TypeJSON)
+	}
 	if uu.mutation.SavedTracksCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
@@ -183,6 +192,12 @@ type UserUpdateOne struct {
 // SetSpotifyToken sets the "spotifyToken" field.
 func (uuo *UserUpdateOne) SetSpotifyToken(o *oauth2.Token) *UserUpdateOne {
 	uuo.mutation.SetSpotifyToken(o)
+	return uuo
+}
+
+// ClearSpotifyToken clears the value of the "spotifyToken" field.
+func (uuo *UserUpdateOne) ClearSpotifyToken() *UserUpdateOne {
+	uuo.mutation.ClearSpotifyToken()
 	return uuo
 }
 
@@ -295,6 +310,9 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if value, ok := uuo.mutation.SpotifyToken(); ok {
 		_spec.SetField(user.FieldSpotifyToken, field.TypeJSON, value)
+	}
+	if uuo.mutation.SpotifyTokenCleared() {
+		_spec.ClearField(user.FieldSpotifyToken, field.TypeJSON)
 	}
 	if uuo.mutation.SavedTracksCleared() {
 		edge := &sqlgraph.EdgeSpec{

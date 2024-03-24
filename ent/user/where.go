@@ -63,6 +63,16 @@ func IDContainsFold(id string) predicate.User {
 	return predicate.User(sql.FieldContainsFold(FieldID, id))
 }
 
+// SpotifyTokenIsNil applies the IsNil predicate on the "spotifyToken" field.
+func SpotifyTokenIsNil() predicate.User {
+	return predicate.User(sql.FieldIsNull(FieldSpotifyToken))
+}
+
+// SpotifyTokenNotNil applies the NotNil predicate on the "spotifyToken" field.
+func SpotifyTokenNotNil() predicate.User {
+	return predicate.User(sql.FieldNotNull(FieldSpotifyToken))
+}
+
 // HasSavedTracks applies the HasEdge predicate on the "savedTracks" edge.
 func HasSavedTracks() predicate.User {
 	return predicate.User(func(s *sql.Selector) {

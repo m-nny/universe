@@ -8,8 +8,7 @@ import (
 )
 
 type User struct {
-	ID       uint `gorm:"primarykey"`
-	Username string
+	Username string `gorm:"primarykey"`
 	// TODO add proper token
 	SpotifyTokenStr string
 }
