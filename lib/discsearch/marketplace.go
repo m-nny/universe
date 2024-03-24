@@ -14,7 +14,7 @@ func (a *App) Inventory(ctx context.Context, sellerId string) ([]*ent.Album, err
 		return nil, err
 	}
 	albums, err := sliceutils.MapCtxErr(ctx, inventory,
-		func(ctx context.Context, release *discogs.Listing) (*ent.Album, error) {
+		func(ctx context.Context, release discogs.Listing) (*ent.Album, error) {
 			return a.ListingRelease(ctx, release.Release)
 		})
 	if err != nil {

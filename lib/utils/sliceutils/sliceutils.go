@@ -60,7 +60,7 @@ func Unique[T any, K comparable](arr []T, fn func(item T) K) []T {
 	return result
 }
 
-func Cnt[T any](arr []T, fn func(item T) int) int {
+func Sum[T any](arr []T, fn func(item T) int) int {
 	val := 0
 	for _, item := range arr {
 		val += fn(item)

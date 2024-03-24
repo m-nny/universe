@@ -12,7 +12,7 @@ import (
 	"github.com/m-nny/universe/lib/utils/sliceutils"
 )
 
-func (a *App) ListingRelease(ctx context.Context, release *discogs.ListingRelease) (*ent.Album, error) {
+func (a *App) ListingRelease(ctx context.Context, release discogs.ListingRelease) (*ent.Album, error) {
 	q := sanitizeQ(fmt.Sprintf("%s %s", release.Artist, release.Title))
 	log.Printf("q: %v", q)
 	salbums, err := a.Spotify.SearchAlbum(ctx, q)
@@ -43,29 +43,29 @@ func sanitizeQ(q string) string {
 	return sanitizeRgx.ReplaceAllString(q, "")
 }
 
-func mostSimilarAlbum(ctx context.Context, m *discogs.ListingRelease, arr []*ent.Album) (result *ent.Album, err error) {
+func mostSimilarAlbum(ctx context.Context, dRelease discogs.ListingRelease, eAlbums []*ent.Album) (*ent.Album, error) {
+	var result *ent.Album
 	maxScore := 0
-	for _, item := range arr {
-		if len(item.Edges.Artists) == 0 {
-			artists, err := item.QueryArtists().All(ctx)
+	for _, eAlbum := range eAlbums {
+		if len(eAlbum.Edges.Artists) == 0 {
+			artists, err := eAlbum.QueryArtists().All(ctx)
 			if err != nil {
 				return nil, err
 			}
-			item.Edges.Artists = artists
+			eAlbum.Edges.Artists = artists
 		}
-		score := albumSimilarity(m, item)
+		score := albumSimilarity(dRelease, eAlbum)
 		if score > maxScore {
 			maxScore = score
-			result = item
+			result = eAlbum
 		}
 	}
-	return
+	return result, nil
 }
 
-func albumSimilarity(m *discogs.ListingRelease, a *ent.Album) int {
-	artistScores := sliceutils.Map(a.Edges.Artists, func(e *ent.Artist) int { return similaryScore(m.Artist, e.Name) })
-	artistScore := sliceutils.Cnt(artistScores, sliceutils.Identity)
-	titleScore := similaryScore(m.Title, a.Name)
+func albumSimilarity(dRelease discogs.ListingRelease, eAlbum *ent.Album) int {
+	artistScore := sliceutils.Sum(eAlbum.Edges.Artists, func(e *ent.Artist) int { return similaryScore(dRelease.Artist, e.Name) })
+	titleScore := similaryScore(dRelease.Title, eAlbum.Name)
 	return artistScore + titleScore
 }
 
