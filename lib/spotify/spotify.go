@@ -8,8 +8,8 @@ import (
 	"github.com/zmb3/spotify/v2"
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 
-	"github.com/m-nny/universe/ent"
 	"github.com/m-nny/universe/lib/brain"
+	"github.com/m-nny/universe/lib/spotify/token"
 )
 
 type ID = spotify.ID
@@ -43,7 +43,7 @@ func LoadConfig() (*Config, error) {
 	return c, nil
 }
 
-func New(ctx context.Context, ent *ent.Client, brain *brain.Brain, username string) (*Service, error) {
+func New(ctx context.Context, tokenStorage token.TokenStorage, brain *brain.Brain, username string) (*Service, error) {
 	config, err := LoadConfig()
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func New(ctx context.Context, ent *ent.Client, brain *brain.Brain, username stri
 		spotifyauth.WithRedirectURL(config.RedirectUrl),
 		spotifyauth.WithScopes(spotifyauth.ScopeUserLibraryRead),
 	)
-	token, err := getTokenCached(ctx, auth, ent, username)
+	token, err := token.GetToken(ctx, auth, ":3000", tokenStorage, username)
 	if err != nil {
 		return nil, err
 	}

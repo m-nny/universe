@@ -14,7 +14,8 @@ import (
 	"github.com/m-nny/universe/lib/brain"
 	"github.com/m-nny/universe/lib/discogs"
 	"github.com/m-nny/universe/lib/spotify"
-	spotify_ent "github.com/m-nny/universe/lib/spotify_ent"
+	"github.com/m-nny/universe/lib/spotify/token"
+	"github.com/m-nny/universe/lib/spotify_ent"
 )
 
 type App struct {
@@ -37,7 +38,7 @@ func New(ctx context.Context, username string) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	spotify, err := spotify.New(ctx, ent, brain, username)
+	spotify, err := spotify.New(ctx, token.NewEntTokenStorage(ent), brain, username)
 	if err != nil {
 		return nil, err
 	}

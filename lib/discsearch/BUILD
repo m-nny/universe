@@ -19,6 +19,7 @@ go_library(
         "//lib/brain",
         "//lib/discogs",
         "//lib/spotify",
+        "//lib/spotify/token",
         "//lib/spotify_ent",
         "//lib/utils/sliceutils",
         "@com_github_joho_godotenv//:godotenv",

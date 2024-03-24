@@ -11,6 +11,7 @@ go_library(
         "meta_track.go",
         "spotify_album.go",
         "spotify_track.go",
+        "user.go",
     ],
     importpath = "github.com/m-nny/universe/lib/brain",
     visibility = ["//visibility:public"],
@@ -21,6 +22,7 @@ go_library(
         "@io_gorm_driver_sqlite//:sqlite",
         "@io_gorm_gorm//:gorm",
         "@io_gorm_gorm//logger",
+        "@org_golang_x_oauth2//:oauth2",
     ],
 )
 
