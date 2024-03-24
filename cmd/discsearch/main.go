@@ -105,7 +105,7 @@ func demoGormTracks(ctx context.Context, app *discsearch.App) error {
 		return err
 	}
 	for idx, bTrack := range bTracks {
-		log.Printf("[%d/%d] bTrack: %+v - %s - %+v", idx+1, len(sTracks), bTrack.Artists, bTrack.MetaAlbum, bTrack.SimplifiedName)
+		log.Printf("[%d/%d] bTrack: %+v - %+v - %+v", idx+1, len(sTracks), bTrack.Artists, bTrack.MetaAlbum, bTrack.SimplifiedName)
 	}
 	return nil
 }
