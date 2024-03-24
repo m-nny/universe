@@ -23,6 +23,7 @@ go_library(
         "@com_github_zmb3_spotify_v2//:spotify",
         "@io_gorm_driver_sqlite//:sqlite",
         "@io_gorm_gorm//:gorm",
+        "@io_gorm_gorm//clause",
         "@io_gorm_gorm//logger",
         "@org_golang_x_oauth2//:oauth2",
     ],

@@ -3,19 +3,21 @@ package brain
 import (
 	"context"
 	"encoding/json"
+	"log"
 
 	"golang.org/x/oauth2"
+	"gorm.io/gorm/clause"
 )
 
 type User struct {
 	Username string `gorm:"primarykey"`
 	// TODO add proper token
-	SpotifyTokenStr string
+	SpotifyTokenStr []byte
 }
 
 func (u *User) SpotifyToken() (*oauth2.Token, error) {
 	var token oauth2.Token
-	if err := json.Unmarshal([]byte(u.SpotifyTokenStr), &token); err != nil {
+	if err := json.Unmarshal(u.SpotifyTokenStr, &token); err != nil {
 		return nil, err
 	}
 	return &token, nil
@@ -28,16 +30,21 @@ func newUser(username string, spotifyToken *oauth2.Token) (*User, error) {
 	}
 	return &User{
 		Username:        username,
-		SpotifyTokenStr: string(spotifyTokenStr),
+		SpotifyTokenStr: spotifyTokenStr,
 	}, nil
 }
 
 func (b *Brain) GetSpotifyToken(ctx context.Context, username string) (*oauth2.Token, error) {
 	var user User
-	if err := b.gormDb.Where("username = ?", username).First(&user).Error; err != nil {
+	if err := b.gormDb.Where(User{Username: username}).First(&user).Error; err != nil {
 		return nil, err
 	}
-	return user.SpotifyToken()
+	userToken, err := user.SpotifyToken()
+	if err != nil {
+		return nil, err
+	}
+	log.Printf("GetSpotifyToken(): userToken.tokenExpiry: %v", userToken.Expiry)
+	return userToken, nil
 }
 
 func (b *Brain) StoreSpotifyToken(ctx context.Context, username string, spotifyToken *oauth2.Token) error {
@@ -45,5 +52,8 @@ func (b *Brain) StoreSpotifyToken(ctx context.Context, username string, spotifyT
 	if err != nil {
 		return err
 	}
-	return b.gormDb.Create(&user).Error
+	if err := b.gormDb.Clauses(clause.OnConflict{UpdateAll: true}).Create(&user).Error; err != nil {
+		return nil
+	}
+	return nil
 }

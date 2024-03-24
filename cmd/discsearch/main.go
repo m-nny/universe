@@ -24,9 +24,9 @@ func main() {
 	// 	log.Fatalf("%v", err)
 	// }
 
-	// if err := getAlbumsById(ctx, app); err != nil {
-	// 	log.Fatalf("%v", err)
-	// }
+	if err := getAlbumsById(ctx, app); err != nil {
+		log.Fatalf("%v", err)
+	}
 
 	// if err := gormGetUserTracks(ctx, app); err != nil {
 	// 	log.Fatalf("%v", err)
@@ -44,9 +44,9 @@ func main() {
 	// 	log.Fatalf("%v", err)
 	// }
 
-	if _, err := app.Inventory(ctx, "nezrathebeatmaker"); err != nil {
-		log.Fatalf("%v", err)
-	}
+	// if _, err := app.Inventory(ctx, "nezrathebeatmaker"); err != nil {
+	// 	log.Fatalf("%v", err)
+	// }
 	log.Printf("Done")
 }
 

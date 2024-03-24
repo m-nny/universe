@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	spotifyauth "github.com/zmb3/spotify/v2/auth"
 	"golang.org/x/oauth2"
@@ -18,6 +19,13 @@ type TokenStorage interface {
 
 func GetToken(ctx context.Context, auth *spotifyauth.Authenticator, serverAddress string, tokenStorage TokenStorage, username string) (*oauth2.Token, error) {
 	storedToken, err := tokenStorage.GetSpotifyToken(ctx, username)
+	{
+		var tokenExpiry time.Time
+		if storedToken != nil {
+			tokenExpiry = storedToken.Expiry
+		}
+		log.Printf("storedToken.Expiriry: %v storedToken.Valid(): %v err: %v", tokenExpiry, storedToken.Valid(), err)
+	}
 	if err == nil && storedToken.Valid() {
 		return storedToken, nil
 	}
