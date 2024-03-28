@@ -13,6 +13,7 @@ type User struct {
 	Username string `gorm:"primarykey"`
 	// TODO add proper token
 	SpotifyTokenStr []byte
+	SavedTracks     []*MetaTrack `gorm:"many2many:user_saved_tracks"`
 }
 
 func (u *User) SpotifyToken() (*oauth2.Token, error) {
@@ -21,6 +22,10 @@ func (u *User) SpotifyToken() (*oauth2.Token, error) {
 		return nil, err
 	}
 	return &token, nil
+}
+
+type SimpleUser struct {
+	Username string
 }
 
 func newUser(username string, spotifyToken *oauth2.Token) (*User, error) {
@@ -54,6 +59,17 @@ func (b *Brain) StoreSpotifyToken(ctx context.Context, username string, spotifyT
 	}
 	if err := b.gormDb.Clauses(clause.OnConflict{UpdateAll: true}).Create(&user).Error; err != nil {
 		return nil
+	}
+	return nil
+}
+
+func (b *Brain) addSavedTracks(username string, tracks []*MetaTrack) error {
+	user := User{Username: username}
+	if err := b.gormDb.Where("username = ?", username).FirstOrCreate(&user).Error; err != nil {
+		return err
+	}
+	if err := b.gormDb.Model(&user).Association("SavedTracks").Replace(tracks); err != nil {
+		return err
 	}
 	return nil
 }

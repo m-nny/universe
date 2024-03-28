@@ -93,7 +93,7 @@ func upsertMetaTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex) (
 //   - It will create new entries in DB if necessary
 //   - It will deduplicate returned albums, this may result in len(result) < len(sTracks)
 //   - NOTE: Does not debupe based on simplified name
-func (b *Brain) SaveTracks(savedTracks []spotify.SavedTrack) ([]*MetaTrack, error) {
+func (b *Brain) SaveTracks(savedTracks []spotify.SavedTrack, username string) ([]*MetaTrack, error) {
 	var sAlbums []spotify.SimpleAlbum
 	var sTracks []spotify.SimpleTrack
 	for _, sFullTrack := range savedTracks {
@@ -110,5 +110,9 @@ func (b *Brain) SaveTracks(savedTracks []spotify.SavedTrack) ([]*MetaTrack, erro
 		sTracks = append(sTracks, sTrack)
 	}
 	_, tracks, err := b.batchSaveAlbumTracks(sAlbums, sTracks)
+	if err := b.addSavedTracks(username, tracks); err != nil {
+		return nil, err
+	}
+
 	return tracks, err
 }

@@ -69,12 +69,13 @@ var (
 func TestSaveTracks(t *testing.T) {
 	t.Run("returns same ID for same spotify ID", func(t *testing.T) {
 		brain := getInmemoryBrain(t)
+		username := "test_username"
 		if nTracks := logAllMetaTracks(t, brain); nTracks != 0 {
 			t.Fatalf("sqlite db is not clean")
 		}
 
 		want1 := []*MetaTrack{bTrackOS, bTrackITE}
-		got1, err := brain.SaveTracks([]spotify.SavedTrack{sTrackOS, sTrackITE})
+		got1, err := brain.SaveTracks([]spotify.SavedTrack{sTrackOS, sTrackITE}, username)
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -82,7 +83,7 @@ func TestSaveTracks(t *testing.T) {
 			t.Errorf("SaveTracks() mismatch (-want +got):\n%s", diff)
 		}
 
-		got2, err := brain.SaveTracks([]spotify.SavedTrack{sTrackOS, sTrackITE})
+		got2, err := brain.SaveTracks([]spotify.SavedTrack{sTrackOS, sTrackITE}, username)
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -92,12 +93,13 @@ func TestSaveTracks(t *testing.T) {
 	})
 	t.Run("returns different ID for different spotify ID", func(t *testing.T) {
 		brain := getInmemoryBrain(t)
+		username := "test_username"
 		if nTracks := logAllMetaTracks(t, brain); nTracks != 0 {
 			t.Fatalf("sqlite db is not clean")
 		}
 
 		want1 := []*MetaTrack{bTrackOS}
-		got1, err := brain.SaveTracks([]spotify.SavedTrack{sTrackOS})
+		got1, err := brain.SaveTracks([]spotify.SavedTrack{sTrackOS}, username)
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -106,7 +108,7 @@ func TestSaveTracks(t *testing.T) {
 		}
 
 		want2 := []*MetaTrack{bTrackITE}
-		got2, err := brain.SaveTracks([]spotify.SavedTrack{sTrackITE})
+		got2, err := brain.SaveTracks([]spotify.SavedTrack{sTrackITE}, username)
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -115,7 +117,7 @@ func TestSaveTracks(t *testing.T) {
 		}
 
 		want3 := []*MetaTrack{bTrackSC}
-		got3, err := brain.SaveTracks([]spotify.SavedTrack{sTrackSC})
+		got3, err := brain.SaveTracks([]spotify.SavedTrack{sTrackSC}, username)
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}

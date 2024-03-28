@@ -44,9 +44,9 @@ func main() {
 	// 	log.Fatalf("%v", err)
 	// }
 
-	if err := getSellerInventory(ctx, app); err != nil {
-		log.Fatalf("%v", err)
-	}
+	// if err := getSellerInventory(ctx, app); err != nil {
+	// 	log.Fatalf("%v", err)
+	// }
 	log.Printf("Done")
 }
 
@@ -100,7 +100,7 @@ func demoGormTracks(ctx context.Context, app *discsearch.App) error {
 	for idx, sTrack := range sTracks {
 		log.Printf("[%d/%d] sTrack: %s - %s - %+s", idx+1, len(sTracks), spotifyutils.SArtistsString(sTrack.Artists), sTrack.Album.Name, sTrack.Name)
 	}
-	bTracks, err := app.Brain.SaveTracks(sTracks)
+	bTracks, err := app.Brain.SaveTracks(sTracks, username)
 	if err != nil {
 		return err
 	}
@@ -171,7 +171,7 @@ func benchGetUserTracks(ctx context.Context, app *discsearch.App) error {
 	log.Printf("==========================")
 	log.Printf("brain.SaveTracks")
 	start = time.Now()
-	brainTracks, err := app.Brain.SaveTracks(userTracks)
+	brainTracks, err := app.Brain.SaveTracks(userTracks, username)
 	if err != nil {
 		return fmt.Errorf("error getting all tracks: %w", err)
 	}
