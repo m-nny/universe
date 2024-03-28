@@ -3,26 +3,42 @@ package discsearch
 import (
 	"context"
 	"fmt"
+	"log"
 	"regexp"
 
 	"github.com/m-nny/universe/lib/brain"
 )
 
-func (a *App) FindRelease(ctx context.Context, bRelease *brain.DiscogsRelease) (*brain.MetaAlbum, int, error) {
+func (a *App) FindRelease(ctx context.Context, bRelease *brain.DiscogsRelease) (*brain.MetaAlbum, error) {
+	if bRelease.SearchedMetaAlbum {
+		return bRelease.MetaAlbum, nil
+	}
+
 	q := sanitizeQ(fmt.Sprintf("%s %s", bRelease.ArtistName, bRelease.Name))
 	if len(q) > 50 {
-		return nil, 0, nil
+		return nil, nil
 	}
 	sAlbums, err := a.Spotify.SearchAlbum(ctx, q, 1)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 	bAlbums, err := a.Brain.SaveSimpleAlbums(sAlbums)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	result, score, err := brain.MostSimilarAlbum(bRelease, bAlbums)
-	return result, score, err
+	bMetaAlbum, score, err := brain.MostSimilarAlbum(bRelease, bAlbums)
+	if err != nil {
+		return nil, err
+	}
+	if bMetaAlbum == nil {
+		log.Printf("album: not found release_id: %d %+v", bRelease.DiscogsID, bRelease)
+	} else {
+		log.Printf("album: %s score: %d", bMetaAlbum.SimplifiedName, score)
+	}
+	if err := a.Brain.AssociateDiscogsRelease(bRelease, bMetaAlbum, score); err != nil {
+		return nil, err
+	}
+	return bMetaAlbum, nil
 }
 
 var sanitizeRgx = regexp.MustCompile(`[\(\)*\\\/\"\'\=\~\!\#\&\?]`)

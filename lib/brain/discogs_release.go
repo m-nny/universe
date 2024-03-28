@@ -9,29 +9,33 @@ import (
 )
 
 type DiscogsRelease struct {
-	ID          uint `gorm:"primarykey"`
-	DiscogsID   int
-	Name        string
-	ArtistName  string
-	MetaAlbumId *uint
-	MetaAlbum   *MetaAlbum
+	ID                       uint `gorm:"primarykey"`
+	DiscogsID                int
+	Name                     string
+	ArtistName               string
+	SearchedMetaAlbum        bool
+	MetaAlbumSimilariryScore int
+	MetaAlbumId              *uint
+	MetaAlbum                *MetaAlbum
 }
 
 func newDiscogsRelease(release discogs.ListingRelease) *DiscogsRelease {
 	r := &DiscogsRelease{
-		DiscogsID:  release.ID,
-		Name:       release.Title,
-		ArtistName: release.Artist,
+		DiscogsID:         release.ID,
+		Name:              release.Title,
+		ArtistName:        release.Artist,
+		SearchedMetaAlbum: false,
 	}
 	return r
 }
 
-func (dr *DiscogsRelease) addMetaAlbum(bMetaAlbum *MetaAlbum) {
-	if bMetaAlbum == nil {
-		return
-	}
+func (dr *DiscogsRelease) addMetaAlbum(bMetaAlbum *MetaAlbum, score int) {
 	dr.MetaAlbum = bMetaAlbum
-	dr.MetaAlbumId = &bMetaAlbum.ID
+	if bMetaAlbum != nil {
+		dr.MetaAlbumId = &bMetaAlbum.ID
+	}
+	dr.MetaAlbumSimilariryScore = score
+	dr.SearchedMetaAlbum = true
 }
 
 func (b *Brain) SaveDiscorgsReleases(dReleases []discogs.ListingRelease) ([]*DiscogsRelease, error) {
@@ -44,6 +48,7 @@ func (b *Brain) SaveDiscorgsReleases(dReleases []discogs.ListingRelease) ([]*Dis
 	var existingReleases []*DiscogsRelease
 	if err := b.gormDb.
 		Where("discogs_id IN ?", discogsIds).
+		Preload("MetaAlbum").
 		Find(&existingReleases).Error; err != nil {
 		return nil, err
 	}
@@ -59,20 +64,17 @@ func (b *Brain) SaveDiscorgsReleases(dReleases []discogs.ListingRelease) ([]*Dis
 	if len(newReleases) == 0 {
 		return existingReleases, nil
 	}
-	if err := b.gormDb.Create(newReleases).Error; err != nil {
+	if err := b.gormDb.CreateInBatches(newReleases, gormBatchSize).Error; err != nil {
 		return nil, err
 	}
 	return append(existingReleases, newReleases...), nil
 }
 
-func (b *Brain) AssociateDiscogsRelease(bRelease *DiscogsRelease, bMetaAlbum *MetaAlbum) error {
-	if bMetaAlbum == nil {
-		return fmt.Errorf("cannot set MetaAlbum to nil")
-	}
-	if err := b.gormDb.Model(bRelease).UpdateColumn("meta_album_id", bMetaAlbum.ID).Error; err != nil {
+func (b *Brain) AssociateDiscogsRelease(bRelease *DiscogsRelease, bMetaAlbum *MetaAlbum, score int) error {
+	bRelease.addMetaAlbum(bMetaAlbum, score)
+	if err := b.gormDb.Model(bRelease).Select("meta_album_id", "meta_album_similariry_score", "searched_meta_album").Updates(bRelease).Error; err != nil {
 		return err
 	}
-	bRelease.addMetaAlbum(bMetaAlbum)
 	return nil
 }
 

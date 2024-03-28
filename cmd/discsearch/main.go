@@ -44,9 +44,9 @@ func main() {
 	// 	log.Fatalf("%v", err)
 	// }
 
-	// if err := getSellerInventory(ctx, app); err != nil {
-	// 	log.Fatalf("%v", err)
-	// }
+	if err := getSellerInventory(ctx, app); err != nil {
+		log.Fatalf("%v", err)
+	}
 	log.Printf("Done")
 }
 
@@ -201,6 +201,7 @@ func benchGetUserTracks(ctx context.Context, app *discsearch.App) error {
 }
 
 func getSellerInventory(ctx context.Context, app *discsearch.App) error {
+	// sellerId := "nezrathebeatmaker"
 	sellerId := "TheRecordAlbum"
 	if _, err := app.Inventory(ctx, sellerId); err != nil {
 		return err

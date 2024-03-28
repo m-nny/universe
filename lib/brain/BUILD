@@ -8,6 +8,7 @@ go_library(
         "brainIndex.go",
         "common.go",
         "discogs_release.go",
+        "discogs_seller.go",
         "meta_album.go",
         "meta_track.go",
         "spotify_album.go",

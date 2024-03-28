@@ -10,6 +10,10 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+const (
+	gormBatchSize = 100
+)
+
 type Brain struct {
 	gormDb *gorm.DB
 }
@@ -19,9 +23,9 @@ func New(databasePath string, enableLogging bool) (*Brain, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := gormDb.AutoMigrate(
-		&Artist{}, &SpotifyAlbum{}, &MetaAlbum{}, &SpotifyTrack{}, &MetaTrack{}, &User{}, &DiscogsRelease{},
-	); err != nil {
+
+	allModels := []any{&Artist{}, &SpotifyAlbum{}, &MetaAlbum{}, &SpotifyTrack{}, &MetaTrack{}, &User{}, &DiscogsRelease{}, &DiscogsSeller{}}
+	if err := gormDb.AutoMigrate(allModels...); err != nil {
 		return nil, err
 	}
 	if enableLogging {

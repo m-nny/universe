@@ -34,21 +34,13 @@ func (a *App) Inventory(ctx context.Context, sellerId string) ([]*brain.MetaAlbu
 			bAlbums = append(bAlbums, bRelease.MetaAlbum)
 			continue
 		}
-		bMetaAlbum, score, err := a.FindRelease(ctx, bRelease)
+		bMetaAlbum, err := a.FindRelease(ctx, bRelease)
 		if err != nil {
 			return nil, err
-		}
-		if bMetaAlbum != nil {
-			log.Printf("album: %s score: %d", bMetaAlbum.SimplifiedName, score)
-		} else {
-			log.Printf("album: not found release_id: %d %+v", bRelease.DiscogsID, bRelease)
 		}
 		if bMetaAlbum == nil {
 			missedBRelease = append(missedBRelease, *bRelease)
 			continue
-		}
-		if err := a.Brain.AssociateDiscogsRelease(bRelease, bMetaAlbum); err != nil {
-			return nil, err
 		}
 		bAlbums = append(bAlbums, bMetaAlbum)
 	}
