@@ -11,7 +11,7 @@ import (
 )
 
 func (s *Service) GetUserTracks(ctx context.Context, username string) ([]spotify.SavedTrack, error) {
-	rawTracks, err := jsoncache.CachedExec("spotify_savedTracks", func() ([]spotify.SavedTrack, error) {
+	rawTracks, err := jsoncache.CachedExec("spotify/savedTracks/"+username, func() ([]spotify.SavedTrack, error) {
 		var rawTracks []spotify.SavedTrack
 		resp, err := s.spotify.CurrentUsersTracks(ctx,
 			spotify.Limit(50),

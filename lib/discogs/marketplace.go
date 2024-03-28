@@ -10,7 +10,7 @@ import (
 )
 
 func (d *Service) SellerInventory(ctx context.Context, username string) ([]Listing, error) {
-	return jsoncache.CachedExec("discogs_inventory_"+username, func() ([]Listing, error) {
+	return jsoncache.CachedExec("discogs/inventory/"+username, func() ([]Listing, error) {
 		return d._SellerInventory(ctx, username)
 	})
 }
