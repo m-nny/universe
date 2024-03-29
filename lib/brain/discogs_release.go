@@ -9,10 +9,13 @@ import (
 )
 
 type DiscogsRelease struct {
-	ID                       uint `gorm:"primarykey"`
-	DiscogsID                int
-	Name                     string
-	ArtistName               string
+	ID uint `gorm:"primarykey"`
+
+	DiscogsID  int
+	Name       string
+	ArtistName string
+	Format     string
+
 	SearchedMetaAlbum        bool
 	MetaAlbumSimilariryScore int
 	MetaAlbumId              *uint
@@ -21,9 +24,11 @@ type DiscogsRelease struct {
 
 func newDiscogsRelease(release discogs.ListingRelease) *DiscogsRelease {
 	r := &DiscogsRelease{
-		DiscogsID:         release.ID,
-		Name:              release.Title,
-		ArtistName:        release.Artist,
+		DiscogsID:  release.ID,
+		Name:       release.Title,
+		ArtistName: release.Artist,
+		Format:     release.Format,
+
 		SearchedMetaAlbum: false,
 	}
 	return r
@@ -38,7 +43,18 @@ func (dr *DiscogsRelease) addMetaAlbum(bMetaAlbum *MetaAlbum, score int) {
 	dr.SearchedMetaAlbum = true
 }
 
-func (b *Brain) SaveDiscorgsReleases(dReleases []discogs.ListingRelease) ([]*DiscogsRelease, error) {
+func (b *Brain) SaveDiscorgsReleases(dReleases []discogs.ListingRelease, username string) ([]*DiscogsRelease, error) {
+	bReleases, err := b._SaveDiscorgsReleases(dReleases)
+	if err != nil {
+		return nil, err
+	}
+	if err := b.upsertDiscogsUser(username, bReleases); err != nil {
+		return nil, err
+	}
+	return bReleases, nil
+}
+
+func (b *Brain) _SaveDiscorgsReleases(dReleases []discogs.ListingRelease) ([]*DiscogsRelease, error) {
 	dReleases = sliceutils.Unique(dReleases, func(item discogs.ListingRelease) int { return item.ID })
 	var discogsIds []int
 	for _, dRelease := range dReleases {

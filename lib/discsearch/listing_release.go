@@ -11,13 +11,9 @@ import (
 
 func (a *App) FindRelease(ctx context.Context, bRelease *brain.DiscogsRelease) (*brain.MetaAlbum, error) {
 	if bRelease.SearchedMetaAlbum {
-		return bRelease.MetaAlbum, nil
-	}
-
-	q := sanitizeQ(fmt.Sprintf("%s %s", bRelease.ArtistName, bRelease.Name))
-	if len(q) > 50 {
 		return nil, nil
 	}
+	q := sanitizeQ(fmt.Sprintf("%s %s", bRelease.ArtistName, bRelease.Name))
 	sAlbums, err := a.Spotify.SearchAlbum(ctx, q, 1)
 	if err != nil {
 		return nil, err

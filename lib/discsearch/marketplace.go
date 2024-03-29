@@ -20,20 +20,20 @@ func (a *App) Inventory(ctx context.Context, sellerId string) ([]*brain.MetaAlbu
 	for idx, dListing := range inventory {
 		dReleases[idx] = dListing.Release
 	}
-	bReleases, err := a.Brain.SaveDiscorgsReleases(dReleases)
+	bReleases, err := a.Brain.SaveDiscorgsReleases(dReleases, sellerId)
 	if err != nil {
 		return nil, err
 	}
 	var bAlbums []*brain.MetaAlbum
 	var missedBRelease []brain.DiscogsRelease
 	for idx, bRelease := range bReleases {
-		log.Printf("[%d/%d] release: %+v", idx+1, len(bReleases), bRelease.Name)
-		log.Printf("==================================")
-		log.Printf("release: %s - %s", bRelease.ArtistName, bRelease.Name)
 		if bRelease.MetaAlbum != nil {
 			bAlbums = append(bAlbums, bRelease.MetaAlbum)
 			continue
 		}
+		log.Printf("[%d/%d] release: %+v", idx+1, len(bReleases), bRelease.Name)
+		log.Printf("==================================")
+		log.Printf("release: %s - %s", bRelease.ArtistName, bRelease.Name)
 		bMetaAlbum, err := a.FindRelease(ctx, bRelease)
 		if err != nil {
 			return nil, err
