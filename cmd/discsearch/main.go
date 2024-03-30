@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"time"
@@ -11,11 +12,16 @@ import (
 	"github.com/m-nny/universe/lib/utils/spotifyutils"
 )
 
+var (
+	offlineMode = flag.Bool("offline", false, "Offline mode")
+)
+
 const username = "m-nny"
 
 func main() {
+	flag.Parse()
 	ctx := context.Background()
-	app, err := discsearch.New(ctx, username)
+	app, err := discsearch.New(ctx, username, *offlineMode)
 	if err != nil {
 		log.Fatalf("Could not init app: %v", err)
 	}

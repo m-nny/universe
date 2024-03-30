@@ -17,6 +17,8 @@ type ID = spotify.ID
 type Service struct {
 	brain   *brain.Brain
 	spotify *spotify.Client
+
+	offlineMode bool
 }
 
 type Config struct {
@@ -43,7 +45,10 @@ func LoadConfig() (*Config, error) {
 	return c, nil
 }
 
-func New(ctx context.Context, brain *brain.Brain, username string) (*Service, error) {
+func New(ctx context.Context, brain *brain.Brain, username string, offlineMode bool) (*Service, error) {
+	if offlineMode {
+		return &Service{brain: brain, offlineMode: true}, nil
+	}
 	config, err := LoadConfig()
 	if err != nil {
 		return nil, err
@@ -60,7 +65,8 @@ func New(ctx context.Context, brain *brain.Brain, username string) (*Service, er
 	}
 	client := spotify.New(auth.Client(ctx, token))
 	return &Service{
-		brain:   brain,
-		spotify: client,
+		brain:       brain,
+		spotify:     client,
+		offlineMode: offlineMode,
 	}, nil
 }

@@ -9,6 +9,9 @@ import (
 )
 
 func (s *Service) GetTracksById(ctx context.Context, ids []spotify.ID) ([]*spotify.SimpleTrack, error) {
+	if s.offlineMode {
+		return nil, ErrOffileMode
+	}
 	sFullTracks, err := s.spotify.GetTracks(ctx, ids)
 	if err != nil {
 		return nil, err

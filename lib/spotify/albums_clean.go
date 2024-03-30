@@ -13,6 +13,9 @@ const (
 )
 
 func (s *Service) GetAlbumsById(ctx context.Context, ids []spotify.ID) ([]*spotify.FullAlbum, error) {
+	if s.offlineMode {
+		return nil, ErrOffileMode
+	}
 	sAlbums, err := s.spotify.GetAlbums(ctx, ids)
 	if err != nil {
 		return nil, err
@@ -25,6 +28,9 @@ func (s *Service) SearchAlbum(ctx context.Context, q string, searchSize int) ([]
 		return nil, nil
 	}
 	results, err := jsoncache.CachedExec("spotify/search/"+q, func() (*spotify.SearchResult, error) {
+		if s.offlineMode {
+			return nil, ErrOffileMode
+		}
 		return s.spotify.Search(ctx, q, spotify.SearchTypeAlbum, spotify.Limit(searchSize))
 	})
 	if err != nil {

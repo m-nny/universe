@@ -21,7 +21,7 @@ type App struct {
 	Discogs *discogs.Service
 }
 
-func New(ctx context.Context, username string) (*App, error) {
+func New(ctx context.Context, username string, offlineMode bool) (*App, error) {
 	if err := godotenv.Load(); err != nil && !os.IsNotExist(err) {
 		return nil, fmt.Errorf("could not load .env: %v", err)
 	}
@@ -29,7 +29,7 @@ func New(ctx context.Context, username string) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
-	spotify, err := spotify.New(ctx, brain, username)
+	spotify, err := spotify.New(ctx, brain, username, offlineMode)
 	if err != nil {
 		return nil, err
 	}

@@ -5,6 +5,7 @@ go_library(
     srcs = [
         "albums_clean.go",
         "artist_clean.go",
+        "errors.go",
         "spotify.go",
         "tracks_clean.go",
         "user_tracks_clean.go",
