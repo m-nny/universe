@@ -6,6 +6,8 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/schollz/progressbar/v3"
+
 	"github.com/m-nny/universe/lib/brain"
 	"github.com/m-nny/universe/lib/discogs"
 )
@@ -26,14 +28,16 @@ func (a *App) Inventory(ctx context.Context, sellerId string) ([]*brain.MetaAlbu
 	}
 	var bAlbums []*brain.MetaAlbum
 	var missedBRelease []brain.DiscogsRelease
-	for idx, bRelease := range bReleases {
+	bar := progressbar.Default(int64(len(bReleases)))
+	for _, bRelease := range bReleases {
+		bar.Add(1)
 		if bRelease.MetaAlbum != nil {
 			bAlbums = append(bAlbums, bRelease.MetaAlbum)
 			continue
 		}
-		log.Printf("[%d/%d] release: %+v", idx+1, len(bReleases), bRelease.Name)
-		log.Printf("==================================")
-		log.Printf("release: %s - %s", bRelease.ArtistName, bRelease.Name)
+		// log.Printf("[%d/%d] release: %+v", idx+1, len(bReleases), bRelease.Name)
+		// log.Printf("==================================")
+		// log.Printf("release: %s - %s", bRelease.ArtistName, bRelease.Name)
 		bMetaAlbum, err := a.FindRelease(ctx, bRelease)
 		if err != nil {
 			return nil, err
@@ -52,9 +56,9 @@ func (a *App) Inventory(ctx context.Context, sellerId string) ([]*brain.MetaAlbu
 		return strings.Compare(a.Name, b.Name)
 	})
 	log.Printf("Missed %d bReleases", len(missedBRelease))
-	for idx, bRelease := range missedBRelease {
-		log.Printf("%3d. %08d %s - %s", idx+1, bRelease.DiscogsID, bRelease.ArtistName, bRelease.Name)
-		log.Printf("              https://www.discogs.com/release/%d", bRelease.DiscogsID)
-	}
+	// for idx, bRelease := range missedBRelease {
+	// 	log.Printf("%3d. %08d %s - %s", idx+1, bRelease.DiscogsID, bRelease.ArtistName, bRelease.Name)
+	// 	log.Printf("              https://www.discogs.com/release/%d", bRelease.DiscogsID)
+	// }
 	return bAlbums, nil
 }

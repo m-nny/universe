@@ -201,8 +201,8 @@ func benchGetUserTracks(ctx context.Context, app *discsearch.App) error {
 }
 
 func getSellerInventory(ctx context.Context, app *discsearch.App) error {
-	sellerId := "nezrathebeatmaker"
-	// sellerId := "TheRecordAlbum"
+	// sellerId := "nezrathebeatmaker"
+	sellerId := "TheRecordAlbum"
 	if _, err := app.Inventory(ctx, sellerId); err != nil {
 		return err
 	}

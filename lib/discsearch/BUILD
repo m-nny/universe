@@ -20,5 +20,6 @@ go_library(
         "//lib/spotify",
         "@com_github_joho_godotenv//:godotenv",
         "@com_github_mattn_go_sqlite3//:go-sqlite3",
+        "@com_github_schollz_progressbar_v3//:progressbar",
     ],
 )
