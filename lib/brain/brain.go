@@ -1,11 +1,14 @@
 package brain
 
 import (
+	"database/sql"
+
 	"gorm.io/gorm"
 )
 
 type Brain struct {
 	gormDb *gorm.DB
+	turso  *sql.DB
 }
 
 func New(databasePath string, enableLogging bool) (*Brain, error) {
@@ -13,5 +16,9 @@ func New(databasePath string, enableLogging bool) (*Brain, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Brain{gormDb: gormDb}, nil
+	turso, err := initTurso()
+	if err != nil {
+		return nil, err
+	}
+	return &Brain{gormDb: gormDb, turso: turso}, nil
 }
