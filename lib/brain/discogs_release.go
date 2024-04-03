@@ -99,7 +99,7 @@ func MostSimilarAlbum(dRelease *DiscogsRelease, bAlbums []*MetaAlbum) (*MetaAlbu
 	maxScore := 0
 	for _, bAlbum := range bAlbums {
 		if len(bAlbum.Artists) == 0 {
-			return nil, 0, fmt.Errorf("Albums should have artists populated")
+			return nil, 0, fmt.Errorf("albums should have artists populated")
 		}
 		score := albumSimilarity(dRelease, bAlbum)
 		if score > maxScore {

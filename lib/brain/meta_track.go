@@ -22,7 +22,7 @@ func (s *MetaTrack) String() string {
 	if s == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("%s", s.SimplifiedName)
+	return s.SimplifiedName
 }
 
 func newMetaTrack(sTrack spotify.SimpleTrack, bMetaAlbum *MetaAlbum, bArtists []*Artist) *MetaTrack {

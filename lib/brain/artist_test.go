@@ -82,9 +82,9 @@ func Test_saveArtists(t *testing.T) {
 	})
 }
 
-func diffArtist(want, got *Artist) string {
-	return cmp.Diff(want, got)
-}
+// func diffArtist(want, got *Artist) string {
+// 	return cmp.Diff(want, got)
+// }
 
 func diffArtists(want, got []*Artist) string {
 	return cmp.Diff(want, got)

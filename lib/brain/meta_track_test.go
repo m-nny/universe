@@ -132,9 +132,9 @@ func TestSaveTracks(t *testing.T) {
 
 var IGNORE_META_TRACK_FIELDS = cmpopts.IgnoreFields(MetaTrack{}, "MetaAlbum")
 
-func diffMetaTrack(want, got *MetaTrack) string {
-	return cmp.Diff(want, got, IGNORE_META_ALBUM_FIELDS, IGNORE_META_TRACK_FIELDS)
-}
+// func diffMetaTrack(want, got *MetaTrack) string {
+// 	return cmp.Diff(want, got, IGNORE_META_ALBUM_FIELDS, IGNORE_META_TRACK_FIELDS)
+// }
 
 func diffMetaTracks(want, got []*MetaTrack) string {
 	return cmp.Diff(want, got, IGNORE_META_ALBUM_FIELDS, IGNORE_META_TRACK_FIELDS)

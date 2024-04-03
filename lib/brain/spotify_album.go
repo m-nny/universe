@@ -19,7 +19,7 @@ func (s *SpotifyAlbum) String() string {
 	if s == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("%s", s.Name)
+	return s.Name
 }
 
 func newSpotifyAlbum(sAlbum spotify.SimpleAlbum, bArtists []*Artist, bMetaAlbum *MetaAlbum) *SpotifyAlbum {

@@ -14,7 +14,7 @@ func newDiscogsSeller(username string) *User {
 }
 
 func (b *Brain) upsertDiscogsUser(username string, releases []*DiscogsRelease) error {
-	seller := DiscogsSeller{Username: username}
+	seller := newDiscogsSeller(username)
 	if err := b.gormDb.Where("username = ?", username).FirstOrCreate(&seller).Error; err != nil {
 		return err
 	}

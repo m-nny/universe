@@ -55,7 +55,7 @@ func TestToAlbums(t *testing.T) {
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
-		if diff := diffMeteaAlbums(want1, got1); diff != "" {
+		if diff := diffMetaAlbums(want1, got1); diff != "" {
 			t.Errorf("ToAlbums() mismatch (-want +got):\n%s", diff)
 		}
 
@@ -63,7 +63,7 @@ func TestToAlbums(t *testing.T) {
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
-		if diff := diffMeteaAlbums(want1, got2); diff != "" {
+		if diff := diffMetaAlbums(want1, got2); diff != "" {
 			t.Errorf("ToAlbums() mismatch (-want +got):\n%s", diff)
 		}
 	})
@@ -78,7 +78,7 @@ func TestToAlbums(t *testing.T) {
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
-		if diff := diffMeteaAlbums(want1, got1); diff != "" {
+		if diff := diffMetaAlbums(want1, got1); diff != "" {
 			t.Errorf("ToAlbums() mismatch (-want +got):\n%s", diff)
 		}
 
@@ -87,7 +87,7 @@ func TestToAlbums(t *testing.T) {
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
-		if diff := diffMeteaAlbums(want2, got2); diff != "" {
+		if diff := diffMetaAlbums(want2, got2); diff != "" {
 			t.Errorf("ToAlbums() mismatch (-want +got):\n%s", diff)
 		}
 
@@ -96,7 +96,7 @@ func TestToAlbums(t *testing.T) {
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
-		if diff := diffMeteaAlbums(want3, got3); diff != "" {
+		if diff := diffMetaAlbums(want3, got3); diff != "" {
 			t.Errorf("ToAlbums() mismatch (-want +got):\n%s", diff)
 		}
 	})
@@ -104,11 +104,11 @@ func TestToAlbums(t *testing.T) {
 
 var IGNORE_META_ALBUM_FIELDS = cmpopts.IgnoreFields(MetaAlbum{}, "AnyName")
 
-func diffMetaAlbum(want, got *MetaAlbum) string {
-	return cmp.Diff(want, got, IGNORE_META_ALBUM_FIELDS)
-}
+// func diffMetaAlbum(want, got *MetaAlbum) string {
+// 	return cmp.Diff(want, got, IGNORE_META_ALBUM_FIELDS)
+// }
 
-func diffMeteaAlbums(want, got []*MetaAlbum) string {
+func diffMetaAlbums(want, got []*MetaAlbum) string {
 	return cmp.Diff(want, got, IGNORE_META_ALBUM_FIELDS)
 }
 
