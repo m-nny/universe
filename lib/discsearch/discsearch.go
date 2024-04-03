@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 
 	"github.com/joho/godotenv"
-	_ "github.com/mattn/go-sqlite3"
 
 	"github.com/m-nny/universe/lib/brain"
 	"github.com/m-nny/universe/lib/discogs"
