@@ -7,8 +7,8 @@ type DiscogsSeller struct {
 	SellingReleases []*DiscogsRelease `gorm:"many2many:discogs_seller_selling_releases"`
 }
 
-func newDiscogsSeller(username string) *User {
-	return &User{
+func newDiscogsSeller(username string) *DiscogsSeller {
+	return &DiscogsSeller{
 		Username: username,
 	}
 }

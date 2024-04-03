@@ -1,24 +1,26 @@
 package brain
 
 import (
-	"database/sql"
-
+	"github.com/jmoiron/sqlx"
 	"gorm.io/gorm"
 )
 
 type Brain struct {
 	gormDb *gorm.DB
-	turso  *sql.DB
+	sqlxDb *sqlx.DB
 }
 
-func New(databasePath string, enableLogging bool) (*Brain, error) {
-	gormDb, err := initGormDb(databasePath, enableLogging)
+func New(gormDsn, sqlxDsn string, enableLogging bool) (*Brain, error) {
+	gormDb, err := initGormDb(gormDsn, enableLogging)
 	if err != nil {
 		return nil, err
 	}
-	turso, err := initTurso()
+	sqlxDb, err := sqlx.Connect("libsql", sqlxDsn)
 	if err != nil {
 		return nil, err
 	}
-	return &Brain{gormDb: gormDb, turso: turso}, nil
+	if err := initSqlx(sqlxDb); err != nil {
+		return nil, err
+	}
+	return &Brain{gormDb: gormDb, sqlxDb: sqlxDb}, nil
 }

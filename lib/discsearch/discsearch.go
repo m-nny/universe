@@ -58,13 +58,19 @@ func getDbPath(db string) (string, error) {
 }
 
 func getBrain() (*brain.Brain, error) {
-	dsn := os.Getenv("turso_db_dsn")
-	authToken := os.Getenv("turso_db_token")
-	if dsn == "" {
-		log.Fatalf("turso_db_name is empty")
-	}
-	if authToken != "" {
-		dsn += "authToken=" + authToken
-	}
-	return brain.New(dsn /*enableLogging=*/, false)
+	// tursoDsn := os.Getenv("turso_db_dsn")
+	// authToken := os.Getenv("turso_db_token")
+	// if tursoDsn == "" {
+	// 	return nil, fmt.Errorf("turso_db_name is empty")
+	// }
+	// if authToken != "" {
+	// 	tursoDsn += "authToken=" + authToken
+	// }
+	// sqliteDsn, err := getDbPath("gorm")
+	// if err != nil {
+	// 	return nil, err
+	// }
+	gormDsn := "http://127.0.0.1:8080"
+	sqlxDsn := "http://127.0.0.1:8081"
+	return brain.New(gormDsn, sqlxDsn /*enableLogging=*/, false)
 }

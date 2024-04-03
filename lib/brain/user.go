@@ -24,10 +24,6 @@ func (u *User) SpotifyToken() (*oauth2.Token, error) {
 	return &token, nil
 }
 
-type SimpleUser struct {
-	Username string
-}
-
 func newUser(username string, spotifyToken *oauth2.Token) (*User, error) {
 	spotifyTokenStr, err := json.Marshal(spotifyToken)
 	if err != nil {
@@ -41,7 +37,7 @@ func newUser(username string, spotifyToken *oauth2.Token) (*User, error) {
 
 func (b *Brain) GetSpotifyToken(ctx context.Context, username string) (*oauth2.Token, error) {
 	var user User
-	if err := b.gormDb.Where(User{Username: username}).First(&user).Error; err != nil {
+	if err := b.sqlxDb.GetContext(ctx, &user, "SELECT * FROM users WHERE username = ?", username); err != nil {
 		return nil, err
 	}
 	userToken, err := user.SpotifyToken()
@@ -57,6 +53,13 @@ func (b *Brain) StoreSpotifyToken(ctx context.Context, username string, spotifyT
 	if err != nil {
 		return err
 	}
+	if _, err := b.sqlxDb.ExecContext(ctx, `
+		INSERT INTO users (username, spotify_token_str) VALUES (?, ?)
+		ON CONFLICT DO UPDATE SET spotify_token_str = excluded.spotify_token_str
+	`, user.Username, user.SpotifyTokenStr); err != nil {
+		return nil
+	}
+	// Shadow write to gorm
 	if err := b.gormDb.Clauses(clause.OnConflict{UpdateAll: true}).Create(&user).Error; err != nil {
 		return nil
 	}

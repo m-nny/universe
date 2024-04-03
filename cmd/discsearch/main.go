@@ -50,9 +50,9 @@ func main() {
 	// 	log.Fatalf("%v", err)
 	// }
 
-	if err := getSellerInventory(ctx, app); err != nil {
-		log.Fatalf("%v", err)
-	}
+	// if err := getSellerInventory(ctx, app); err != nil {
+	// 	log.Fatalf("%v", err)
+	// }
 	log.Printf("Done")
 }
 
