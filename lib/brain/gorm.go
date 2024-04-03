@@ -1,7 +1,6 @@
 package brain
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -16,16 +15,7 @@ const (
 	gormBatchSize = 100
 )
 
-func initGormDb(databasePath string, enableLogging bool) (*gorm.DB, error) {
-	dbName := os.Getenv("turso_db_name")
-	authToken := os.Getenv("turso_db_token")
-	if dbName == "" {
-		log.Fatalf("turso_db_name is empty")
-	}
-	if authToken == "" {
-		log.Fatalf("turso_db_token is empty")
-	}
-	dsn := fmt.Sprintf("libsql://%s.turso.io?authToken=%s", dbName, authToken)
+func initGormDb(dsn string, enableLogging bool) (*gorm.DB, error) {
 	log.Printf("Connecting to %s", dsn)
 	gormDb, err := gorm.Open(sqlite.Dialector{
 		DriverName: "libsql",

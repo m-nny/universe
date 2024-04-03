@@ -58,9 +58,13 @@ func getDbPath(db string) (string, error) {
 }
 
 func getBrain() (*brain.Brain, error) {
-	databasePath, err := getDbPath("gorm")
-	if err != nil {
-		return nil, err
+	dsn := os.Getenv("turso_db_dsn")
+	authToken := os.Getenv("turso_db_token")
+	if dsn == "" {
+		log.Fatalf("turso_db_name is empty")
 	}
-	return brain.New(databasePath /*enableLogging=*/, false)
+	if authToken != "" {
+		dsn += "authToken=" + authToken
+	}
+	return brain.New(dsn /*enableLogging=*/, false)
 }
