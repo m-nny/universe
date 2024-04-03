@@ -12,7 +12,7 @@ import (
 type User struct {
 	Username string `gorm:"primarykey"`
 	// TODO add proper token
-	SpotifyTokenStr []byte
+	SpotifyTokenStr []byte       `db:"spotify_token_str"`
 	SavedTracks     []*MetaTrack `gorm:"many2many:user_saved_tracks"`
 }
 
