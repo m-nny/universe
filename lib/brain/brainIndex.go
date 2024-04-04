@@ -1,6 +1,8 @@
 package brain
 
 import (
+	"maps"
+
 	"github.com/zmb3/spotify/v2"
 
 	utils "github.com/m-nny/universe/lib/utils/spotifyutils"
@@ -21,6 +23,16 @@ func newBrainIndex() *brainIndex {
 		metaTrackMap:    make(map[string]*MetaTrack),
 		spotifyAlbumMap: make(map[spotify.ID]*SpotifyAlbum),
 		spotifyTrackMap: make(map[spotify.ID]*SpotifyTrack),
+	}
+}
+
+func (bi *brainIndex) Clone() *brainIndex {
+	return &brainIndex{
+		artistsMap:      maps.Clone(bi.artistsMap),
+		metaAlbumMap:    maps.Clone(bi.metaAlbumMap),
+		metaTrackMap:    maps.Clone(bi.metaTrackMap),
+		spotifyAlbumMap: maps.Clone(bi.spotifyAlbumMap),
+		spotifyTrackMap: maps.Clone(bi.spotifyTrackMap),
 	}
 }
 
