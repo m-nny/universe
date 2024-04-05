@@ -91,13 +91,21 @@ func diffArtists(want, got []*Artist) string {
 }
 
 func logAllArtists(tb testing.TB, brain *Brain) int {
-	var allArtists []Artist
-	if err := brain.gormDb.Find(&allArtists).Error; err != nil {
+	var gormArtists []Artist
+	if err := brain.gormDb.Find(&gormArtists).Error; err != nil {
 		tb.Fatalf("err: %v", err)
 	}
-	tb.Logf("There are %d artists in db:\n", len(allArtists))
-	for idx, item := range allArtists {
-		tb.Logf("[%d/%d] artist: %+v", idx+1, len(allArtists), item)
+	tb.Logf("There are %d artists in gorm db:\n", len(gormArtists))
+	for idx, item := range gormArtists {
+		tb.Logf("[%d/%d] artist: %+v", idx+1, len(gormArtists), item)
 	}
-	return len(allArtists)
+	tb.Logf("---------")
+	sqlxArtists, err := getAllSqlxArtists(brain.sqlxDb)
+	if err != nil {
+		tb.Fatalf("err: %v", err)
+	}
+	if len(gormArtists) != len(sqlxArtists) {
+		tb.Fatalf("len(gormArtists) != len(sqlxArtists): %d != %d", len(gormArtists), len(sqlxArtists))
+	}
+	return len(gormArtists)
 }

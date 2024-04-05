@@ -5,8 +5,7 @@ import (
 )
 
 func getInmemoryBrain(tb testing.TB) *Brain {
-	dbName := "file::memory:"
-	brain, err := New(dbName /*enableLogging=*/, "", false)
+	brain, err := New("file::memory:", "file::memory:" /*enableLogging=*/, false)
 	if err != nil {
 		tb.Fatalf("err: %v", err)
 	}

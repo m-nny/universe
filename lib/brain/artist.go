@@ -125,3 +125,16 @@ func _sqlxUpsertArtists(db *sqlx.DB, sArtists []spotify.SimpleArtist, bi *brainI
 	bi.AddArtists(newArtists)
 	return append(existingArtists, newArtists...), nil
 }
+
+func getAllSqlxArtists(db *sqlx.DB) ([]*Artist, error) {
+	var existingArtists []*Artist
+	query, args, err := sqlx.In(`SELECT * FROM artists`)
+	if err != nil {
+		return nil, err
+	}
+	query = db.Rebind(query)
+	if err := db.Select(&existingArtists, query, args...); err != nil {
+		return nil, err
+	}
+	return existingArtists, nil
+}
