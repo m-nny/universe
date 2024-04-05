@@ -8,32 +8,33 @@ import (
 	"github.com/zmb3/spotify/v2"
 )
 
+// Inputs
 var (
-	sAlbumHT = &spotify.FullAlbum{
-		SimpleAlbum: spotify.SimpleAlbum{
-			ID:      "spotify:hybrid_theory",
-			Name:    "Hybrid Theory",
-			Artists: []spotify.SimpleArtist{sArtistLP},
-		},
+	sSimpleAlbumHT = spotify.SimpleAlbum{
+		ID:      "spotify:hybrid_theory",
+		Name:    "Hybrid Theory",
+		Artists: []spotify.SimpleArtist{sArtistLP},
 	}
-	sAlbumHT20 = &spotify.FullAlbum{
-		SimpleAlbum: spotify.SimpleAlbum{
-			ID:      "spotify:hybryd_theory_20",
-			Name:    "Hybrid Theory (20th Anniversary Edition)",
-			Artists: []spotify.SimpleArtist{sArtistLP},
-		},
+	sSimpleAlbumHT20 = spotify.SimpleAlbum{
+		ID:      "spotify:hybryd_theory_20",
+		Name:    "Hybrid Theory (20th Anniversary Edition)",
+		Artists: []spotify.SimpleArtist{sArtistLP},
 	}
-	sAlbumN = &spotify.FullAlbum{
-		SimpleAlbum: spotify.SimpleAlbum{
-			ID:      "spotify:nurture",
-			Name:    "Nurture",
-			Artists: []spotify.SimpleArtist{sArtistPR},
-		},
+	sSimpleAlbumN = spotify.SimpleAlbum{
+		ID:      "spotify:nurture",
+		Name:    "Nurture",
+		Artists: []spotify.SimpleArtist{sArtistPR},
 	}
-	bMetaAlbumHT = &MetaAlbum{
-		ID:      1,
-		Artists: []*Artist{bArtistLP},
+	sFullAlbumHT   = &spotify.FullAlbum{SimpleAlbum: sSimpleAlbumHT}
+	sFullAlbumHT20 = &spotify.FullAlbum{SimpleAlbum: sSimpleAlbumHT20}
+	sFullAlbumN    = &spotify.FullAlbum{SimpleAlbum: sSimpleAlbumN}
+)
 
+// Expected outputs
+var (
+	bMetaAlbumHT = &MetaAlbum{
+		ID:             1,
+		Artists:        []*Artist{bArtistLP},
 		SimplifiedName: "linkin park - hybrid theory",
 	}
 	bMetaAlbumN = &MetaAlbum{
@@ -51,7 +52,7 @@ func Test_SaveAlbums(t *testing.T) {
 		}
 
 		want1 := []*MetaAlbum{bMetaAlbumHT, bMetaAlbumN}
-		got1, err := brain.SaveAlbums([]*spotify.FullAlbum{sAlbumHT, sAlbumHT20, sAlbumN})
+		got1, err := brain.SaveAlbums([]*spotify.FullAlbum{sFullAlbumHT, sFullAlbumHT20, sFullAlbumN})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -59,7 +60,7 @@ func Test_SaveAlbums(t *testing.T) {
 			t.Errorf("ToAlbums() mismatch (-want +got):\n%s", diff)
 		}
 
-		got2, err := brain.SaveAlbums([]*spotify.FullAlbum{sAlbumHT, sAlbumHT20, sAlbumN})
+		got2, err := brain.SaveAlbums([]*spotify.FullAlbum{sFullAlbumHT, sFullAlbumHT20, sFullAlbumN})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -74,7 +75,7 @@ func Test_SaveAlbums(t *testing.T) {
 		}
 
 		want1 := []*MetaAlbum{bMetaAlbumHT}
-		got1, err := brain.SaveAlbums([]*spotify.FullAlbum{sAlbumHT})
+		got1, err := brain.SaveAlbums([]*spotify.FullAlbum{sFullAlbumHT})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -83,7 +84,7 @@ func Test_SaveAlbums(t *testing.T) {
 		}
 
 		want2 := []*MetaAlbum{bMetaAlbumHT}
-		got2, err := brain.SaveAlbums([]*spotify.FullAlbum{sAlbumHT20})
+		got2, err := brain.SaveAlbums([]*spotify.FullAlbum{sFullAlbumHT20})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -92,11 +93,43 @@ func Test_SaveAlbums(t *testing.T) {
 		}
 
 		want3 := []*MetaAlbum{bMetaAlbumN}
-		got3, err := brain.SaveAlbums([]*spotify.FullAlbum{sAlbumN})
+		got3, err := brain.SaveAlbums([]*spotify.FullAlbum{sFullAlbumN})
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffMetaAlbums(want3, got3); diff != "" {
+			t.Errorf("ToAlbums() mismatch (-want +got):\n%s", diff)
+		}
+	})
+}
+
+func Test_upsertMetaAlbumsGorm(t *testing.T) {
+	t.Run("returns same ID for same spotify ID", func(t *testing.T) {
+		brain := getInmemoryBrain(t)
+		if nAlbums := checkNMetaAlbumsGorm(t, brain); nAlbums != 0 {
+			t.Fatalf("sqlite db is not clean")
+		}
+
+		// Setup Artists
+		bi := newBrainIndex()
+		if _, err := upsertArtistsGorm(brain.gormDb, []spotify.SimpleArtist{sArtistLP, sArtistPR}, bi); err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+
+		want1 := []*MetaAlbum{bMetaAlbumHT, bMetaAlbumN}
+		got1, err := upsertMetaAlbumsGorm(brain.gormDb, []spotify.SimpleAlbum{sSimpleAlbumHT, sSimpleAlbumHT20, sSimpleAlbumN}, bi.Clone())
+		if err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+		if diff := diffMetaAlbums(want1, got1); diff != "" {
+			t.Errorf("ToAlbums() mismatch (-want +got):\n%s", diff)
+		}
+
+		got2, err := upsertMetaAlbumsGorm(brain.gormDb, []spotify.SimpleAlbum{sSimpleAlbumHT, sSimpleAlbumHT20, sSimpleAlbumN}, bi.Clone())
+		if err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+		if diff := diffMetaAlbums(want1, got2); diff != "" {
 			t.Errorf("ToAlbums() mismatch (-want +got):\n%s", diff)
 		}
 	})

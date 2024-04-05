@@ -1,7 +1,6 @@
 package brain
 
 import (
-	"log"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -18,7 +17,7 @@ var (
 				TrackNumber: 2,
 				Artists:     []spotify.SimpleArtist{sArtistLP},
 			},
-			Album: sAlbumHT.SimpleAlbum,
+			Album: sSimpleAlbumHT,
 		},
 	}
 	sTrackITE = spotify.SavedTrack{
@@ -29,7 +28,7 @@ var (
 				TrackNumber: 8,
 				Artists:     []spotify.SimpleArtist{sArtistLP},
 			},
-			Album: sAlbumHT.SimpleAlbum,
+			Album: sSimpleAlbumHT,
 		},
 	}
 	sTrackSC = spotify.SavedTrack{
@@ -40,7 +39,7 @@ var (
 				TrackNumber: 11,
 				Artists:     []spotify.SimpleArtist{sArtistPR},
 			},
-			Album: sAlbumN.SimpleAlbum,
+			Album: sSimpleAlbumN,
 		},
 	}
 	bTrackOS = &MetaTrack{
@@ -121,9 +120,6 @@ func TestSaveTracks(t *testing.T) {
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
-		log.Printf("got1: %v", got1)
-		log.Printf("got2: %v", got2)
-		log.Printf("got3: %v", got3)
 		if diff := diffMetaTracks(want3, got3); diff != "" {
 			t.Errorf("SaveTracks() mismatch (-want +got):\n%s", diff)
 		}

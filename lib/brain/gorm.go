@@ -16,7 +16,7 @@ const (
 )
 
 func initGormDb(dsn string, enableLogging bool) (*gorm.DB, error) {
-	log.Printf("Connecting to %s", dsn)
+	// log.Printf("Connecting to %s", dsn)
 	dialector := sqlite.Dialector{DriverName: "libsql", DSN: dsn}
 	gormDb, err := gorm.Open(dialector, &gorm.Config{})
 	if err != nil {

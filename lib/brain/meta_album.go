@@ -2,7 +2,6 @@ package brain
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/zmb3/spotify/v2"
 	"gorm.io/gorm"
@@ -68,8 +67,8 @@ func upsertMetaAlbumsGorm(db *gorm.DB, sAlbums []spotify.SimpleAlbum, bi *brainI
 		}
 		bArtists, ok := bi.GetArtists(sAlbum.Artists)
 		if !ok {
-			log.Printf("WTF sAlbum: %v", sAlbum)
-			return nil, fmt.Errorf("could not get artists for %s, but it should be there", sAlbum.Name)
+			// log.Printf("could not get artists for %s, but they should be there", sAlbum.Name)
+			return nil, fmt.Errorf("could not get artists for %s, but they should be there", sAlbum.Name)
 		}
 		newAlbums = append(newAlbums, newMetaAlbum(sAlbum, bArtists))
 	}
