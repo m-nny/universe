@@ -26,6 +26,11 @@ func newMetaAlbum(sAlbum spotify.SimpleAlbum, bArtists []*Artist) *MetaAlbum {
 	}
 }
 
+type MetaAlbumArtist struct {
+	MetaAlbumId uint `db:"meta_album_id"`
+	ArtistId    uint `db:"artist_id"`
+}
+
 func upsertMetaAlbums(b *Brain, sAlbums []spotify.SimpleAlbum, bi *brainIndex) ([]*MetaAlbum, error) {
 	sqlxBi := bi.Clone()
 	sqlxMetaAlbums, err := upsertMetaAlbumsSqlx(b.sqlxDb, sAlbums, sqlxBi)
@@ -46,15 +51,15 @@ func upsertMetaAlbums(b *Brain, sAlbums []spotify.SimpleAlbum, bi *brainIndex) (
 
 func upsertMetaAlbumsGorm(db *gorm.DB, sAlbums []spotify.SimpleAlbum, bi *brainIndex) ([]*MetaAlbum, error) {
 	sAlbums = sliceutils.Unique(sAlbums, utils.SimplifiedAlbumName)
-	var albumSimps []string
+	var simpNames []string
 	for _, sAlbum := range sAlbums {
-		albumSimps = append(albumSimps, utils.SimplifiedAlbumName(sAlbum))
+		simpNames = append(simpNames, utils.SimplifiedAlbumName(sAlbum))
 	}
 
 	var existingMetaAlbums []*MetaAlbum
 	if err := db.
 		Preload("Artists").
-		Where("simplified_name IN ?", albumSimps).
+		Where("simplified_name IN ?", simpNames).
 		Find(&existingMetaAlbums).Error; err != nil {
 		return nil, err
 	}
@@ -85,21 +90,22 @@ func upsertMetaAlbumsGorm(db *gorm.DB, sAlbums []spotify.SimpleAlbum, bi *brainI
 
 func upsertMetaAlbumsSqlx(db *sqlx.DB, sAlbums []spotify.SimpleAlbum, bi *brainIndex) ([]*MetaAlbum, error) {
 	sAlbums = sliceutils.Unique(sAlbums, utils.SimplifiedAlbumName)
-	var albumSimps []string
+	var simpNames []string
 	for _, sAlbum := range sAlbums {
-		albumSimps = append(albumSimps, utils.SimplifiedAlbumName(sAlbum))
+		simpNames = append(simpNames, utils.SimplifiedAlbumName(sAlbum))
 	}
 
 	var existingMetaAlbums []*MetaAlbum
-	if err := db.
-		Preload("Artists").
-		Where("simplified_name IN ?", albumSimps).
-		Find(&existingMetaAlbums).Error; err != nil {
+	query, args, err := sqlx.In(`SELECT * FROM meta_albums WHERE simplified_name IN (?)`, simpNames)
+	if err != nil {
+		return nil, err
+	}
+	query = db.Rebind(query)
+	if err := db.Select(&existingMetaAlbums, query, args...); err != nil {
 		return nil, err
 	}
 	bi.AddMetaAlbums(existingMetaAlbums)
 
-	// var newMetaAlbums []*MetaAlbum
 	var newAlbums []*MetaAlbum
 	for _, sAlbum := range sAlbums {
 		if _, ok := bi.GetMetaAlbum(sAlbum); ok {
@@ -107,7 +113,6 @@ func upsertMetaAlbumsSqlx(db *sqlx.DB, sAlbums []spotify.SimpleAlbum, bi *brainI
 		}
 		bArtists, ok := bi.GetArtists(sAlbum.Artists)
 		if !ok {
-			// log.Printf("could not get artists for %s, but they should be there", sAlbum.Name)
 			return nil, fmt.Errorf("could not get artists for %s, but they should be there", sAlbum.Name)
 		}
 		newAlbums = append(newAlbums, newMetaAlbum(sAlbum, bArtists))
@@ -115,10 +120,26 @@ func upsertMetaAlbumsSqlx(db *sqlx.DB, sAlbums []spotify.SimpleAlbum, bi *brainI
 	if len(newAlbums) == 0 {
 		return existingMetaAlbums, nil
 	}
-	if err := db.Create(newAlbums).Error; err != nil {
+	rows, err := db.NamedQuery(`INSERT INTO meta_albums (simplified_name, any_name) VALUES (:simplified_name, :any_name) RETURNING id`, newAlbums)
+	if err != nil {
 		return nil, err
 	}
+	for idx := 0; rows.Next(); idx++ {
+		if err := rows.Scan(&newAlbums[idx].ID); err != nil {
+			return nil, err
+		}
+	}
 	bi.AddMetaAlbums(newAlbums)
+	var metaAlbumArtists []MetaAlbumArtist
+	for _, bAlbum := range newAlbums {
+		for _, bArtist := range bAlbum.Artists {
+			metaAlbumArtists = append(metaAlbumArtists, MetaAlbumArtist{bAlbum.ID, bArtist.ID})
+		}
+	}
+	_, err = db.NamedExec(`INSERT INTO meta_album_artists (meta_album_id, artist_id) VALUES (:meta_album_id, :artist_id)`, metaAlbumArtists)
+	if err != nil {
+		return nil, err
+	}
 	return append(existingMetaAlbums, newAlbums...), nil
 }
 
@@ -150,16 +171,19 @@ func (b *Brain) MetaAlbumCount() (int, error) {
 }
 
 func getAllMetaAlbumsSqlx(db *sqlx.DB) ([]MetaAlbum, error) {
-	var existingMetaAlbums []MetaAlbum
-	query, args, err := sqlx.In(`SELECT * FROM meta_albums`)
-	if err != nil {
+	var bMetaAlbums []MetaAlbum
+	if err := db.Select(&bMetaAlbums, `SELECT * FROM meta_albums`); err != nil {
 		return nil, err
 	}
-	query = db.Rebind(query)
-	if err := db.Select(&existingMetaAlbums, query, args...); err != nil {
-		return nil, err
+	return bMetaAlbums, nil
+}
+
+func cntMetaAlbumArtistsSqlx(db *sqlx.DB) (int, error) {
+	var cnt int
+	if err := db.Get(&cnt, `SELECT COUNT(*) FROM meta_album_artists`); err != nil {
+		return 0, err
 	}
-	return existingMetaAlbums, nil
+	return cnt, nil
 }
 
 func getAllMetaAlbumsGorm(db *gorm.DB) ([]MetaAlbum, error) {

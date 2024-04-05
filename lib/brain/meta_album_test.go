@@ -59,7 +59,7 @@ func Test_SaveAlbums(t *testing.T) {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffMetaAlbums(want1, got1); diff != "" {
-			t.Errorf("SaveAlbums() mismatch (-want +got):\n%s", diff)
+			t.Fatalf("SaveAlbums() mismatch (-want +got):\n%s", diff)
 		}
 
 		got2, err := brain.SaveAlbums([]*spotify.FullAlbum{sFullAlbumHT, sFullAlbumHT20, sFullAlbumN})
@@ -67,7 +67,7 @@ func Test_SaveAlbums(t *testing.T) {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffMetaAlbums(want1, got2); diff != "" {
-			t.Errorf("SaveAlbums() mismatch (-want +got):\n%s", diff)
+			t.Fatalf("SaveAlbums() mismatch (-want +got):\n%s", diff)
 		}
 	})
 	t.Run("returns different ID for different spotify ID", func(t *testing.T) {
@@ -82,7 +82,7 @@ func Test_SaveAlbums(t *testing.T) {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffMetaAlbums(want1, got1); diff != "" {
-			t.Errorf("SaveAlbums() mismatch (-want +got):\n%s", diff)
+			t.Fatalf("SaveAlbums() mismatch (-want +got):\n%s", diff)
 		}
 
 		want2 := []*MetaAlbum{bMetaAlbumHT}
@@ -91,7 +91,7 @@ func Test_SaveAlbums(t *testing.T) {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffMetaAlbums(want2, got2); diff != "" {
-			t.Errorf("SaveAlbums() mismatch (-want +got):\n%s", diff)
+			t.Fatalf("SaveAlbums() mismatch (-want +got):\n%s", diff)
 		}
 
 		want3 := []*MetaAlbum{bMetaAlbumN}
@@ -100,7 +100,7 @@ func Test_SaveAlbums(t *testing.T) {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffMetaAlbums(want3, got3); diff != "" {
-			t.Errorf("SaveAlbums() mismatch (-want +got):\n%s", diff)
+			t.Fatalf("SaveAlbums() mismatch (-want +got):\n%s", diff)
 		}
 	})
 }
@@ -124,7 +124,7 @@ func Test_upsertMetaAlbumsGorm(t *testing.T) {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffMetaAlbums(want1, got1); diff != "" {
-			t.Errorf("upsertArtistsGorm() mismatch (-want +got):\n%s", diff)
+			t.Fatalf("upsertArtistsGorm() mismatch (-want +got):\n%s", diff)
 		}
 
 		got2, err := upsertMetaAlbumsGorm(brain.gormDb, []spotify.SimpleAlbum{sSimpleAlbumHT, sSimpleAlbumHT20, sSimpleAlbumN}, bi.Clone())
@@ -132,7 +132,7 @@ func Test_upsertMetaAlbumsGorm(t *testing.T) {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffMetaAlbums(want1, got2); diff != "" {
-			t.Errorf("upsertArtistsGorm() mismatch (-want +got):\n%s", diff)
+			t.Fatalf("upsertArtistsGorm() mismatch (-want +got):\n%s", diff)
 		}
 	})
 	t.Run("returns different ID for different spotify ID", func(t *testing.T) {
@@ -153,7 +153,7 @@ func Test_upsertMetaAlbumsGorm(t *testing.T) {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffMetaAlbums(want1, got1); diff != "" {
-			t.Errorf("upsertArtistsGorm() mismatch (-want +got):\n%s", diff)
+			t.Fatalf("upsertArtistsGorm() mismatch (-want +got):\n%s", diff)
 		}
 
 		want2 := []*MetaAlbum{bMetaAlbumHT}
@@ -162,7 +162,7 @@ func Test_upsertMetaAlbumsGorm(t *testing.T) {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffMetaAlbums(want2, got2); diff != "" {
-			t.Errorf("upsertArtistsGorm() mismatch (-want +got):\n%s", diff)
+			t.Fatalf("upsertArtistsGorm() mismatch (-want +got):\n%s", diff)
 		}
 
 		want3 := []*MetaAlbum{bMetaAlbumN}
@@ -171,7 +171,7 @@ func Test_upsertMetaAlbumsGorm(t *testing.T) {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffMetaAlbums(want3, got3); diff != "" {
-			t.Errorf("upsertArtistsGorm() mismatch (-want +got):\n%s", diff)
+			t.Fatalf("upsertArtistsGorm() mismatch (-want +got):\n%s", diff)
 		}
 	})
 }
@@ -179,8 +179,11 @@ func Test_upsertMetaAlbumsGorm(t *testing.T) {
 func Test_upsertMetaAlbumsSqlx(t *testing.T) {
 	t.Run("returns same ID for same spotify ID", func(t *testing.T) {
 		brain := getInmemoryBrain(t)
-		if nAlbums := checkNMetaAlbumsSqlx(t, brain.sqlxDb); nAlbums != 0 {
-			t.Fatalf("sqlite db is not clean")
+		if want, got := 0, checkNMetaAlbumsSqlx(t, brain.sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta albums, but want %d rows", got, want)
+		}
+		if want, got := 0, checkNMetaAlbumArtistsSqlx(t, brain.sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta album artists, but want %d rows", got, want)
 		}
 
 		// Setup Artists
@@ -195,7 +198,7 @@ func Test_upsertMetaAlbumsSqlx(t *testing.T) {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffMetaAlbums(want1, got1); diff != "" {
-			t.Errorf("upsertMetaAlbumsSqlx() mismatch (-want +got):\n%s", diff)
+			t.Fatalf("upsertMetaAlbumsSqlx() mismatch (-want +got):\n%s", diff)
 		}
 
 		got2, err := upsertMetaAlbumsSqlx(brain.sqlxDb, []spotify.SimpleAlbum{sSimpleAlbumHT, sSimpleAlbumHT20, sSimpleAlbumN}, bi.Clone())
@@ -203,13 +206,22 @@ func Test_upsertMetaAlbumsSqlx(t *testing.T) {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffMetaAlbums(want1, got2); diff != "" {
-			t.Errorf("upsertMetaAlbumsSqlx() mismatch (-want +got):\n%s", diff)
+			t.Fatalf("upsertMetaAlbumsSqlx() mismatch (-want +got):\n%s", diff)
+		}
+		if want, got := 2, checkNMetaAlbumsSqlx(t, brain.sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta albums, but want %d rows", got, want)
+		}
+		if want, got := 2, checkNMetaAlbumArtistsSqlx(t, brain.sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta album artists, but want %d rows", got, want)
 		}
 	})
 	t.Run("returns different ID for different spotify ID", func(t *testing.T) {
 		brain := getInmemoryBrain(t)
-		if nAlbums := checkNMetaAlbumsSqlx(t, brain.sqlxDb); nAlbums != 0 {
-			t.Fatalf("sqlite db is not clean")
+		if want, got := 0, checkNMetaAlbumsSqlx(t, brain.sqlxDb); got != want {
+			t.Fatalf("sqlx has %d rows, but want %d rows", got, want)
+		}
+		if want, got := 0, checkNMetaAlbumArtistsSqlx(t, brain.sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta album artists, but want %d rows", got, want)
 		}
 
 		// Setup Artists
@@ -224,7 +236,7 @@ func Test_upsertMetaAlbumsSqlx(t *testing.T) {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffMetaAlbums(want1, got1); diff != "" {
-			t.Errorf("checkNMetaAlbumsSqlx() mismatch (-want +got):\n%s", diff)
+			t.Fatalf("checkNMetaAlbumsSqlx() mismatch (-want +got):\n%s", diff)
 		}
 
 		want2 := []*MetaAlbum{bMetaAlbumHT}
@@ -233,7 +245,7 @@ func Test_upsertMetaAlbumsSqlx(t *testing.T) {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffMetaAlbums(want2, got2); diff != "" {
-			t.Errorf("checkNMetaAlbumsSqlx() mismatch (-want +got):\n%s", diff)
+			t.Fatalf("checkNMetaAlbumsSqlx() mismatch (-want +got):\n%s", diff)
 		}
 
 		want3 := []*MetaAlbum{bMetaAlbumN}
@@ -242,12 +254,18 @@ func Test_upsertMetaAlbumsSqlx(t *testing.T) {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffMetaAlbums(want3, got3); diff != "" {
-			t.Errorf("checkNMetaAlbumsSqlx() mismatch (-want +got):\n%s", diff)
+			t.Fatalf("checkNMetaAlbumsSqlx() mismatch (-want +got):\n%s", diff)
+		}
+		if want, got := 2, checkNMetaAlbumsSqlx(t, brain.sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta albums, but want %d rows", got, want)
+		}
+		if want, got := 2, checkNMetaAlbumArtistsSqlx(t, brain.sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta album artists, but want %d rows", got, want)
 		}
 	})
 }
 
-var IGNORE_META_ALBUM_FIELDS = cmpopts.IgnoreFields(MetaAlbum{}, "AnyName")
+var IGNORE_META_ALBUM_FIELDS = cmpopts.IgnoreFields(MetaAlbum{}, "AnyName", "Artists")
 
 func diffMetaAlbums(want, got []*MetaAlbum) string {
 	return cmp.Diff(want, got, IGNORE_META_ALBUM_FIELDS)
@@ -277,4 +295,17 @@ func checkNMetaAlbumsSqlx(tb testing.TB, db *sqlx.DB) int {
 	// }
 	// tb.Logf("---------")
 	return len(sqlxMetaAlbums)
+}
+
+func checkNMetaAlbumArtistsSqlx(tb testing.TB, db *sqlx.DB) int {
+	sqlxMetaAlbumArtists, err := cntMetaAlbumArtistsSqlx(db)
+	if err != nil {
+		tb.Fatalf("err: %v", err)
+	}
+	// tb.Logf("There are %d artists in sqlx db:\n", len(sqlxMetaAlbums))
+	// for idx, item := range sqlxMetaAlbums {
+	// 	tb.Logf("[%d/%d] artist: %+v", idx+1, len(sqlxMetaAlbums), item)
+	// }
+	// tb.Logf("---------")
+	return sqlxMetaAlbumArtists
 }
