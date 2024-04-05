@@ -24,6 +24,7 @@ func (b *Brain) batchSaveAlbumTracks(sAlbums []spotify.SimpleAlbum, sTracks []sp
 	}
 
 	bi := newBrainIndex()
+
 	_, err := upsertArtists(b, sArtists, bi)
 	if err != nil {
 		return nil, nil, err

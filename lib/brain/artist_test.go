@@ -28,7 +28,7 @@ var (
 	}
 )
 
-func Test_saveArtists(t *testing.T) {
+func Test_upsertArtists(t *testing.T) {
 	t.Run("returns same ID, when called multiple times with same SpotifyId", func(t *testing.T) {
 		brain := getInmemoryBrain(t)
 		if nArtists := logAllArtists(t, brain); nArtists != 0 {
@@ -36,21 +36,21 @@ func Test_saveArtists(t *testing.T) {
 		}
 
 		want1 := []*Artist{bArtistLP, bArtistPR}
-		got1, err := brain._saveArtists([]spotify.SimpleArtist{sArtistLP, sArtistPR})
+		got1, err := upsertArtists(brain, []spotify.SimpleArtist{sArtistLP, sArtistPR}, newBrainIndex())
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffArtists(want1, got1); diff != "" {
-			t.Errorf("_saveArtistss() mismatch (-want +got):\n%s", diff)
+			t.Errorf("upsertArtists() mismatch (-want +got):\n%s", diff)
 		}
 		logAllArtists(t, brain)
 
-		got2, err := brain._saveArtists([]spotify.SimpleArtist{sArtistLP, sArtistPR})
+		got2, err := upsertArtists(brain, []spotify.SimpleArtist{sArtistLP, sArtistPR}, newBrainIndex())
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffArtists(want1, got2); diff != "" {
-			t.Errorf("_saveArtistss() mismatch (-want +got):\n%s", diff)
+			t.Errorf("upsertArtists() mismatch (-want +got):\n%s", diff)
 		}
 		logAllArtists(t, brain)
 	})
@@ -61,30 +61,26 @@ func Test_saveArtists(t *testing.T) {
 		}
 
 		want1 := []*Artist{bArtistLP}
-		got1, err := brain._saveArtists([]spotify.SimpleArtist{sArtistLP})
+		got1, err := upsertArtists(brain, []spotify.SimpleArtist{sArtistLP}, newBrainIndex())
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffArtists(want1, got1); diff != "" {
-			t.Errorf("_saveArtistss() mismatch (-want +got):\n%s", diff)
+			t.Errorf("upsertArtists() mismatch (-want +got):\n%s", diff)
 		}
 		logAllArtists(t, brain)
 
-		want2 := []*Artist{bArtistLP, bArtistPR}
-		got2, err := brain._saveArtists([]spotify.SimpleArtist{sArtistLP, sArtistLP, sArtistPR, sArtistPR})
+		want2 := []*Artist{bArtistPR}
+		got2, err := upsertArtists(brain, []spotify.SimpleArtist{sArtistPR}, newBrainIndex())
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffArtists(want2, got2); diff != "" {
-			t.Errorf("_saveArtistss() mismatch (-want +got):\n%s", diff)
+			t.Errorf("upsertArtists() mismatch (-want +got):\n%s", diff)
 		}
 		logAllArtists(t, brain)
 	})
 }
-
-// func diffArtist(want, got *Artist) string {
-// 	return cmp.Diff(want, got)
-// }
 
 func diffArtists(want, got []*Artist) string {
 	return cmp.Diff(want, got)

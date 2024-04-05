@@ -26,13 +26,8 @@ func newArtist(sArtist spotify.SimpleArtist) *Artist {
 //   - It will create new entries in DB if necessary
 //   - It will deduplicate returned artists, this may result in len(result) < len(sArtists)
 func (b *Brain) SaveArtists(sArtists []*spotify.FullArtist) ([]*Artist, error) {
-	bi := newBrainIndex()
 	sSimpleArtists := sliceutils.Map(sArtists, func(item *spotify.FullArtist) spotify.SimpleArtist { return item.SimpleArtist })
-	return upsertArtists(b, sSimpleArtists, bi)
-}
-
-func (b *Brain) _saveArtists(sArtists []spotify.SimpleArtist) ([]*Artist, error) {
-	return upsertArtists(b, sArtists, newBrainIndex())
+	return upsertArtists(b, sSimpleArtists, newBrainIndex())
 }
 
 func upsertArtists(b *Brain, sArtists []spotify.SimpleArtist, bi *brainIndex) ([]*Artist, error) {
@@ -54,8 +49,8 @@ func upsertArtists(b *Brain, sArtists []spotify.SimpleArtist, bi *brainIndex) ([
 func _gormUpsertArtists(db *gorm.DB, sArtists []spotify.SimpleArtist, bi *brainIndex) ([]*Artist, error) {
 	sArtists = sliceutils.Unique(sArtists, func(item spotify.SimpleArtist) spotify.ID { return item.ID })
 	var spotifyIds []spotify.ID
-	for _, sAlbum := range sArtists {
-		spotifyIds = append(spotifyIds, sAlbum.ID)
+	for _, sArtist := range sArtists {
+		spotifyIds = append(spotifyIds, sArtist.ID)
 	}
 
 	var existingArtists []*Artist
@@ -86,8 +81,8 @@ func _gormUpsertArtists(db *gorm.DB, sArtists []spotify.SimpleArtist, bi *brainI
 func _sqlxUpsertArtists(db *sqlx.DB, sArtists []spotify.SimpleArtist, bi *brainIndex) ([]*Artist, error) {
 	sArtists = sliceutils.Unique(sArtists, func(item spotify.SimpleArtist) spotify.ID { return item.ID })
 	var spotifyIds []spotify.ID
-	for _, sAlbum := range sArtists {
-		spotifyIds = append(spotifyIds, sAlbum.ID)
+	for _, sArtist := range sArtists {
+		spotifyIds = append(spotifyIds, sArtist.ID)
 	}
 
 	var existingArtists []*Artist
