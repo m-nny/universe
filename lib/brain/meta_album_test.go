@@ -49,8 +49,8 @@ var (
 func Test_SaveAlbums(t *testing.T) {
 	t.Run("returns same ID for same spotify ID", func(t *testing.T) {
 		brain := getInmemoryBrain(t)
-		if nAlbums := checkNMetaAlbumsGorm(t, brain.gormDb); nAlbums != 0 {
-			t.Fatalf("sqlite db is not clean")
+		if want, got := 0, checkNMetaAlbumsGorm(t, brain.gormDb); got != want {
+			t.Fatalf("gorm has %d meta albums, but want %d rows", got, want)
 		}
 
 		want1 := []*MetaAlbum{bMetaAlbumHT, bMetaAlbumN}
@@ -69,11 +69,15 @@ func Test_SaveAlbums(t *testing.T) {
 		if diff := diffMetaAlbums(want1, got2); diff != "" {
 			t.Fatalf("SaveAlbums() mismatch (-want +got):\n%s", diff)
 		}
+
+		if want, got := 2, checkNMetaAlbumsGorm(t, brain.gormDb); got != want {
+			t.Fatalf("gorm has %d meta albums, but want %d rows", got, want)
+		}
 	})
 	t.Run("returns different ID for different spotify ID", func(t *testing.T) {
 		brain := getInmemoryBrain(t)
-		if nAlbums := checkNMetaAlbumsGorm(t, brain.gormDb); nAlbums != 0 {
-			t.Fatalf("sqlite db is not clean")
+		if want, got := 0, checkNMetaAlbumsGorm(t, brain.gormDb); got != want {
+			t.Fatalf("gorm has %d meta albums, but want %d rows", got, want)
 		}
 
 		want1 := []*MetaAlbum{bMetaAlbumHT}
@@ -102,14 +106,17 @@ func Test_SaveAlbums(t *testing.T) {
 		if diff := diffMetaAlbums(want3, got3); diff != "" {
 			t.Fatalf("SaveAlbums() mismatch (-want +got):\n%s", diff)
 		}
+		if want, got := 2, checkNMetaAlbumsGorm(t, brain.gormDb); got != want {
+			t.Fatalf("gorm has %d meta albums, but want %d rows", got, want)
+		}
 	})
 }
 
 func Test_upsertMetaAlbumsGorm(t *testing.T) {
 	t.Run("returns same ID for same spotify ID", func(t *testing.T) {
 		brain := getInmemoryBrain(t)
-		if nAlbums := checkNMetaAlbumsGorm(t, brain.gormDb); nAlbums != 0 {
-			t.Fatalf("sqlite db is not clean")
+		if want, got := 0, checkNMetaAlbumsGorm(t, brain.gormDb); got != want {
+			t.Fatalf("gorm has %d meta albums, but want %d rows", got, want)
 		}
 
 		// Setup Artists
@@ -134,11 +141,15 @@ func Test_upsertMetaAlbumsGorm(t *testing.T) {
 		if diff := diffMetaAlbums(want1, got2); diff != "" {
 			t.Fatalf("upsertArtistsGorm() mismatch (-want +got):\n%s", diff)
 		}
+
+		if want, got := 2, checkNMetaAlbumsGorm(t, brain.gormDb); got != want {
+			t.Fatalf("gorm has %d meta albums, but want %d rows", got, want)
+		}
 	})
 	t.Run("returns different ID for different spotify ID", func(t *testing.T) {
 		brain := getInmemoryBrain(t)
-		if nAlbums := checkNMetaAlbumsGorm(t, brain.gormDb); nAlbums != 0 {
-			t.Fatalf("sqlite db is not clean")
+		if want, got := 0, checkNMetaAlbumsGorm(t, brain.gormDb); got != want {
+			t.Fatalf("gorm has %d meta albums, but want %d rows", got, want)
 		}
 
 		// Setup Artists
@@ -172,6 +183,9 @@ func Test_upsertMetaAlbumsGorm(t *testing.T) {
 		}
 		if diff := diffMetaAlbums(want3, got3); diff != "" {
 			t.Fatalf("upsertArtistsGorm() mismatch (-want +got):\n%s", diff)
+		}
+		if want, got := 2, checkNMetaAlbumsGorm(t, brain.gormDb); got != want {
+			t.Fatalf("gorm has %d meta albums, but want %d rows", got, want)
 		}
 	})
 }

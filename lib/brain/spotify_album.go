@@ -34,20 +34,25 @@ func newSpotifyAlbum(sAlbum spotify.SimpleAlbum, bArtists []*Artist, bMetaAlbum 
 	}
 }
 
+type SpotifyAlbumArtist struct {
+	SpotifyAlbumId uint `db:"spotify_album_id"`
+	ArtistId       uint `db:"artist_id"`
+}
+
 func upsertSpotifyAlbums(b *Brain, sAlbums []spotify.SimpleAlbum, bi *brainIndex) ([]*SpotifyAlbum, error) {
-	// sqlxBi := bi.Clone()
-	// sqlxSpotifyAlbums, err := upsertSpotifyAlbumsSqlx(b.sqlxDb, sAlbums, sqlxBi)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	sqlxBi := bi.Clone()
+	sqlxSpotifyAlbums, err := upsertSpotifyAlbumsSqlx(b.sqlxDb, sAlbums, sqlxBi)
+	if err != nil {
+		return nil, err
+	}
 	gormSpotifyAlbums, err := upsertSpotifyAlbumsGorm(b.gormDb, sAlbums, bi)
 	if err != nil {
 		return nil, err
 	}
-	// // TODO(m-nny): check sqlxSpotifyAlbums == gormSpotifyAlbums
-	// if len(gormSpotifyAlbums) != len(sqlxSpotifyAlbums) {
-	// 	return nil, fmt.Errorf("len(gormSpotifyAlbums) != len(sqlxSpotifyAlbums): %d != %d", len(gormSpotifyAlbums), len(sqlxSpotifyAlbums))
-	// }
+	// TODO(m-nny): check sqlxSpotifyAlbums == gormSpotifyAlbums
+	if len(gormSpotifyAlbums) != len(sqlxSpotifyAlbums) {
+		return nil, fmt.Errorf("len(gormSpotifyAlbums) != len(sqlxSpotifyAlbums): %d != %d", len(gormSpotifyAlbums), len(sqlxSpotifyAlbums))
+	}
 	return gormSpotifyAlbums, nil
 }
 
@@ -92,5 +97,59 @@ func upsertSpotifyAlbumsGorm(db *gorm.DB, sAlbums []spotify.SimpleAlbum, bi *bra
 }
 
 func upsertSpotifyAlbumsSqlx(db *sqlx.DB, sAlbums []spotify.SimpleAlbum, bi *brainIndex) ([]*SpotifyAlbum, error) {
-	return nil, fmt.Errorf("not implmemented")
+	var albumSIds []spotify.ID
+	for _, sAlbum := range sAlbums {
+		albumSIds = append(albumSIds, sAlbum.ID)
+	}
+	var existingSpotifyAlbums []*SpotifyAlbum
+	query, args, err := sqlx.In(`SELECT * FROM spotify_albums WHERE spotify_id IN (?)`, albumSIds)
+	if err != nil {
+		return nil, err
+	}
+	query = db.Rebind(query)
+	if err := db.Select(&existingSpotifyAlbums, query, args...); err != nil {
+		return nil, err
+	}
+	bi.AddSpotifyAlbums(existingSpotifyAlbums)
+
+	var newAlbums []*SpotifyAlbum
+	for _, sAlbum := range sAlbums {
+		if _, ok := bi.GetSpotifyAlbum(sAlbum); ok {
+			continue
+		}
+		bArtists, ok := bi.GetArtists(sAlbum.Artists)
+		if !ok {
+			return nil, fmt.Errorf("bArtist not found")
+		}
+		bMetaAlbum, ok := bi.GetMetaAlbum(sAlbum)
+		if !ok {
+			return nil, fmt.Errorf("bMetaAlbum not found")
+		}
+		newAlbums = append(newAlbums, newSpotifyAlbum(sAlbum, bArtists, bMetaAlbum))
+	}
+	if len(newAlbums) == 0 {
+		return existingSpotifyAlbums, nil
+	}
+	rows, err := db.NamedQuery(`INSERT INTO spotify_albums (spotify_id, name, meta_album_id) VALUES (:spotify_id, :name, :meta_album_id) RETURNING id`, newAlbums)
+	if err != nil {
+		return nil, err
+	}
+	for idx := 0; rows.Next(); idx++ {
+		if err := rows.Scan(&newAlbums[idx].ID); err != nil {
+			return nil, err
+		}
+	}
+	bi.AddSpotifyAlbums(newAlbums)
+
+	var spotifyAlbumArtists []SpotifyAlbumArtist
+	for _, bAlbum := range newAlbums {
+		for _, bArtist := range bAlbum.Artists {
+			spotifyAlbumArtists = append(spotifyAlbumArtists, SpotifyAlbumArtist{bAlbum.ID, bArtist.ID})
+		}
+	}
+	_, err = db.NamedExec(`INSERT INTO spotify_album_artists (spotify_album_id, artist_id) VALUES (:spotify_album_id, :artist_id)`, spotifyAlbumArtists)
+	if err != nil {
+		return nil, err
+	}
+	return append(existingSpotifyAlbums, newAlbums...), nil
 }
