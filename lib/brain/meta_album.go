@@ -168,27 +168,3 @@ func (b *Brain) MetaAlbumCount() (int, error) {
 	err := b.gormDb.Model(&MetaAlbum{}).Count(&count).Error
 	return int(count), err
 }
-
-func getAllMetaAlbumsSqlx(db *sqlx.DB) ([]MetaAlbum, error) {
-	var bMetaAlbums []MetaAlbum
-	if err := db.Select(&bMetaAlbums, `SELECT * FROM meta_albums`); err != nil {
-		return nil, err
-	}
-	return bMetaAlbums, nil
-}
-
-func cntMetaAlbumArtistsSqlx(db *sqlx.DB) (int, error) {
-	var cnt int
-	if err := db.Get(&cnt, `SELECT COUNT(*) FROM meta_album_artists`); err != nil {
-		return 0, err
-	}
-	return cnt, nil
-}
-
-func getAllMetaAlbumsGorm(db *gorm.DB) ([]MetaAlbum, error) {
-	var gormMetaAlbums []MetaAlbum
-	if err := db.Find(&gormMetaAlbums).Error; err != nil {
-		return nil, err
-	}
-	return gormMetaAlbums, nil
-}

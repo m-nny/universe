@@ -272,40 +272,25 @@ func diffMetaAlbums(want, got []*MetaAlbum) string {
 }
 
 func checkNMetaAlbumsGorm(tb testing.TB, db *gorm.DB) int {
-	gormMetaAlbums, err := getAllMetaAlbumsGorm(db)
-	if err != nil {
+	var gormMetaAlbums []MetaAlbum
+	if err := db.Find(&gormMetaAlbums).Error; err != nil {
 		tb.Fatalf("err: %v", err)
 	}
-	// tb.Logf("There are %d artists in gorm db:\n", len(gormMetaAlbums))
-	// for idx, item := range gormMetaAlbums {
-	// 	tb.Logf("[%d/%d] artist: %+v", idx+1, len(gormMetaAlbums), item)
-	// }
-	// tb.Logf("---------")
 	return len(gormMetaAlbums)
 }
 
 func checkNMetaAlbumsSqlx(tb testing.TB, db *sqlx.DB) int {
-	sqlxMetaAlbums, err := getAllMetaAlbumsSqlx(db)
-	if err != nil {
+	var cnt int
+	if err := db.Get(&cnt, `SELECT COUNT(*) FROM meta_albums`); err != nil {
 		tb.Fatalf("err: %v", err)
 	}
-	// tb.Logf("There are %d artists in sqlx db:\n", len(sqlxMetaAlbums))
-	// for idx, item := range sqlxMetaAlbums {
-	// 	tb.Logf("[%d/%d] artist: %+v", idx+1, len(sqlxMetaAlbums), item)
-	// }
-	// tb.Logf("---------")
-	return len(sqlxMetaAlbums)
+	return cnt
 }
 
 func checkNMetaAlbumArtistsSqlx(tb testing.TB, db *sqlx.DB) int {
-	sqlxMetaAlbumArtists, err := cntMetaAlbumArtistsSqlx(db)
-	if err != nil {
+	var cnt int
+	if err := db.Get(&cnt, `SELECT COUNT(*) FROM meta_album_artists`); err != nil {
 		tb.Fatalf("err: %v", err)
 	}
-	// tb.Logf("There are %d artists in sqlx db:\n", len(sqlxMetaAlbums))
-	// for idx, item := range sqlxMetaAlbums {
-	// 	tb.Logf("[%d/%d] artist: %+v", idx+1, len(sqlxMetaAlbums), item)
-	// }
-	// tb.Logf("---------")
-	return sqlxMetaAlbumArtists
+	return cnt
 }
