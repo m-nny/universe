@@ -3,6 +3,7 @@ package brain
 import (
 	"fmt"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/zmb3/spotify/v2"
 	"gorm.io/gorm"
 
@@ -26,24 +27,63 @@ func newMetaAlbum(sAlbum spotify.SimpleAlbum, bArtists []*Artist) *MetaAlbum {
 }
 
 func upsertMetaAlbums(b *Brain, sAlbums []spotify.SimpleAlbum, bi *brainIndex) ([]*MetaAlbum, error) {
-	// sqlxBi := bi.Clone()
-	// sqlxMetaAlbums, err := upsertMetaAlbumsSqlx(b.sqlxDb, sMetaAlbums, sqlxBi)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	sqlxBi := bi.Clone()
+	sqlxMetaAlbums, err := upsertMetaAlbumsSqlx(b.sqlxDb, sAlbums, sqlxBi)
+	if err != nil {
+		return nil, err
+	}
 	gormMetaAlbums, err := upsertMetaAlbumsGorm(b.gormDb, sAlbums, bi)
 	if err != nil {
 		return nil, err
 	}
-	// // TODO(m-nny): check sqlxMetaAlbums == gormMetaAlbums
-	// if len(gormMetaAlbums) != len(sqlxMetaAlbums) {
-	// 	return nil, fmt.Errorf("len(gormMetaAlbums) != len(sqlxMetaAlbums): %d != %d", len(gormMetaAlbums), len(sqlxMetaAlbums))
-	// }
+	// TODO(m-nny): check sqlxMetaAlbums == gormMetaAlbums
+	if len(gormMetaAlbums) != len(sqlxMetaAlbums) {
+		return nil, fmt.Errorf("len(gormMetaAlbums) != len(sqlxMetaAlbums): %d != %d", len(gormMetaAlbums), len(sqlxMetaAlbums))
+	}
 	return gormMetaAlbums, nil
 
 }
 
 func upsertMetaAlbumsGorm(db *gorm.DB, sAlbums []spotify.SimpleAlbum, bi *brainIndex) ([]*MetaAlbum, error) {
+	sAlbums = sliceutils.Unique(sAlbums, utils.SimplifiedAlbumName)
+	var albumSimps []string
+	for _, sAlbum := range sAlbums {
+		albumSimps = append(albumSimps, utils.SimplifiedAlbumName(sAlbum))
+	}
+
+	var existingMetaAlbums []*MetaAlbum
+	if err := db.
+		Preload("Artists").
+		Where("simplified_name IN ?", albumSimps).
+		Find(&existingMetaAlbums).Error; err != nil {
+		return nil, err
+	}
+	bi.AddMetaAlbums(existingMetaAlbums)
+
+	// var newMetaAlbums []*MetaAlbum
+	var newAlbums []*MetaAlbum
+	for _, sAlbum := range sAlbums {
+		if _, ok := bi.GetMetaAlbum(sAlbum); ok {
+			continue
+		}
+		bArtists, ok := bi.GetArtists(sAlbum.Artists)
+		if !ok {
+			// log.Printf("could not get artists for %s, but they should be there", sAlbum.Name)
+			return nil, fmt.Errorf("could not get artists for %s, but they should be there", sAlbum.Name)
+		}
+		newAlbums = append(newAlbums, newMetaAlbum(sAlbum, bArtists))
+	}
+	if len(newAlbums) == 0 {
+		return existingMetaAlbums, nil
+	}
+	if err := db.Create(newAlbums).Error; err != nil {
+		return nil, err
+	}
+	bi.AddMetaAlbums(newAlbums)
+	return append(existingMetaAlbums, newAlbums...), nil
+}
+
+func upsertMetaAlbumsSqlx(db *sqlx.DB, sAlbums []spotify.SimpleAlbum, bi *brainIndex) ([]*MetaAlbum, error) {
 	sAlbums = sliceutils.Unique(sAlbums, utils.SimplifiedAlbumName)
 	var albumSimps []string
 	for _, sAlbum := range sAlbums {
@@ -107,4 +147,25 @@ func (b *Brain) MetaAlbumCount() (int, error) {
 	var count int64
 	err := b.gormDb.Model(&MetaAlbum{}).Count(&count).Error
 	return int(count), err
+}
+
+func getAllMetaAlbumsSqlx(db *sqlx.DB) ([]MetaAlbum, error) {
+	var existingMetaAlbums []MetaAlbum
+	query, args, err := sqlx.In(`SELECT * FROM meta_albums`)
+	if err != nil {
+		return nil, err
+	}
+	query = db.Rebind(query)
+	if err := db.Select(&existingMetaAlbums, query, args...); err != nil {
+		return nil, err
+	}
+	return existingMetaAlbums, nil
+}
+
+func getAllMetaAlbumsGorm(db *gorm.DB) ([]MetaAlbum, error) {
+	var gormMetaAlbums []MetaAlbum
+	if err := db.Find(&gormMetaAlbums).Error; err != nil {
+		return nil, err
+	}
+	return gormMetaAlbums, nil
 }
