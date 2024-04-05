@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/m-nny/universe/lib/utils/sliceutils"
-	utils "github.com/m-nny/universe/lib/utils/spotifyutils"
+	"github.com/m-nny/universe/lib/utils/spotifyutils"
 )
 
 type MetaAlbum struct {
@@ -20,7 +20,7 @@ type MetaAlbum struct {
 
 func newMetaAlbum(sAlbum spotify.SimpleAlbum, bArtists []*Artist) *MetaAlbum {
 	return &MetaAlbum{
-		SimplifiedName: utils.SimplifiedAlbumName(sAlbum),
+		SimplifiedName: spotifyutils.SimplifiedAlbumName(sAlbum),
 		AnyName:        sAlbum.Name,
 		Artists:        bArtists,
 	}
@@ -46,14 +46,13 @@ func upsertMetaAlbums(b *Brain, sAlbums []spotify.SimpleAlbum, bi *brainIndex) (
 		return nil, fmt.Errorf("len(gormMetaAlbums) != len(sqlxMetaAlbums): %d != %d", len(gormMetaAlbums), len(sqlxMetaAlbums))
 	}
 	return gormMetaAlbums, nil
-
 }
 
 func upsertMetaAlbumsGorm(db *gorm.DB, sAlbums []spotify.SimpleAlbum, bi *brainIndex) ([]*MetaAlbum, error) {
-	sAlbums = sliceutils.Unique(sAlbums, utils.SimplifiedAlbumName)
+	sAlbums = sliceutils.Unique(sAlbums, spotifyutils.SimplifiedAlbumName)
 	var simpNames []string
 	for _, sAlbum := range sAlbums {
-		simpNames = append(simpNames, utils.SimplifiedAlbumName(sAlbum))
+		simpNames = append(simpNames, spotifyutils.SimplifiedAlbumName(sAlbum))
 	}
 
 	var existingMetaAlbums []*MetaAlbum
@@ -89,10 +88,10 @@ func upsertMetaAlbumsGorm(db *gorm.DB, sAlbums []spotify.SimpleAlbum, bi *brainI
 }
 
 func upsertMetaAlbumsSqlx(db *sqlx.DB, sAlbums []spotify.SimpleAlbum, bi *brainIndex) ([]*MetaAlbum, error) {
-	sAlbums = sliceutils.Unique(sAlbums, utils.SimplifiedAlbumName)
+	sAlbums = sliceutils.Unique(sAlbums, spotifyutils.SimplifiedAlbumName)
 	var simpNames []string
 	for _, sAlbum := range sAlbums {
-		simpNames = append(simpNames, utils.SimplifiedAlbumName(sAlbum))
+		simpNames = append(simpNames, spotifyutils.SimplifiedAlbumName(sAlbum))
 	}
 
 	var existingMetaAlbums []*MetaAlbum
