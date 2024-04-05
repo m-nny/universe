@@ -2,7 +2,6 @@ package brain
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/zmb3/spotify/v2"
@@ -128,7 +127,6 @@ func upsertArtistsSqlx(db *sqlx.DB, sArtists []spotify.SimpleArtist, bi *brainIn
 		if err := rows.Scan(&newArtists[idx].ID); err != nil {
 			return nil, err
 		}
-		log.Printf("row: %+v", newArtists[idx])
 	}
 	bi.AddArtists(newArtists)
 	return append(existingArtists, newArtists...), nil

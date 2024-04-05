@@ -43,10 +43,10 @@ var (
 	}
 )
 
-func TestToAlbums(t *testing.T) {
+func Test_SaveAlbums(t *testing.T) {
 	t.Run("returns same ID for same spotify ID", func(t *testing.T) {
 		brain := getInmemoryBrain(t)
-		if nAlbums := logAllAlbums(t, brain); nAlbums != 0 {
+		if nAlbums := checkNMetaAlbumsGorm(t, brain); nAlbums != 0 {
 			t.Fatalf("sqlite db is not clean")
 		}
 
@@ -69,7 +69,7 @@ func TestToAlbums(t *testing.T) {
 	})
 	t.Run("returns different ID for different spotify ID", func(t *testing.T) {
 		brain := getInmemoryBrain(t)
-		if nAlbums := logAllAlbums(t, brain); nAlbums != 0 {
+		if nAlbums := checkNMetaAlbumsGorm(t, brain); nAlbums != 0 {
 			t.Fatalf("sqlite db is not clean")
 		}
 
@@ -104,22 +104,18 @@ func TestToAlbums(t *testing.T) {
 
 var IGNORE_META_ALBUM_FIELDS = cmpopts.IgnoreFields(MetaAlbum{}, "AnyName")
 
-// func diffMetaAlbum(want, got *MetaAlbum) string {
-// 	return cmp.Diff(want, got, IGNORE_META_ALBUM_FIELDS)
-// }
-
 func diffMetaAlbums(want, got []*MetaAlbum) string {
 	return cmp.Diff(want, got, IGNORE_META_ALBUM_FIELDS)
 }
 
-func logAllAlbums(tb testing.TB, brain *Brain) int {
+func checkNMetaAlbumsGorm(tb testing.TB, brain *Brain) int {
 	var allAlbums []MetaAlbum
 	if err := brain.gormDb.Find(&allAlbums).Error; err != nil {
 		tb.Fatalf("err: %v", err)
 	}
-	tb.Logf("There are %d albums in db:\n", len(allAlbums))
-	for idx, item := range allAlbums {
-		tb.Logf("[%d/%d] album: %+v", idx+1, len(allAlbums), item)
-	}
+	// tb.Logf("There are %d albums in db:\n", len(allAlbums))
+	// for idx, item := range allAlbums {
+	// 	tb.Logf("[%d/%d] album: %+v", idx+1, len(allAlbums), item)
+	// }
 	return len(allAlbums)
 }

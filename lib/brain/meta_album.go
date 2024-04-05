@@ -5,15 +5,16 @@ import (
 	"log"
 
 	"github.com/zmb3/spotify/v2"
+	"gorm.io/gorm"
 
 	"github.com/m-nny/universe/lib/utils/sliceutils"
 	utils "github.com/m-nny/universe/lib/utils/spotifyutils"
 )
 
 type MetaAlbum struct {
-	ID             uint `gorm:"primarykey"`
-	SimplifiedName string
-	AnyName        string
+	ID             uint      `gorm:"primarykey"`
+	SimplifiedName string    `db:"simplified_name"`
+	AnyName        string    `db:"any_name"`
 	Artists        []*Artist `gorm:"many2many:meta_album_artists;"`
 }
 
@@ -25,13 +26,25 @@ func newMetaAlbum(sAlbum spotify.SimpleAlbum, bArtists []*Artist) *MetaAlbum {
 	}
 }
 
-func (b *Brain) MetaAlbumCount() (int, error) {
-	var count int64
-	err := b.gormDb.Model(&MetaAlbum{}).Count(&count).Error
-	return int(count), err
+func upsertMetaAlbums(b *Brain, sAlbums []spotify.SimpleAlbum, bi *brainIndex) ([]*MetaAlbum, error) {
+	// sqlxBi := bi.Clone()
+	// sqlxMetaAlbums, err := upsertMetaAlbumsSqlx(b.sqlxDb, sMetaAlbums, sqlxBi)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	gormMetaAlbums, err := upsertMetaAlbumsGorm(b.gormDb, sAlbums, bi)
+	if err != nil {
+		return nil, err
+	}
+	// // TODO(m-nny): check sqlxMetaAlbums == gormMetaAlbums
+	// if len(gormMetaAlbums) != len(sqlxMetaAlbums) {
+	// 	return nil, fmt.Errorf("len(gormMetaAlbums) != len(sqlxMetaAlbums): %d != %d", len(gormMetaAlbums), len(sqlxMetaAlbums))
+	// }
+	return gormMetaAlbums, nil
+
 }
 
-func upsertMetaAlbums(b *Brain, sAlbums []spotify.SimpleAlbum, bi *brainIndex) ([]*MetaAlbum, error) {
+func upsertMetaAlbumsGorm(db *gorm.DB, sAlbums []spotify.SimpleAlbum, bi *brainIndex) ([]*MetaAlbum, error) {
 	sAlbums = sliceutils.Unique(sAlbums, utils.SimplifiedAlbumName)
 	var albumSimps []string
 	for _, sAlbum := range sAlbums {
@@ -39,7 +52,7 @@ func upsertMetaAlbums(b *Brain, sAlbums []spotify.SimpleAlbum, bi *brainIndex) (
 	}
 
 	var existingMetaAlbums []*MetaAlbum
-	if err := b.gormDb.
+	if err := db.
 		Preload("Artists").
 		Where("simplified_name IN ?", albumSimps).
 		Find(&existingMetaAlbums).Error; err != nil {
@@ -63,7 +76,7 @@ func upsertMetaAlbums(b *Brain, sAlbums []spotify.SimpleAlbum, bi *brainIndex) (
 	if len(newAlbums) == 0 {
 		return existingMetaAlbums, nil
 	}
-	if err := b.gormDb.Create(newAlbums).Error; err != nil {
+	if err := db.Create(newAlbums).Error; err != nil {
 		return nil, err
 	}
 	bi.AddMetaAlbums(newAlbums)
@@ -89,4 +102,10 @@ func (b *Brain) SaveAlbums(fullAlbums []*spotify.FullAlbum) ([]*MetaAlbum, error
 func (b *Brain) SaveSimpleAlbums(sAlbums []spotify.SimpleAlbum) ([]*MetaAlbum, error) {
 	albums, _, err := b.batchSaveAlbumTracks(sAlbums, nil)
 	return albums, err
+}
+
+func (b *Brain) MetaAlbumCount() (int, error) {
+	var count int64
+	err := b.gormDb.Model(&MetaAlbum{}).Count(&count).Error
+	return int(count), err
 }

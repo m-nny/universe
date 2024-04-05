@@ -145,9 +145,9 @@ func logAllMetaTracks(tb testing.TB, brain *Brain) int {
 	if err := brain.gormDb.Find(&allTracks).Error; err != nil {
 		tb.Fatalf("err: %v", err)
 	}
-	tb.Logf("There are %d tracks in db:\n", len(allTracks))
-	for idx, item := range allTracks {
-		tb.Logf("[%d/%d] track: %+v", idx+1, len(allTracks), item)
-	}
+	// tb.Logf("There are %d tracks in db:\n", len(allTracks))
+	// for idx, item := range allTracks {
+	// 	tb.Logf("[%d/%d] track: %+v", idx+1, len(allTracks), item)
+	// }
 	return len(allTracks)
 }

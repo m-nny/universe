@@ -147,32 +147,33 @@ func Test_upsertArtistsGorm(t *testing.T) {
 		}
 	})
 }
+
 func diffArtists(want, got []*Artist) string {
 	return cmp.Diff(want, got)
 }
 
 func checkNArtistsSqlx(tb testing.TB, db *sqlx.DB) int {
 	sqlxArtists, err := getAllArtistsSqlx(db)
-	tb.Logf("There are %d artists in sqlx db:\n", len(sqlxArtists))
-	for idx, item := range sqlxArtists {
-		tb.Logf("[%d/%d] artist: %+v", idx+1, len(sqlxArtists), item)
-	}
-	tb.Logf("---------")
 	if err != nil {
 		tb.Fatalf("err: %v", err)
 	}
+	// tb.Logf("There are %d artists in sqlx db:\n", len(sqlxArtists))
+	// for idx, item := range sqlxArtists {
+	// 	tb.Logf("[%d/%d] artist: %+v", idx+1, len(sqlxArtists), item)
+	// }
+	// tb.Logf("---------")
 	return len(sqlxArtists)
 }
 
 func checkNArtistsGorm(tb testing.TB, db *gorm.DB) int {
 	gormArtists, err := getAllArtistsGorm(db)
-	tb.Logf("There are %d artists in gorm db:\n", len(gormArtists))
-	for idx, item := range gormArtists {
-		tb.Logf("[%d/%d] artist: %+v", idx+1, len(gormArtists), item)
-	}
-	tb.Logf("---------")
 	if err != nil {
 		tb.Fatalf("err: %v", err)
 	}
+	// tb.Logf("There are %d artists in gorm db:\n", len(gormArtists))
+	// for idx, item := range gormArtists {
+	// 	tb.Logf("[%d/%d] artist: %+v", idx+1, len(gormArtists), item)
+	// }
+	// tb.Logf("---------")
 	return len(gormArtists)
 }
