@@ -36,7 +36,7 @@ func newMetaTrack(sTrack spotify.SimpleTrack, bMetaAlbum *MetaAlbum, bArtists []
 
 func upsertMetaTracksSqlx(db *sqlx.DB, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*MetaTrack, error) {
 	if len(sTracks) == 0 {
-		return nil, nil
+		return []*MetaTrack{}, nil
 	}
 	sTracks = sliceutils.Unique(sTracks, bi.MustTrackSimplifiedName)
 	var simpNames []string

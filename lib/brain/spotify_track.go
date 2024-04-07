@@ -32,7 +32,7 @@ func newSpotifyTrack(sTrack spotify.SimpleTrack, bSpotifyAlbum *SpotifyAlbum, bA
 
 func upsertSpotifyTracksSqlx(db *sqlx.DB, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*SpotifyTrack, error) {
 	if len(sTracks) == 0 {
-		return nil, nil
+		return []*SpotifyTrack{}, nil
 	}
 	var spotifyIds []spotify.ID
 	for _, sTrack := range sTracks {

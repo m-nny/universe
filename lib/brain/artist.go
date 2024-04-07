@@ -19,6 +19,9 @@ func newArtist(sArtist spotify.SimpleArtist) *Artist {
 }
 
 func upsertArtistsSqlx(db *sqlx.DB, sArtists []spotify.SimpleArtist, bi *brainIndex) ([]*Artist, error) {
+	if len(sArtists) == 0 {
+		return []*Artist{}, nil
+	}
 	sArtists = sliceutils.Unique(sArtists, func(item spotify.SimpleArtist) spotify.ID { return item.ID })
 	var spotifyIds []spotify.ID
 	for _, sArtist := range sArtists {

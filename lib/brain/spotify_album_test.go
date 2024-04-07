@@ -129,6 +129,31 @@ func Test_upsertSpotifyAlbumsSqlx(t *testing.T) {
 			t.Fatalf("sqlx has %d spotify album artists, but want %d rows", got, want)
 		}
 	})
+	t.Run("handles 0 args", func(t *testing.T) {
+		sqlxDb := getInmemoryBrain(t).sqlxDb
+		if want, got := 0, checkNSpotifyAlbumsSqlx(t, sqlxDb); got != want {
+			t.Fatalf("sqlx has %d spotify albums, but want %d rows", got, want)
+		}
+		if want, got := 0, checkNSpotifyAlbumArtistsSqlx(t, sqlxDb); got != want {
+			t.Fatalf("sqlx has %d spotify album artists, but want %d rows", got, want)
+		}
+
+		want := []*SpotifyAlbum{}
+		got, err := upsertSpotifyAlbumsSqlx(sqlxDb, []spotify.SimpleAlbum{}, newBrainIndex())
+		if err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+		if diff := diffSpotifyAlbums(want, got); diff != "" {
+			t.Fatalf("upsertSpotifyAlbumsSqlx() mismatch (-want +got):\n%s", diff)
+		}
+
+		if want, got := 0, checkNSpotifyAlbumsSqlx(t, sqlxDb); got != want {
+			t.Fatalf("sqlx has %d spotify albums, but want %d rows", got, want)
+		}
+		if want, got := 0, checkNSpotifyAlbumArtistsSqlx(t, sqlxDb); got != want {
+			t.Fatalf("sqlx has %d spotify album artists, but want %d rows", got, want)
+		}
+	})
 }
 
 var IGNORE_SPOTIFY_ALBUM_FIELDS = cmpopts.IgnoreFields(SpotifyAlbum{}, "Artists", "MetaAlbum")

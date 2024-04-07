@@ -132,6 +132,21 @@ func Test_upsertMetaAlbumsSqlx(t *testing.T) {
 			t.Fatalf("sqlx has %d meta album artists, but want %d rows", got, want)
 		}
 	})
+	t.Run("handles 0 args", func(t *testing.T) {
+		brain := getInmemoryBrain(t)
+
+		want1 := []*MetaAlbum{}
+		got1, err := upsertMetaAlbumsSqlx(brain.sqlxDb, []spotify.SimpleAlbum{}, newBrainIndex())
+		if err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+		if diff := diffMetaAlbums(want1, got1); diff != "" {
+			t.Errorf("upsertMetaAlbumsSqlx() mismatch (-want +got):\n%s", diff)
+		}
+		if wantN, nArtists := 0, checkNArtistsSqlx(t, brain.sqlxDb); nArtists != wantN {
+			t.Fatalf("sqlx have %d rows, but want %d rows", nArtists, wantN)
+		}
+	})
 }
 
 var IGNORE_META_ALBUM_FIELDS = cmpopts.IgnoreFields(MetaAlbum{}, "AnyName", "Artists")

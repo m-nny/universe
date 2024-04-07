@@ -13,7 +13,7 @@ func newDiscogsSeller(username string) *DiscogsSeller {
 	}
 }
 
-func (b *Brain) upsertDiscogsUser(username string, releases []*DiscogsRelease) error {
+func (b *Brain) addDiscogsReleases(username string, releases []*DiscogsRelease) error {
 	return fmt.Errorf("not implemented")
 	// seller := newDiscogsSeller(username)
 	// if err := b.gormDb.Where("username = ?", username).FirstOrCreate(&seller).Error; err != nil {

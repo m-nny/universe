@@ -39,6 +39,9 @@ type SpotifyAlbumArtist struct {
 }
 
 func upsertSpotifyAlbumsSqlx(db *sqlx.DB, sAlbums []spotify.SimpleAlbum, bi *brainIndex) ([]*SpotifyAlbum, error) {
+	if len(sAlbums) == 0 {
+		return []*SpotifyAlbum{}, nil
+	}
 	var albumSIds []spotify.ID
 	for _, sAlbum := range sAlbums {
 		albumSIds = append(albumSIds, sAlbum.ID)

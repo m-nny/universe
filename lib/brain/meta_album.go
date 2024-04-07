@@ -31,18 +31,21 @@ type MetaAlbumArtist struct {
 }
 
 func upsertMetaAlbumsSqlx(db *sqlx.DB, sAlbums []spotify.SimpleAlbum, bi *brainIndex) ([]*MetaAlbum, error) {
+	if len(sAlbums) == 0 {
+		return []*MetaAlbum{}, nil
+	}
 	sAlbums = sliceutils.Unique(sAlbums, spotifyutils.SimplifiedAlbumName)
 	var simpNames []string
 	for _, sAlbum := range sAlbums {
 		simpNames = append(simpNames, spotifyutils.SimplifiedAlbumName(sAlbum))
 	}
 
-	var existingMetaAlbums []*MetaAlbum
 	query, args, err := sqlx.In(`SELECT * FROM meta_albums WHERE simplified_name IN (?)`, simpNames)
 	if err != nil {
 		return nil, err
 	}
 	query = db.Rebind(query)
+	var existingMetaAlbums []*MetaAlbum
 	if err := db.Select(&existingMetaAlbums, query, args...); err != nil {
 		return nil, err
 	}

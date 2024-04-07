@@ -141,6 +141,31 @@ func Test_upsertSpotifyTracksSqlx(t *testing.T) {
 			t.Fatalf("sqlx has %d meta track artists, but want %d rows", got, want)
 		}
 	})
+	t.Run("handles 0 args", func(t *testing.T) {
+		sqlxDb := getInmemoryBrain(t).sqlxDb
+		// username := "test_username"
+		if want, got := 0, checkNSpotifyTracksSqlx(t, sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta tracks, but want %d rows", got, want)
+		}
+		if want, got := 0, checkNSpotifyTrackArtistsSqlx(t, sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta track artists, but want %d rows", got, want)
+		}
+
+		want := []*SpotifyTrack{}
+		got, err := upsertSpotifyTracksSqlx(sqlxDb, []spotify.SimpleTrack{}, newBrainIndex())
+		if err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+		if diff := diffSpotifyTracks(want, got); diff != "" {
+			t.Errorf("upsertSpotifyTracksSqlx() mismatch (-want +got):\n%s", diff)
+		}
+		if want, got := 0, checkNSpotifyTracksSqlx(t, sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta tracks, but want %d rows", got, want)
+		}
+		if want, got := 0, checkNSpotifyTrackArtistsSqlx(t, sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta track artists, but want %d rows", got, want)
+		}
+	})
 }
 
 var IGNORE_SPOTIFY_TRACK_FIELDS = cmpopts.IgnoreFields(SpotifyTrack{}, "Artists", "MetaTrack", "SpotifyAlbum")

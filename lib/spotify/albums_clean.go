@@ -25,7 +25,7 @@ func (s *Service) GetAlbumsById(ctx context.Context, ids []spotify.ID) ([]*spoti
 
 func (s *Service) SearchAlbum(ctx context.Context, q string, searchSize int) ([]spotify.SimpleAlbum, error) {
 	if len(q) > _MAX_Q_LENGTH {
-		return nil, nil
+		return []spotify.SimpleAlbum{}, nil
 	}
 	results, err := jsoncache.CachedExec("spotify/search/"+q, func() (*spotify.SearchResult, error) {
 		if s.offlineMode {

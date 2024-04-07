@@ -86,6 +86,21 @@ func Test_upsertArtistsSqlx(t *testing.T) {
 			t.Fatalf("sqlx have %d rows, but want %d rows", nArtists, wantN)
 		}
 	})
+	t.Run("handles 0 args", func(t *testing.T) {
+		brain := getInmemoryBrain(t)
+
+		want1 := []*Artist{}
+		got1, err := upsertArtistsSqlx(brain.sqlxDb, []spotify.SimpleArtist{}, newBrainIndex())
+		if err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+		if diff := diffArtists(want1, got1); diff != "" {
+			t.Errorf("upsertArtistsSqlx() mismatch (-want +got):\n%s", diff)
+		}
+		if wantN, nArtists := 0, checkNArtistsSqlx(t, brain.sqlxDb); nArtists != wantN {
+			t.Fatalf("sqlx have %d rows, but want %d rows", nArtists, wantN)
+		}
+	})
 }
 
 func diffArtists(want, got []*Artist) string {
