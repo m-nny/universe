@@ -4,7 +4,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/zmb3/spotify/v2"
 
-	"github.com/m-nny/universe/lib/utils/iterutils"
+	"github.com/m-nny/universe/lib/utils/sliceutils"
 )
 
 // batchSaveAlbumTracksSqlx returns Brain representain of a spotify albums and tracks
@@ -12,8 +12,8 @@ import (
 //   - It will deduplicate returned albums base on spotify.ID, this may result in len(bMetaAlbums) < len(sAlbums)
 //   - It will deduplicate returned tracks base on spotify.ID, this may result in len(bMetaTracks) < len(sTracks)
 func batchSaveAlbumTracksSqlx(db *sqlx.DB, sAlbums []spotify.SimpleAlbum, sTracks []spotify.SimpleTrack) ([]*MetaAlbum, []*MetaTrack, error) {
-	sAlbums = iterutils.Unique(sAlbums, func(item spotify.SimpleAlbum) spotify.ID { return item.ID })
-	sTracks = iterutils.Unique(sTracks, func(item spotify.SimpleTrack) spotify.ID { return item.ID })
+	sAlbums = sliceutils.Unique(sAlbums, func(item spotify.SimpleAlbum) spotify.ID { return item.ID })
+	sTracks = sliceutils.Unique(sTracks, func(item spotify.SimpleTrack) spotify.ID { return item.ID })
 
 	var sArtists []spotify.SimpleArtist
 	for _, sAlbum := range sAlbums {

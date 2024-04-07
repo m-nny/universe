@@ -7,7 +7,7 @@ import (
 
 	"github.com/zmb3/spotify/v2"
 
-	iterutils "github.com/m-nny/universe/lib/utils/iterutils"
+	iterutils "github.com/m-nny/universe/lib/utils/sliceutils"
 )
 
 var simplifyAlbumNameRegex = func() *regexp.Regexp {

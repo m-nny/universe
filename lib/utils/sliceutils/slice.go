@@ -1,4 +1,4 @@
-package iterutils
+package sliceutils
 
 func Map[T, R any](arr []T, fn func(item T) R) []R {
 	var res []R

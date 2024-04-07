@@ -6,7 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/zmb3/spotify/v2"
 
-	"github.com/m-nny/universe/lib/utils/iterutils"
+	"github.com/m-nny/universe/lib/utils/sliceutils"
 	utils "github.com/m-nny/universe/lib/utils/spotifyutils"
 )
 
@@ -38,7 +38,7 @@ func upsertMetaTracksSqlx(db *sqlx.DB, sTracks []spotify.SimpleTrack, bi *brainI
 	if len(sTracks) == 0 {
 		return []*MetaTrack{}, nil
 	}
-	sTracks = iterutils.Unique(sTracks, bi.MustTrackSimplifiedName)
+	sTracks = sliceutils.Unique(sTracks, bi.MustTrackSimplifiedName)
 	var simpNames []string
 	for _, sTrack := range sTracks {
 		simpName, ok := bi.TrackSimplifiedName(sTrack)
