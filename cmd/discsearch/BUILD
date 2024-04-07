@@ -8,7 +8,6 @@ go_library(
     deps = [
         "//lib/discsearch",
         "//lib/spotify",
-        "//lib/utils/spotifyutils",
     ],
 )
 

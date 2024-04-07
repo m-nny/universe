@@ -7,7 +7,6 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/jmoiron/sqlx"
 	"github.com/zmb3/spotify/v2"
-	"gorm.io/gorm"
 )
 
 // Expected outputs
@@ -34,91 +33,6 @@ var (
 		MetaAlbumId: 2,
 	}
 )
-
-func Test_upsertSpotifyAlbumsGorm(t *testing.T) {
-	t.Run("returns same ID for same spotify ID", func(t *testing.T) {
-		gormDb := getInmemoryBrain(t).gormDb
-		if want, got := 0, checkNSpotifyAlbumsGorm(t, gormDb); got != want {
-			t.Fatalf("gorm has %d spotify albums, but want %d rows", got, want)
-		}
-
-		// Setup Artists & MetaAlbums
-		bi := newBrainIndex()
-		if _, err := upsertArtistsGorm(gormDb, []spotify.SimpleArtist{sArtistLP, sArtistPR}, bi); err != nil {
-			t.Fatalf("got Error: %v", err)
-		}
-		if _, err := upsertMetaAlbumsGorm(gormDb, []spotify.SimpleAlbum{sSimpleAlbumHT, sSimpleAlbumHT20, sSimpleAlbumN}, bi); err != nil {
-			t.Fatalf("got Error: %v", err)
-		}
-
-		want1 := []*SpotifyAlbum{bSpotifyAlbumHT, bSpotifyAlbumHT20, bSpotifyAlbumN}
-		got1, err := upsertSpotifyAlbumsGorm(gormDb, []spotify.SimpleAlbum{sSimpleAlbumHT, sSimpleAlbumHT20, sSimpleAlbumN}, bi.Clone())
-		if err != nil {
-			t.Fatalf("got Error: %v", err)
-		}
-		if diff := diffSpotifyAlbums(want1, got1); diff != "" {
-			t.Fatalf("upsertSpotifyAlbumsGorm() mismatch (-want +got):\n%s", diff)
-		}
-
-		got2, err := upsertSpotifyAlbumsGorm(gormDb, []spotify.SimpleAlbum{sSimpleAlbumHT, sSimpleAlbumHT20, sSimpleAlbumN}, bi.Clone())
-		if err != nil {
-			t.Fatalf("got Error: %v", err)
-		}
-		if diff := diffSpotifyAlbums(want1, got2); diff != "" {
-			t.Fatalf("upsertSpotifyAlbumsGorm() mismatch (-want +got):\n%s", diff)
-		}
-
-		if want, got := 3, checkNSpotifyAlbumsGorm(t, gormDb); got != want {
-			t.Fatalf("gorm has %d spotify albums, but want %d rows", got, want)
-		}
-	})
-	t.Run("returns different ID for different spotify ID", func(t *testing.T) {
-		gormDb := getInmemoryBrain(t).gormDb
-		if want, got := 0, checkNSpotifyAlbumsGorm(t, gormDb); got != want {
-			t.Fatalf("gorm has %d spotify albums, but want %d rows", got, want)
-		}
-
-		// Setup Artists & MetaAlbums
-		bi := newBrainIndex()
-		if _, err := upsertArtistsGorm(gormDb, []spotify.SimpleArtist{sArtistLP, sArtistPR}, bi); err != nil {
-			t.Fatalf("got Error: %v", err)
-		}
-		if _, err := upsertMetaAlbumsGorm(gormDb, []spotify.SimpleAlbum{sSimpleAlbumHT, sSimpleAlbumHT20, sSimpleAlbumN}, bi); err != nil {
-			t.Fatalf("got Error: %v", err)
-		}
-
-		want1 := []*SpotifyAlbum{bSpotifyAlbumHT}
-		got1, err := upsertSpotifyAlbumsGorm(gormDb, []spotify.SimpleAlbum{sSimpleAlbumHT}, bi.Clone())
-		if err != nil {
-			t.Fatalf("got Error: %v", err)
-		}
-		if diff := diffSpotifyAlbums(want1, got1); diff != "" {
-			t.Fatalf("upsertSpotifyAlbumsGorm() mismatch (-want +got):\n%s", diff)
-		}
-
-		want2 := []*SpotifyAlbum{bSpotifyAlbumHT20}
-		got2, err := upsertSpotifyAlbumsGorm(gormDb, []spotify.SimpleAlbum{sSimpleAlbumHT20}, bi.Clone())
-		if err != nil {
-			t.Fatalf("got Error: %v", err)
-		}
-		if diff := diffSpotifyAlbums(want2, got2); diff != "" {
-			t.Fatalf("upsertSpotifyAlbumsGorm() mismatch (-want +got):\n%s", diff)
-		}
-
-		want3 := []*SpotifyAlbum{bSpotifyAlbumN}
-		got3, err := upsertSpotifyAlbumsGorm(gormDb, []spotify.SimpleAlbum{sSimpleAlbumN}, bi.Clone())
-		if err != nil {
-			t.Fatalf("got Error: %v", err)
-		}
-		if diff := diffSpotifyAlbums(want3, got3); diff != "" {
-			t.Fatalf("upsertSpotifyAlbumsGorm() mismatch (-want +got):\n%s", diff)
-		}
-
-		if want, got := 3, checkNSpotifyAlbumsGorm(t, gormDb); got != want {
-			t.Fatalf("gorm has %d spotify albums, but want %d rows", got, want)
-		}
-	})
-}
 
 func Test_upsertSpotifyAlbumsSqlx(t *testing.T) {
 	t.Run("returns same ID for same spotify ID", func(t *testing.T) {
@@ -221,14 +135,6 @@ var IGNORE_SPOTIFY_ALBUM_FIELDS = cmpopts.IgnoreFields(SpotifyAlbum{}, "Artists"
 
 func diffSpotifyAlbums(want, got []*SpotifyAlbum) string {
 	return cmp.Diff(want, got, IGNORE_SPOTIFY_ALBUM_FIELDS)
-}
-
-func checkNSpotifyAlbumsGorm(tb testing.TB, db *gorm.DB) int {
-	var gormSpotifyAlbums []SpotifyAlbum
-	if err := db.Find(&gormSpotifyAlbums).Error; err != nil {
-		tb.Fatalf("err: %v", err)
-	}
-	return len(gormSpotifyAlbums)
 }
 
 func checkNSpotifyAlbumsSqlx(tb testing.TB, db *sqlx.DB) int {

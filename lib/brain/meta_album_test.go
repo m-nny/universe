@@ -7,7 +7,6 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/jmoiron/sqlx"
 	"github.com/zmb3/spotify/v2"
-	"gorm.io/gorm"
 )
 
 // Inputs
@@ -45,84 +44,6 @@ var (
 		SimplifiedName: "porter robinson - nurture",
 	}
 )
-
-func Test_upsertMetaAlbumsGorm(t *testing.T) {
-	t.Run("returns same ID for same spotify ID", func(t *testing.T) {
-		gormDb := getInmemoryBrain(t).gormDb
-		if want, got := 0, checkNMetaAlbumsGorm(t, gormDb); got != want {
-			t.Fatalf("gorm has %d meta albums, but want %d rows", got, want)
-		}
-
-		// Setup Artists
-		bi := newBrainIndex()
-		if _, err := upsertArtistsGorm(gormDb, []spotify.SimpleArtist{sArtistLP, sArtistPR}, bi); err != nil {
-			t.Fatalf("got Error: %v", err)
-		}
-
-		want1 := []*MetaAlbum{bMetaAlbumHT, bMetaAlbumN}
-		got1, err := upsertMetaAlbumsGorm(gormDb, []spotify.SimpleAlbum{sSimpleAlbumHT, sSimpleAlbumHT20, sSimpleAlbumN}, bi.Clone())
-		if err != nil {
-			t.Fatalf("got Error: %v", err)
-		}
-		if diff := diffMetaAlbums(want1, got1); diff != "" {
-			t.Fatalf("upsertArtistsGorm() mismatch (-want +got):\n%s", diff)
-		}
-
-		got2, err := upsertMetaAlbumsGorm(gormDb, []spotify.SimpleAlbum{sSimpleAlbumHT, sSimpleAlbumHT20, sSimpleAlbumN}, bi.Clone())
-		if err != nil {
-			t.Fatalf("got Error: %v", err)
-		}
-		if diff := diffMetaAlbums(want1, got2); diff != "" {
-			t.Fatalf("upsertArtistsGorm() mismatch (-want +got):\n%s", diff)
-		}
-
-		if want, got := 2, checkNMetaAlbumsGorm(t, gormDb); got != want {
-			t.Fatalf("gorm has %d meta albums, but want %d rows", got, want)
-		}
-	})
-	t.Run("returns different ID for different spotify ID", func(t *testing.T) {
-		gormDb := getInmemoryBrain(t).gormDb
-		if want, got := 0, checkNMetaAlbumsGorm(t, gormDb); got != want {
-			t.Fatalf("gorm has %d meta albums, but want %d rows", got, want)
-		}
-
-		// Setup Artists
-		bi := newBrainIndex()
-		if _, err := upsertArtistsGorm(gormDb, []spotify.SimpleArtist{sArtistLP, sArtistPR}, bi); err != nil {
-			t.Fatalf("got Error: %v", err)
-		}
-
-		want1 := []*MetaAlbum{bMetaAlbumHT}
-		got1, err := upsertMetaAlbumsGorm(gormDb, []spotify.SimpleAlbum{sSimpleAlbumHT}, bi.Clone())
-		if err != nil {
-			t.Fatalf("got Error: %v", err)
-		}
-		if diff := diffMetaAlbums(want1, got1); diff != "" {
-			t.Fatalf("upsertArtistsGorm() mismatch (-want +got):\n%s", diff)
-		}
-
-		want2 := []*MetaAlbum{bMetaAlbumHT}
-		got2, err := upsertMetaAlbumsGorm(gormDb, []spotify.SimpleAlbum{sSimpleAlbumHT20}, bi.Clone())
-		if err != nil {
-			t.Fatalf("got Error: %v", err)
-		}
-		if diff := diffMetaAlbums(want2, got2); diff != "" {
-			t.Fatalf("upsertArtistsGorm() mismatch (-want +got):\n%s", diff)
-		}
-
-		want3 := []*MetaAlbum{bMetaAlbumN}
-		got3, err := upsertMetaAlbumsGorm(gormDb, []spotify.SimpleAlbum{sSimpleAlbumN}, bi.Clone())
-		if err != nil {
-			t.Fatalf("got Error: %v", err)
-		}
-		if diff := diffMetaAlbums(want3, got3); diff != "" {
-			t.Fatalf("upsertArtistsGorm() mismatch (-want +got):\n%s", diff)
-		}
-		if want, got := 2, checkNMetaAlbumsGorm(t, gormDb); got != want {
-			t.Fatalf("gorm has %d meta albums, but want %d rows", got, want)
-		}
-	})
-}
 
 func Test_upsertMetaAlbumsSqlx(t *testing.T) {
 	t.Run("returns same ID for same spotify ID", func(t *testing.T) {
@@ -217,14 +138,6 @@ var IGNORE_META_ALBUM_FIELDS = cmpopts.IgnoreFields(MetaAlbum{}, "AnyName", "Art
 
 func diffMetaAlbums(want, got []*MetaAlbum) string {
 	return cmp.Diff(want, got, IGNORE_META_ALBUM_FIELDS)
-}
-
-func checkNMetaAlbumsGorm(tb testing.TB, db *gorm.DB) int {
-	var gormMetaAlbums []MetaAlbum
-	if err := db.Find(&gormMetaAlbums).Error; err != nil {
-		tb.Fatalf("err: %v", err)
-	}
-	return len(gormMetaAlbums)
 }
 
 func checkNMetaAlbumsSqlx(tb testing.TB, db *sqlx.DB) int {

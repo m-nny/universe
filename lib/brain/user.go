@@ -7,15 +7,13 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"golang.org/x/oauth2"
-	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 type User struct {
-	Username string `gorm:"primarykey"`
+	Username string
 	// TODO add proper token
-	SpotifyTokenStr []byte       `db:"spotify_token_str"`
-	SavedTracks     []*MetaTrack `gorm:"many2many:user_saved_tracks"`
+	SpotifyTokenStr []byte `db:"spotify_token_str"`
+	SavedTracks     []*MetaTrack
 }
 
 func (u *User) SpotifyToken() (*oauth2.Token, error) {
@@ -60,21 +58,6 @@ func (b *Brain) StoreSpotifyToken(ctx context.Context, username string, spotifyT
 		ON CONFLICT DO UPDATE SET spotify_token_str = excluded.spotify_token_str
 	`, user.Username, user.SpotifyTokenStr); err != nil {
 		return nil
-	}
-	// Shadow write to gorm
-	if err := b.gormDb.Clauses(clause.OnConflict{UpdateAll: true}).Create(&user).Error; err != nil {
-		return nil
-	}
-	return nil
-}
-
-func addSavedTracksGorm(db *gorm.DB, username string, tracks []*MetaTrack) error {
-	user := User{Username: username}
-	if err := db.Where("username = ?", username).FirstOrCreate(&user).Error; err != nil {
-		return err
-	}
-	if err := db.Model(&user).Association("SavedTracks").Replace(tracks); err != nil {
-		return err
 	}
 	return nil
 }

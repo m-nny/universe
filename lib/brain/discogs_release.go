@@ -9,7 +9,7 @@ import (
 )
 
 type DiscogsRelease struct {
-	ID uint `gorm:"primarykey"`
+	ID uint
 
 	DiscogsID  int
 	Name       string
@@ -55,43 +55,45 @@ func (b *Brain) SaveDiscorgsReleases(dReleases []discogs.ListingRelease, usernam
 }
 
 func (b *Brain) _SaveDiscorgsReleases(dReleases []discogs.ListingRelease) ([]*DiscogsRelease, error) {
-	dReleases = sliceutils.Unique(dReleases, func(item discogs.ListingRelease) int { return item.ID })
-	var discogsIds []int
-	for _, dRelease := range dReleases {
-		discogsIds = append(discogsIds, dRelease.ID)
-	}
+	return nil, fmt.Errorf("not implemented")
+	// dReleases = sliceutils.Unique(dReleases, func(item discogs.ListingRelease) int { return item.ID })
+	// var discogsIds []int
+	// for _, dRelease := range dReleases {
+	// 	discogsIds = append(discogsIds, dRelease.ID)
+	// }
 
-	var existingReleases []*DiscogsRelease
-	if err := b.gormDb.
-		Where("discogs_id IN ?", discogsIds).
-		Preload("MetaAlbum").
-		Find(&existingReleases).Error; err != nil {
-		return nil, err
-	}
-	releaseMap := sliceutils.ToMap(existingReleases, func(item *DiscogsRelease) int { return item.DiscogsID })
+	// var existingReleases []*DiscogsRelease
+	// if err := b.gormDb.
+	// 	Where("discogs_id IN ?", discogsIds).
+	// 	Preload("MetaAlbum").
+	// 	Find(&existingReleases).Error; err != nil {
+	// 	return nil, err
+	// }
+	// releaseMap := sliceutils.ToMap(existingReleases, func(item *DiscogsRelease) int { return item.DiscogsID })
 
-	var newReleases []*DiscogsRelease
-	for _, dRelease := range dReleases {
-		if _, ok := releaseMap[dRelease.ID]; ok {
-			continue
-		}
-		newReleases = append(newReleases, newDiscogsRelease(dRelease))
-	}
-	if len(newReleases) == 0 {
-		return existingReleases, nil
-	}
-	if err := b.gormDb.CreateInBatches(newReleases, gormBatchSize).Error; err != nil {
-		return nil, err
-	}
-	return append(existingReleases, newReleases...), nil
+	// var newReleases []*DiscogsRelease
+	// for _, dRelease := range dReleases {
+	// 	if _, ok := releaseMap[dRelease.ID]; ok {
+	// 		continue
+	// 	}
+	// 	newReleases = append(newReleases, newDiscogsRelease(dRelease))
+	// }
+	// if len(newReleases) == 0 {
+	// 	return existingReleases, nil
+	// }
+	// if err := b.gormDb.CreateInBatches(newReleases, gormBatchSize).Error; err != nil {
+	// 	return nil, err
+	// }
+	// return append(existingReleases, newReleases...), nil
 }
 
 func (b *Brain) AssociateDiscogsRelease(bRelease *DiscogsRelease, bMetaAlbum *MetaAlbum, score int) error {
-	bRelease.addMetaAlbum(bMetaAlbum, score)
-	if err := b.gormDb.Model(bRelease).Select("meta_album_id", "meta_album_similariry_score", "searched_meta_album").Updates(bRelease).Error; err != nil {
-		return err
-	}
-	return nil
+	return fmt.Errorf("not implemented")
+	// bRelease.addMetaAlbum(bMetaAlbum, score)
+	// if err := b.gormDb.Model(bRelease).Select("meta_album_id", "meta_album_similariry_score", "searched_meta_album").Updates(bRelease).Error; err != nil {
+	// 	return err
+	// }
+	// return nil
 }
 
 func MostSimilarAlbum(dRelease *DiscogsRelease, bAlbums []*MetaAlbum) (*MetaAlbum, int, error) {

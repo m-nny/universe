@@ -5,18 +5,17 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/zmb3/spotify/v2"
-	"gorm.io/gorm"
 
 	"github.com/m-nny/universe/lib/utils/sliceutils"
 	utils "github.com/m-nny/universe/lib/utils/spotifyutils"
 )
 
 type MetaTrack struct {
-	ID             uint   `gorm:"primarykey"`
+	ID             uint
 	SimplifiedName string `db:"simplified_name"`
 	MetaAlbumID    uint   `db:"meta_album_id"`
 	MetaAlbum      *MetaAlbum
-	Artists        []*Artist `gorm:"many2many:meta_track_artists;"`
+	Artists        []*Artist
 }
 
 func (s *MetaTrack) String() string {
@@ -33,52 +32,6 @@ func newMetaTrack(sTrack spotify.SimpleTrack, bMetaAlbum *MetaAlbum, bArtists []
 		MetaAlbum:      bMetaAlbum,
 		Artists:        bArtists,
 	}
-}
-
-func upsertMetaTracksGorm(db *gorm.DB, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*MetaTrack, error) {
-	sTracks = sliceutils.Unique(sTracks, bi.MustTrackSimplifiedName)
-	var trackSimps []string
-	for _, sTrack := range sTracks {
-		simpName, ok := bi.TrackSimplifiedName(sTrack)
-		if !ok {
-			return nil, fmt.Errorf("could not get simplified name for %s, but it should be there", sTrack.Name)
-		}
-		trackSimps = append(trackSimps, simpName)
-	}
-
-	var existingMetaTracks []*MetaTrack
-	if err := db.
-		Preload("Artists").
-		Where("simplified_name IN ?", trackSimps).
-		Find(&existingMetaTracks).Error; err != nil {
-		return nil, err
-	}
-	bi.AddMetaTracks(existingMetaTracks)
-
-	// var newMetaTracks []*MetaTrack
-	var newTracks []*MetaTrack
-	for _, sTrack := range sTracks {
-		if _, ok := bi.GetMetaTrack(sTrack); ok {
-			continue
-		}
-		bMetaAlbum, ok := bi.GetMetaAlbum(sTrack.Album)
-		if !ok {
-			return nil, fmt.Errorf("could not find meta album for %s, but it should be there", sTrack.Name)
-		}
-		bArtists, ok := bi.GetArtists(sTrack.Artists)
-		if !ok {
-			return nil, fmt.Errorf("could not find artists for %s, but it should be there", sTrack.Name)
-		}
-		newTracks = append(newTracks, newMetaTrack(sTrack, bMetaAlbum, bArtists))
-	}
-	if len(newTracks) == 0 {
-		return existingMetaTracks, nil
-	}
-	if err := db.Create(newTracks).Error; err != nil {
-		return nil, err
-	}
-	bi.AddMetaTracks(newTracks)
-	return append(existingMetaTracks, newTracks...), nil
 }
 
 func upsertMetaTracksSqlx(db *sqlx.DB, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*MetaTrack, error) {

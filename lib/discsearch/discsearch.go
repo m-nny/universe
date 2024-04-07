@@ -65,11 +65,6 @@ func getBrain() (*brain.Brain, error) {
 	// if authToken != "" {
 	// 	tursoDsn += "authToken=" + authToken
 	// }
-	// sqliteDsn, err := getDbPath("gorm")
-	// if err != nil {
-	// 	return nil, err
-	// }
-	gormDsn := "http://127.0.0.1:8080"
-	sqlxDsn := "http://127.0.0.1:8081"
-	return brain.New(gormDsn, sqlxDsn /*enableLogging=*/, false)
+	sqlxDsn := "http://127.0.0.1:8080"
+	return brain.New(sqlxDsn /*enableLogging=*/, false)
 }

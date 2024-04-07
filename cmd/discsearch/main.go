@@ -9,7 +9,6 @@ import (
 
 	"github.com/m-nny/universe/lib/discsearch"
 	"github.com/m-nny/universe/lib/spotify"
-	"github.com/m-nny/universe/lib/utils/spotifyutils"
 )
 
 var (
@@ -26,15 +25,7 @@ func main() {
 		log.Fatalf("Could not init app: %v", err)
 	}
 
-	// if err := demoGormTracks(ctx, app); err != nil {
-	// 	log.Fatalf("%v", err)
-	// }
-
 	// if err := getAlbumsById(ctx, app); err != nil {
-	// 	log.Fatalf("%v", err)
-	// }
-
-	// if err := gormGetUserTracks(ctx, app); err != nil {
 	// 	log.Fatalf("%v", err)
 	// }
 
@@ -53,67 +44,8 @@ func main() {
 	// if err := getSellerInventory(ctx, app); err != nil {
 	// 	log.Fatalf("%v", err)
 	// }
+
 	log.Printf("Done")
-}
-
-func demoGormArtists(ctx context.Context, app *discsearch.App) error {
-	// Porter Robinson, Linkin Park, Linkin Park
-	artistIds := []spotify.ID{"3dz0NnIZhtKKeXZxLOxCam", "6XyY86QOPPrYVGvF9ch6wz", "6XyY86QOPPrYVGvF9ch6wz"}
-	sArtists, err := app.Spotify.GetArtistById(ctx, artistIds)
-	if err != nil {
-		return err
-	}
-	for idx, artist := range sArtists {
-		log.Printf("[%d/%d] sArtist: %+v", idx+1, len(sArtists), artist)
-	}
-	bArtists, err := app.Brain.SaveArtists(sArtists)
-	if err != nil {
-		return err
-	}
-	for idx, artist := range bArtists {
-		log.Printf("[%d/%d] bArtist %+v", idx+1, len(sArtists), artist)
-	}
-	return nil
-}
-
-func demoGormAlbums(ctx context.Context, app *discsearch.App) error {
-	// Hybrid Theory, Hybrid Theory (20th Edition)
-	albumIds := []spotify.ID{"6PFPjumGRpZnBzqnDci6qJ", "28DUZ0itKISf2sr6hlseMy", "28DUZ0itKISf2sr6hlseMy"}
-	sAlbums, err := app.Spotify.GetAlbumsById(ctx, albumIds)
-	if err != nil {
-		return err
-	}
-	for idx, sAlbum := range sAlbums {
-		log.Printf("[%d/%d] sAlbum: %+v - %+v", idx+1, len(sAlbums), spotifyutils.SArtistsString(sAlbum.Artists), sAlbum.Name)
-	}
-	bAlbums, err := app.Brain.SaveAlbumsSqlx(sAlbums)
-	if err != nil {
-		return err
-	}
-	for idx, bAlbum := range bAlbums {
-		log.Printf("[%d/%d] bAlbum %+v", idx+1, len(sAlbums), bAlbum)
-	}
-	return nil
-}
-
-func demoGormTracks(ctx context.Context, app *discsearch.App) error {
-	// Hybrid Theory, Hybrid Theory (20th Edition)
-	sTracks, err := app.Spotify.GetUserTracks(ctx, username)
-	sTracks = sTracks[:10]
-	if err != nil {
-		return err
-	}
-	for idx, sTrack := range sTracks {
-		log.Printf("[%d/%d] sTrack: %s - %s - %+s", idx+1, len(sTracks), spotifyutils.SArtistsString(sTrack.Artists), sTrack.Album.Name, sTrack.Name)
-	}
-	bTracks, err := app.Brain.SaveTracksGorm(sTracks, username)
-	if err != nil {
-		return err
-	}
-	for idx, bTrack := range bTracks {
-		log.Printf("[%d/%d] bTrack: %+v - %+v - %+v", idx+1, len(sTracks), bTrack.Artists, bTrack.MetaAlbum, bTrack.SimplifiedName)
-	}
-	return nil
 }
 
 func getDiscogs(ctx context.Context, app *discsearch.App) error {
@@ -155,27 +87,6 @@ func benchGetUserTracks(ctx context.Context, app *discsearch.App) error {
 	log.Printf("brain.GetUserTracks: finished in %s", time.Since(start))
 
 	log.Printf("==========================")
-	log.Printf("brain.SaveTracksGorm")
-	start = time.Now()
-	gormTracks, err := app.Brain.SaveTracksGorm(userTracks, username)
-	if err != nil {
-		return fmt.Errorf("error getting all tracks: %w", err)
-	}
-	log.Printf("finished in %s", time.Since(start))
-	log.Printf("returned %d tracks", len(gormTracks))
-
-	gormTrackCnt, err := app.Brain.MetaTrackCountGorm()
-	if err != nil {
-		return err
-	}
-	log.Printf("track cnt in db: %d", gormTrackCnt)
-	gormAlbumCnt, err := app.Brain.MetaAlbumCountGorm()
-	if err != nil {
-		return err
-	}
-	log.Printf("album cnt in db: %d", gormAlbumCnt)
-
-	log.Printf("==========================")
 	log.Printf("brain.SaveTracksSqlx")
 	start = time.Now()
 	sqlxTracks, err := app.Brain.SaveTracksSqlx(userTracks, username)
@@ -195,13 +106,6 @@ func benchGetUserTracks(ctx context.Context, app *discsearch.App) error {
 		return err
 	}
 	log.Printf("album cnt in db: %d", sqlxAlbumCnt)
-
-	if gormTrackCnt != sqlxTrackCnt {
-		return fmt.Errorf("gormTrackCnt != sqlxTrackCnt: %d != %d", gormTrackCnt, sqlxTrackCnt)
-	}
-	if gormAlbumCnt != sqlxAlbumCnt {
-		return fmt.Errorf("gormAlbumCnt != sqlxAlbumCnt: %d != %d", gormAlbumCnt, sqlxAlbumCnt)
-	}
 
 	return nil
 }

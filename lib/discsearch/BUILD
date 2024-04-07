@@ -10,7 +10,6 @@ go_library(
     data = [
         "//:dotenv",
         "//data:ent_db",
-        "//data:gorm_db",
     ],
     importpath = "github.com/m-nny/universe/lib/discsearch",
     visibility = ["//visibility:public"],
@@ -19,7 +18,6 @@ go_library(
         "//lib/discogs",
         "//lib/spotify",
         "@com_github_joho_godotenv//:godotenv",
-        "@com_github_mattn_go_sqlite3//:go-sqlite3",
         "@com_github_schollz_progressbar_v3//:progressbar",
     ],
 )
