@@ -46,8 +46,16 @@ func (b *Brain) SaveSimpleAlbumsSqlx(sAlbums []spotify.SimpleAlbum) ([]*MetaAlbu
 	return albums, err
 }
 
-func (b *Brain) MetaAlbumCount() (int, error) {
+func (b *Brain) MetaAlbumCountGorm() (int, error) {
 	var count int64
 	err := b.gormDb.Model(&MetaAlbum{}).Count(&count).Error
 	return int(count), err
+}
+
+func (b *Brain) MetaAlbumCountSqlx() (int, error) {
+	var cnt int
+	if err := b.sqlxDb.Get(&cnt, `SELECT COUNT(*) FROM meta_albums`); err != nil {
+		return 0, err
+	}
+	return cnt, nil
 }

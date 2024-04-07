@@ -42,9 +42,9 @@ func main() {
 		log.Fatalf("%v", err)
 	}
 
-	// if err := benchGetUserTracks(ctx, app); err != nil {
-	// 	log.Fatalf("%v", err)
-	// }
+	if err := benchGetUserTracks(ctx, app); err != nil {
+		log.Fatalf("%v", err)
+	}
 
 	// if err := getDiscogs(ctx, app); err != nil {
 	// 	log.Fatalf("%v", err)
@@ -152,56 +152,56 @@ func benchGetUserTracks(ctx context.Context, app *discsearch.App) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("GetUserTracks: finished in %s", time.Since(start))
-
-	// log.Printf("==========================")
-	// log.Printf("ent.ToTracksSaved")
-	// start = time.Now()
-	// entTracks, err := app.SpotifyEnt.ToTracksSaved(ctx, userTracks, username)
-	// if err != nil {
-	// 	return fmt.Errorf("error getting all tracks: %w", err)
-	// }
-	// log.Printf("finished in %s", time.Since(start))
-	// log.Printf("returned %d tracks", len(entTracks))
-	// entTrackCnt, err := app.SpotifyEnt.EntTrackCount(ctx)
-	// if err != nil {
-	// 	return err
-	// }
-	// log.Printf("track cnt in db: %d", entTrackCnt)
-	// entAlbumCnt, err := app.SpotifyEnt.EntAlbumCount(ctx)
-	// if err != nil {
-	// 	return err
-	// }
-	// log.Printf("album cnt in db: %d", entAlbumCnt)
+	log.Printf("brain.GetUserTracks: finished in %s", time.Since(start))
 
 	log.Printf("==========================")
-	log.Printf("brain.SaveTracks")
+	log.Printf("brain.SaveTracksGorm")
 	start = time.Now()
-	brainTracks, err := app.Brain.SaveTracksGorm(userTracks, username)
+	gormTracks, err := app.Brain.SaveTracksGorm(userTracks, username)
 	if err != nil {
 		return fmt.Errorf("error getting all tracks: %w", err)
 	}
 	log.Printf("finished in %s", time.Since(start))
-	log.Printf("returned %d tracks", len(brainTracks))
+	log.Printf("returned %d tracks", len(gormTracks))
 
-	brainTrackCnt, err := app.Brain.MetaTrackCountGorm()
+	gormTrackCnt, err := app.Brain.MetaTrackCountGorm()
 	if err != nil {
 		return err
 	}
-	log.Printf("track cnt in db: %d", brainTrackCnt)
-	brainAlbumCnt, err := app.Brain.MetaAlbumCount()
+	log.Printf("track cnt in db: %d", gormTrackCnt)
+	gormAlbumCnt, err := app.Brain.MetaAlbumCountGorm()
 	if err != nil {
 		return err
 	}
-	log.Printf("album cnt in db: %d", brainAlbumCnt)
+	log.Printf("album cnt in db: %d", gormAlbumCnt)
 
-	// if entTrackCnt != brainTrackCnt {
-	// 	return fmt.Errorf("Different ent and brain track counts: ent %d brain %d", brainTrackCnt, entTrackCnt)
-	// }
+	log.Printf("==========================")
+	log.Printf("brain.SaveTracksSqlx")
+	start = time.Now()
+	sqlxTracks, err := app.Brain.SaveTracksSqlx(userTracks, username)
+	if err != nil {
+		return fmt.Errorf("error getting all tracks: %w", err)
+	}
+	log.Printf("finished in %s", time.Since(start))
+	log.Printf("returned %d tracks", len(sqlxTracks))
 
-	// if entAlbumCnt != brainAlbumCnt {
-	// 	return fmt.Errorf("Different ent and brain album counts: ent %d brain %d", brainAlbumCnt, entAlbumCnt)
-	// }
+	sqlxTrackCnt, err := app.Brain.MetaTrackCountSqlx()
+	if err != nil {
+		return err
+	}
+	log.Printf("track cnt in db: %d", sqlxTrackCnt)
+	sqlxAlbumCnt, err := app.Brain.MetaAlbumCountSqlx()
+	if err != nil {
+		return err
+	}
+	log.Printf("album cnt in db: %d", sqlxAlbumCnt)
+
+	if gormTrackCnt != sqlxTrackCnt {
+		return fmt.Errorf("gormTrackCnt != sqlxTrackCnt: %d != %d", gormTrackCnt, sqlxTrackCnt)
+	}
+	if gormAlbumCnt != sqlxAlbumCnt {
+		return fmt.Errorf("gormAlbumCnt != sqlxAlbumCnt: %d != %d", gormAlbumCnt, sqlxAlbumCnt)
+	}
 
 	return nil
 }

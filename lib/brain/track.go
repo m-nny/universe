@@ -65,3 +65,11 @@ func (b *Brain) MetaTrackCountGorm() (int, error) {
 	err := b.gormDb.Model(&MetaTrack{}).Count(&count).Error
 	return int(count), err
 }
+
+func (b *Brain) MetaTrackCountSqlx() (int, error) {
+	var cnt int
+	if err := b.sqlxDb.Get(&cnt, `SELECT COUNT(*) FROM meta_tracks`); err != nil {
+		return 0, err
+	}
+	return cnt, nil
+}

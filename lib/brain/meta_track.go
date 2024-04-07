@@ -2,7 +2,6 @@ package brain
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/zmb3/spotify/v2"
@@ -42,7 +41,6 @@ func upsertMetaTracksGorm(db *gorm.DB, sTracks []spotify.SimpleTrack, bi *brainI
 	for _, sTrack := range sTracks {
 		simpName, ok := bi.TrackSimplifiedName(sTrack)
 		if !ok {
-			log.Printf("WTF sTrack: %v", sTrack)
 			return nil, fmt.Errorf("could not get simplified name for %s, but it should be there", sTrack.Name)
 		}
 		trackSimps = append(trackSimps, simpName)
@@ -65,13 +63,11 @@ func upsertMetaTracksGorm(db *gorm.DB, sTracks []spotify.SimpleTrack, bi *brainI
 		}
 		bMetaAlbum, ok := bi.GetMetaAlbum(sTrack.Album)
 		if !ok {
-			log.Printf("WTF sTrack: %v", sTrack)
 			return nil, fmt.Errorf("could not find meta album for %s, but it should be there", sTrack.Name)
 		}
 		bArtists, ok := bi.GetArtists(sTrack.Artists)
 		if !ok {
-			log.Printf("WTF sTrack: %v", sTrack)
-			return nil, fmt.Errorf("could not find meta album for %s, but it should be there", sTrack.Name)
+			return nil, fmt.Errorf("could not find artists for %s, but it should be there", sTrack.Name)
 		}
 		newTracks = append(newTracks, newMetaTrack(sTrack, bMetaAlbum, bArtists))
 	}
