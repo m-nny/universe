@@ -1,38 +1,12 @@
 package brain
 
 import (
-	"fmt"
-
 	"github.com/jmoiron/sqlx"
 	"github.com/zmb3/spotify/v2"
 	"gorm.io/gorm"
 
 	"github.com/m-nny/universe/lib/utils/sliceutils"
 )
-
-// batchSaveAlbumTracks returns Brain representain of a spotify albums and tracks
-//   - It will create new entries in DB if necessary for albums, tracks, artists
-//   - It will deduplicate returned albums base on spotify.ID, this may result in len(result) < len(sAlbums)
-//   - NOTE: it does not store all spotify.IDs of duplicated at the moment
-//   - NOTE: Does not debupe based on simplified name
-func (b *Brain) batchSaveAlbumTracks(sAlbums []spotify.SimpleAlbum, sTracks []spotify.SimpleTrack) ([]*MetaAlbum, []*MetaTrack, error) {
-	sqlxMetaAlbums, sqlxMetaTracks, err := batchSaveAlbumTracksSqlx(b.sqlxDb, sAlbums, sTracks)
-	if err != nil {
-		return nil, nil, err
-	}
-	gormMetaAlbums, gormMetaTracks, err := batchSaveAlbumTracksGorm(b.gormDb, sAlbums, sTracks)
-	if err != nil {
-		return nil, nil, err
-	}
-	if len(gormMetaAlbums) != len(sqlxMetaAlbums) {
-		return nil, nil, fmt.Errorf("len(gormMetaAlbums) != len(sqlxMetaAlbums): %d != %d", len(gormMetaAlbums), len(sqlxMetaAlbums))
-	}
-	if len(gormMetaTracks) != len(sqlxMetaTracks) {
-		return nil, nil, fmt.Errorf("len(gormMetaTracks) != len(sqlxMetaTracks): %d != %d", len(gormMetaTracks), len(sqlxMetaTracks))
-	}
-	return gormMetaAlbums, gormMetaTracks, nil
-
-}
 
 // batchSaveAlbumTracksGorm returns Brain representain of a spotify albums and tracks
 //   - It will create new entries in DB if necessary for albums, tracks, artists

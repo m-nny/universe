@@ -86,7 +86,7 @@ func demoGormAlbums(ctx context.Context, app *discsearch.App) error {
 	for idx, sAlbum := range sAlbums {
 		log.Printf("[%d/%d] sAlbum: %+v - %+v", idx+1, len(sAlbums), spotifyutils.SArtistsString(sAlbum.Artists), sAlbum.Name)
 	}
-	bAlbums, err := app.Brain.SaveAlbums(sAlbums)
+	bAlbums, err := app.Brain.SaveAlbumsSqlx(sAlbums)
 	if err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func demoGormTracks(ctx context.Context, app *discsearch.App) error {
 	for idx, sTrack := range sTracks {
 		log.Printf("[%d/%d] sTrack: %s - %s - %+s", idx+1, len(sTracks), spotifyutils.SArtistsString(sTrack.Artists), sTrack.Album.Name, sTrack.Name)
 	}
-	bTracks, err := app.Brain.SaveTracks(sTracks, username)
+	bTracks, err := app.Brain.SaveTracksGorm(sTracks, username)
 	if err != nil {
 		return err
 	}
@@ -177,14 +177,14 @@ func benchGetUserTracks(ctx context.Context, app *discsearch.App) error {
 	log.Printf("==========================")
 	log.Printf("brain.SaveTracks")
 	start = time.Now()
-	brainTracks, err := app.Brain.SaveTracks(userTracks, username)
+	brainTracks, err := app.Brain.SaveTracksGorm(userTracks, username)
 	if err != nil {
 		return fmt.Errorf("error getting all tracks: %w", err)
 	}
 	log.Printf("finished in %s", time.Since(start))
 	log.Printf("returned %d tracks", len(brainTracks))
 
-	brainTrackCnt, err := app.Brain.MetaTrackCount()
+	brainTrackCnt, err := app.Brain.MetaTrackCountGorm()
 	if err != nil {
 		return err
 	}

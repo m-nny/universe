@@ -73,67 +73,6 @@ var (
 	}
 )
 
-func Test_SaveTracks(t *testing.T) {
-	t.Run("returns same ID for same spotify ID", func(t *testing.T) {
-		brain := getInmemoryBrain(t)
-		username := "test_username"
-		if nTracks := checkNMetaTracksGorm(t, brain.gormDb); nTracks != 0 {
-			t.Fatalf("sqlite db is not clean")
-		}
-
-		want1 := []*MetaTrack{bMetaTrackOS, bMetaTrackITE}
-		got1, err := brain.SaveTracks([]spotify.SavedTrack{sSavedTrackOS, sSavedTrackITE}, username)
-		if err != nil {
-			t.Fatalf("got Error: %v", err)
-		}
-		if diff := diffMetaTracks(want1, got1); diff != "" {
-			t.Errorf("SaveTracks() mismatch (-want +got):\n%s", diff)
-		}
-
-		got2, err := brain.SaveTracks([]spotify.SavedTrack{sSavedTrackOS, sSavedTrackITE}, username)
-		if err != nil {
-			t.Fatalf("got Error: %v", err)
-		}
-		if diff := diffMetaTracks(want1, got2); diff != "" {
-			t.Errorf("SaveTracks() mismatch (-want +got):\n%s", diff)
-		}
-	})
-	t.Run("returns different ID for different spotify ID", func(t *testing.T) {
-		brain := getInmemoryBrain(t)
-		username := "test_username"
-		if nTracks := checkNMetaTracksGorm(t, brain.gormDb); nTracks != 0 {
-			t.Fatalf("sqlite db is not clean")
-		}
-
-		want1 := []*MetaTrack{bMetaTrackOS}
-		got1, err := brain.SaveTracks([]spotify.SavedTrack{sSavedTrackOS}, username)
-		if err != nil {
-			t.Fatalf("got Error: %v", err)
-		}
-		if diff := diffMetaTracks(want1, got1); diff != "" {
-			t.Errorf("SaveTracks() mismatch (-want +got):\n%s", diff)
-		}
-
-		want2 := []*MetaTrack{bMetaTrackITE}
-		got2, err := brain.SaveTracks([]spotify.SavedTrack{sSavedTrackITE}, username)
-		if err != nil {
-			t.Fatalf("got Error: %v", err)
-		}
-		if diff := diffMetaTracks(want2, got2); diff != "" {
-			t.Errorf("SaveTracks() mismatch (-want +got):\n%s", diff)
-		}
-
-		want3 := []*MetaTrack{bMetaTrackSC}
-		got3, err := brain.SaveTracks([]spotify.SavedTrack{sSavedTrackSC}, username)
-		if err != nil {
-			t.Fatalf("got Error: %v", err)
-		}
-		if diff := diffMetaTracks(want3, got3); diff != "" {
-			t.Errorf("SaveTracks() mismatch (-want +got):\n%s", diff)
-		}
-	})
-}
-
 func Test_upsertMetaTracksGorm(t *testing.T) {
 	t.Run("returns same ID for same spotify ID", func(t *testing.T) {
 		gormDb := getInmemoryBrain(t).gormDb

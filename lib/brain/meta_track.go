@@ -153,37 +153,3 @@ func upsertMetaTracksSqlx(db *sqlx.DB, sTracks []spotify.SimpleTrack, bi *brainI
 	}
 	return append(existingMetaTracks, newTracks...), nil
 }
-
-// SaveTracks returns Brain representain of a spotify tracks
-//   - It will create new entries in DB if necessary
-//   - It will deduplicate returned albums, this may result in len(result) < len(sTracks)
-//   - NOTE: Does not debupe based on simplified name
-func (b *Brain) SaveTracks(savedTracks []spotify.SavedTrack, username string) ([]*MetaTrack, error) {
-	var sAlbums []spotify.SimpleAlbum
-	var sTracks []spotify.SimpleTrack
-	for _, sFullTrack := range savedTracks {
-		sAlbum := sFullTrack.Album
-		if sAlbum.ID == "" {
-			sAlbum = sFullTrack.SimpleTrack.Album
-		}
-
-		// we are using sTrack.Album to associate it with bAlbum later
-		sTrack := sFullTrack.SimpleTrack
-		sTrack.Album = sAlbum
-
-		sAlbums = append(sAlbums, sAlbum)
-		sTracks = append(sTracks, sTrack)
-	}
-	_, tracks, err := b.batchSaveAlbumTracks(sAlbums, sTracks)
-	if err := b.addSavedTracks(username, tracks); err != nil {
-		return nil, err
-	}
-
-	return tracks, err
-}
-
-func (b *Brain) MetaTrackCount() (int, error) {
-	var count int64
-	err := b.gormDb.Model(&MetaTrack{}).Count(&count).Error
-	return int(count), err
-}

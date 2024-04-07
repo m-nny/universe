@@ -123,30 +123,3 @@ func upsertMetaAlbumsSqlx(db *sqlx.DB, sAlbums []spotify.SimpleAlbum, bi *brainI
 	}
 	return append(existingMetaAlbums, newAlbums...), nil
 }
-
-// SaveAlbums returns Brain representain of a spotify album
-//   - It will create new entries in DB if necessary
-//   - It will deduplicate returned albums, this may result in len(result) < len(sAlbums)
-//   - NOTE: Does not debupe based on simplified name
-func (b *Brain) SaveAlbums(fullAlbums []*spotify.FullAlbum) ([]*MetaAlbum, error) {
-	var sAlbums []spotify.SimpleAlbum
-	var sTracks []spotify.SimpleTrack
-	for _, sAlbum := range fullAlbums {
-		// sAlbum.SimpleAlbum.Artists = sAlbum.Artists
-		sAlbums = append(sAlbums, sAlbum.SimpleAlbum)
-		sTracks = append(sTracks, sAlbum.Tracks.Tracks...)
-	}
-	albums, _, err := b.batchSaveAlbumTracks(sAlbums, sTracks)
-	return albums, err
-}
-
-func (b *Brain) SaveSimpleAlbums(sAlbums []spotify.SimpleAlbum) ([]*MetaAlbum, error) {
-	albums, _, err := b.batchSaveAlbumTracks(sAlbums, nil)
-	return albums, err
-}
-
-func (b *Brain) MetaAlbumCount() (int, error) {
-	var count int64
-	err := b.gormDb.Model(&MetaAlbum{}).Count(&count).Error
-	return int(count), err
-}

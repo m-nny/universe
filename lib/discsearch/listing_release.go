@@ -18,7 +18,7 @@ func (a *App) FindRelease(ctx context.Context, bRelease *brain.DiscogsRelease) (
 	if err != nil {
 		return nil, err
 	}
-	bAlbums, err := a.Brain.SaveSimpleAlbums(sAlbums)
+	bAlbums, err := a.Brain.SaveSimpleAlbumsGorm(sAlbums)
 	if err != nil {
 		return nil, err
 	}

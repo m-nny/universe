@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"log"
 
+	"github.com/jmoiron/sqlx"
 	"golang.org/x/oauth2"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -66,12 +68,39 @@ func (b *Brain) StoreSpotifyToken(ctx context.Context, username string, spotifyT
 	return nil
 }
 
-func (b *Brain) addSavedTracks(username string, tracks []*MetaTrack) error {
+func addSavedTracksGorm(db *gorm.DB, username string, tracks []*MetaTrack) error {
 	user := User{Username: username}
-	if err := b.gormDb.Where("username = ?", username).FirstOrCreate(&user).Error; err != nil {
+	if err := db.Where("username = ?", username).FirstOrCreate(&user).Error; err != nil {
 		return err
 	}
-	if err := b.gormDb.Model(&user).Association("SavedTracks").Replace(tracks); err != nil {
+	if err := db.Model(&user).Association("SavedTracks").Replace(tracks); err != nil {
+		return err
+	}
+	return nil
+}
+
+type UserSavedTrack struct {
+	Username    string `db:"user_username"`
+	MetaTrackId uint   `db:"meta_track_id"`
+}
+
+func addSavedTracksSqlx(db *sqlx.DB, username string, tracks []*MetaTrack) error {
+	if _, err := db.Exec(`
+		INSERT INTO users (username)
+		VALUES (?)
+		ON CONFLICT DO NOTHING
+		`, username); err != nil {
+		return nil
+	}
+	var userSavedTracks []UserSavedTrack
+	for _, bMetaTrack := range tracks {
+		userSavedTracks = append(userSavedTracks, UserSavedTrack{username, bMetaTrack.ID})
+	}
+	if _, err := db.NamedExec(`
+		INSERT INTO user_saved_tracks (user_username, meta_track_id)
+		VALUES (:user_username, :meta_track_id)
+		ON CONFLICT DO NOTHING
+		`, userSavedTracks); err != nil {
 		return err
 	}
 	return nil
