@@ -336,6 +336,7 @@ func checkNMetaTracksSqlx(tb testing.TB, db *sqlx.DB) int {
 	}
 	return cnt
 }
+
 func checkNMetaTrackArtistsSqlx(tb testing.TB, db *sqlx.DB) int {
 	var cnt int
 	if err := db.Get(&cnt, `SELECT COUNT(*) FROM meta_track_artists`); err != nil {

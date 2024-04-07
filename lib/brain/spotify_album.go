@@ -101,12 +101,12 @@ func upsertSpotifyAlbumsSqlx(db *sqlx.DB, sAlbums []spotify.SimpleAlbum, bi *bra
 	for _, sAlbum := range sAlbums {
 		albumSIds = append(albumSIds, sAlbum.ID)
 	}
-	var existingSpotifyAlbums []*SpotifyAlbum
 	query, args, err := sqlx.In(`SELECT * FROM spotify_albums WHERE spotify_id IN (?)`, albumSIds)
 	if err != nil {
 		return nil, err
 	}
 	query = db.Rebind(query)
+	var existingSpotifyAlbums []*SpotifyAlbum
 	if err := db.Select(&existingSpotifyAlbums, query, args...); err != nil {
 		return nil, err
 	}
