@@ -5,7 +5,7 @@ import (
 
 	"github.com/zmb3/spotify/v2"
 
-	"github.com/m-nny/universe/lib/utils/sliceutils"
+	"github.com/m-nny/universe/lib/utils/iterutils"
 )
 
 func (s *Service) GetTracksById(ctx context.Context, ids []spotify.ID) ([]*spotify.SimpleTrack, error) {
@@ -16,6 +16,6 @@ func (s *Service) GetTracksById(ctx context.Context, ids []spotify.ID) ([]*spoti
 	if err != nil {
 		return nil, err
 	}
-	sTracks := sliceutils.Map(sFullTracks, func(item *spotify.FullTrack) *spotify.SimpleTrack { return &item.SimpleTrack })
+	sTracks := iterutils.Map(sFullTracks, func(item *spotify.FullTrack) *spotify.SimpleTrack { return &item.SimpleTrack })
 	return sTracks, nil
 }

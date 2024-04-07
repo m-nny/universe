@@ -6,7 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/m-nny/universe/lib/discogs"
-	"github.com/m-nny/universe/lib/utils/sliceutils"
+	"github.com/m-nny/universe/lib/utils/iterutils"
 )
 
 type DiscogsRelease struct {
@@ -51,7 +51,7 @@ func (b *Brain) _SaveDiscorgsReleases(dReleases []discogs.ListingRelease) ([]*Di
 	if len(dReleases) == 0 {
 		return []*DiscogsRelease{}, nil
 	}
-	dReleases = sliceutils.Unique(dReleases, func(item discogs.ListingRelease) int { return item.ID })
+	dReleases = iterutils.Unique(dReleases, func(item discogs.ListingRelease) int { return item.ID })
 	var discogsIds []int
 	for _, dRelease := range dReleases {
 		discogsIds = append(discogsIds, dRelease.ID)
@@ -65,7 +65,7 @@ func (b *Brain) _SaveDiscorgsReleases(dReleases []discogs.ListingRelease) ([]*Di
 	if err := b.sqlxDb.Select(&existingReleases, query, args...); err != nil {
 		return nil, err
 	}
-	releaseMap := sliceutils.ToMap(existingReleases, func(item *DiscogsRelease) int { return item.DiscogsID })
+	releaseMap := iterutils.ToMap(existingReleases, func(item *DiscogsRelease) int { return item.DiscogsID })
 
 	var newReleases []*DiscogsRelease
 	for _, dRelease := range dReleases {
@@ -127,7 +127,7 @@ func MostSimilarAlbum(dRelease *DiscogsRelease, bAlbums []*MetaAlbum) (*MetaAlbu
 }
 
 func albumSimilarity(dRelease *DiscogsRelease, eAlbum *MetaAlbum) int {
-	artistScore := sliceutils.Sum(eAlbum.Artists, func(e *Artist) int { return similaryScore(dRelease.ArtistName, e.Name) })
+	artistScore := iterutils.Sum(eAlbum.Artists, func(e *Artist) int { return similaryScore(dRelease.ArtistName, e.Name) })
 	if artistScore == 0 {
 		return 0
 	}

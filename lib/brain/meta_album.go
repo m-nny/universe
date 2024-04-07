@@ -6,7 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/zmb3/spotify/v2"
 
-	"github.com/m-nny/universe/lib/utils/sliceutils"
+	"github.com/m-nny/universe/lib/utils/iterutils"
 	"github.com/m-nny/universe/lib/utils/spotifyutils"
 )
 
@@ -34,7 +34,7 @@ func upsertMetaAlbumsSqlx(db *sqlx.DB, sAlbums []spotify.SimpleAlbum, bi *brainI
 	if len(sAlbums) == 0 {
 		return []*MetaAlbum{}, nil
 	}
-	sAlbums = sliceutils.Unique(sAlbums, spotifyutils.SimplifiedAlbumName)
+	sAlbums = iterutils.Unique(sAlbums, spotifyutils.SimplifiedAlbumName)
 	var simpNames []string
 	for _, sAlbum := range sAlbums {
 		simpNames = append(simpNames, spotifyutils.SimplifiedAlbumName(sAlbum))

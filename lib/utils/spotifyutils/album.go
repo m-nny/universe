@@ -7,7 +7,7 @@ import (
 
 	"github.com/zmb3/spotify/v2"
 
-	"github.com/m-nny/universe/lib/utils/sliceutils"
+	iterutils "github.com/m-nny/universe/lib/utils/iterutils"
 )
 
 var simplifyAlbumNameRegex = func() *regexp.Regexp {
@@ -30,7 +30,7 @@ var simplifyAlbumNameRegex = func() *regexp.Regexp {
 		` Deluxe`,
 	}
 
-	regex := strings.Join(sliceutils.Map(blocklistItems, func(s string) string {
+	regex := strings.Join(iterutils.Map(blocklistItems, func(s string) string {
 		return fmt.Sprintf("(%s)", s)
 	}), "|")
 	return regexp.MustCompile(regex)
@@ -39,7 +39,7 @@ var simplifyAlbumNameRegex = func() *regexp.Regexp {
 // SimplifiedAlbumName will return a string in form of "<artist1>, <artist2> - <album name>"
 func SimplifiedAlbumName(a spotify.SimpleAlbum) string {
 	artistNames := strings.Join(
-		sliceutils.Map(a.Artists, func(a spotify.SimpleArtist) string { return a.Name }),
+		iterutils.Map(a.Artists, func(a spotify.SimpleArtist) string { return a.Name }),
 		", ",
 	)
 	// releaseYear := a.ReleaseDateTime().Year()

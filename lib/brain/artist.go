@@ -4,7 +4,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/zmb3/spotify/v2"
 
-	"github.com/m-nny/universe/lib/utils/sliceutils"
+	"github.com/m-nny/universe/lib/utils/iterutils"
 )
 
 type Artist struct {
@@ -22,7 +22,7 @@ func upsertArtistsSqlx(db *sqlx.DB, sArtists []spotify.SimpleArtist, bi *brainIn
 	if len(sArtists) == 0 {
 		return []*Artist{}, nil
 	}
-	sArtists = sliceutils.Unique(sArtists, func(item spotify.SimpleArtist) spotify.ID { return item.ID })
+	sArtists = iterutils.Unique(sArtists, func(item spotify.SimpleArtist) spotify.ID { return item.ID })
 	var spotifyIds []spotify.ID
 	for _, sArtist := range sArtists {
 		spotifyIds = append(spotifyIds, sArtist.ID)
