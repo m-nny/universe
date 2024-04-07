@@ -41,23 +41,6 @@ func (b *Brain) SaveArtists(sArtists []*spotify.FullArtist) ([]*Artist, error) {
 	return gormArtists, nil
 }
 
-func upsertArtists(b *Brain, sArtists []spotify.SimpleArtist, bi *brainIndex) ([]*Artist, error) {
-	sqlxBi := bi.Clone()
-	sqlxArtists, err := upsertArtistsSqlx(b.sqlxDb, sArtists, sqlxBi)
-	if err != nil {
-		return nil, err
-	}
-	gormArtists, err := upsertArtistsGorm(b.gormDb, sArtists, bi)
-	if err != nil {
-		return nil, err
-	}
-	// TODO(m-nny): check sqlxArtists == gormArtists
-	if len(gormArtists) != len(sqlxArtists) {
-		return nil, fmt.Errorf("len(gormArtists) != len(sqlxArtists): %d != %d", len(gormArtists), len(sqlxArtists))
-	}
-	return gormArtists, nil
-}
-
 func upsertArtistsGorm(db *gorm.DB, sArtists []spotify.SimpleArtist, bi *brainIndex) ([]*Artist, error) {
 	sArtists = sliceutils.Unique(sArtists, func(item spotify.SimpleArtist) spotify.ID { return item.ID })
 	var spotifyIds []spotify.ID

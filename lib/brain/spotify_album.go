@@ -39,23 +39,6 @@ type SpotifyAlbumArtist struct {
 	ArtistId       uint `db:"artist_id"`
 }
 
-func upsertSpotifyAlbums(b *Brain, sAlbums []spotify.SimpleAlbum, bi *brainIndex) ([]*SpotifyAlbum, error) {
-	sqlxBi := bi.Clone()
-	sqlxSpotifyAlbums, err := upsertSpotifyAlbumsSqlx(b.sqlxDb, sAlbums, sqlxBi)
-	if err != nil {
-		return nil, err
-	}
-	gormSpotifyAlbums, err := upsertSpotifyAlbumsGorm(b.gormDb, sAlbums, bi)
-	if err != nil {
-		return nil, err
-	}
-	// TODO(m-nny): check sqlxSpotifyAlbums == gormSpotifyAlbums
-	if len(gormSpotifyAlbums) != len(sqlxSpotifyAlbums) {
-		return nil, fmt.Errorf("len(gormSpotifyAlbums) != len(sqlxSpotifyAlbums): %d != %d", len(gormSpotifyAlbums), len(sqlxSpotifyAlbums))
-	}
-	return gormSpotifyAlbums, nil
-}
-
 func upsertSpotifyAlbumsGorm(db *gorm.DB, sAlbums []spotify.SimpleAlbum, bi *brainIndex) ([]*SpotifyAlbum, error) {
 	var albumSIds []spotify.ID
 	for _, sAlbum := range sAlbums {

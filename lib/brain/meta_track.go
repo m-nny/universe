@@ -36,22 +36,6 @@ func newMetaTrack(sTrack spotify.SimpleTrack, bMetaAlbum *MetaAlbum, bArtists []
 	}
 }
 
-func upsertMetaTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*MetaTrack, error) {
-	sqlxMetaTracks, err := upsertMetaTracksSqlx(b.sqlxDb, sTracks, bi.Clone())
-	if err != nil {
-		return nil, err
-	}
-	gormMetaTracks, err := upsertMetaTracksGorm(b.gormDb, sTracks, bi)
-	if err != nil {
-		return nil, err
-	}
-	// TODO(m-nny): check sqlxMetaTracks == gormMetaTracks
-	if len(gormMetaTracks) != len(sqlxMetaTracks) {
-		return nil, fmt.Errorf("len(gormMetaTracks) != len(sqlxMetaTracks): %d != %d", len(gormMetaTracks), len(sqlxMetaTracks))
-	}
-	return gormMetaTracks, nil
-}
-
 func upsertMetaTracksGorm(db *gorm.DB, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*MetaTrack, error) {
 	sTracks = sliceutils.Unique(sTracks, bi.MustTrackSimplifiedName)
 	var trackSimps []string

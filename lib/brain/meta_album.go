@@ -31,23 +31,6 @@ type MetaAlbumArtist struct {
 	ArtistId    uint `db:"artist_id"`
 }
 
-func upsertMetaAlbums(b *Brain, sAlbums []spotify.SimpleAlbum, bi *brainIndex) ([]*MetaAlbum, error) {
-	sqlxBi := bi.Clone()
-	sqlxMetaAlbums, err := upsertMetaAlbumsSqlx(b.sqlxDb, sAlbums, sqlxBi)
-	if err != nil {
-		return nil, err
-	}
-	gormMetaAlbums, err := upsertMetaAlbumsGorm(b.gormDb, sAlbums, bi)
-	if err != nil {
-		return nil, err
-	}
-	// TODO(m-nny): check sqlxMetaAlbums == gormMetaAlbums
-	if len(gormMetaAlbums) != len(sqlxMetaAlbums) {
-		return nil, fmt.Errorf("len(gormMetaAlbums) != len(sqlxMetaAlbums): %d != %d", len(gormMetaAlbums), len(sqlxMetaAlbums))
-	}
-	return gormMetaAlbums, nil
-}
-
 func upsertMetaAlbumsGorm(db *gorm.DB, sAlbums []spotify.SimpleAlbum, bi *brainIndex) ([]*MetaAlbum, error) {
 	sAlbums = sliceutils.Unique(sAlbums, spotifyutils.SimplifiedAlbumName)
 	var simpNames []string

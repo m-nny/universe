@@ -33,22 +33,6 @@ func newSpotifyTrack(sTrack spotify.SimpleTrack, bSpotifyAlbum *SpotifyAlbum, bA
 	}
 }
 
-func upsertSpotifyTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*SpotifyTrack, error) {
-	sqlxSpotifyTracks, err := upsertSpotifyTracksSqlx(b.sqlxDb, sTracks, bi.Clone())
-	if err != nil {
-		return nil, err
-	}
-	gormSpotifyTracks, err := upsertSpotifyTracksGorm(b.gormDb, sTracks, bi)
-	if err != nil {
-		return nil, err
-	}
-	// TODO(m-nny): check sqlxSpotifyTracks == gormSpotifyTracks
-	if len(gormSpotifyTracks) != len(sqlxSpotifyTracks) {
-		return nil, fmt.Errorf("len(gormSpotifyTracks) != len(sqlxSpotifyTracks): %d != %d", len(gormSpotifyTracks), len(sqlxSpotifyTracks))
-	}
-	return gormSpotifyTracks, nil
-}
-
 func upsertSpotifyTracksGorm(db *gorm.DB, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*SpotifyTrack, error) {
 	var existingTracks []*SpotifyTrack
 	if err := db.
