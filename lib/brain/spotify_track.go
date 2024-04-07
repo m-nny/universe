@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/zmb3/spotify/v2"
+	"gorm.io/gorm"
 
 	"github.com/m-nny/universe/lib/utils/sliceutils"
 )
@@ -33,8 +34,25 @@ func newSpotifyTrack(sTrack spotify.SimpleTrack, bSpotifyAlbum *SpotifyAlbum, bA
 }
 
 func upsertSpotifyTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*SpotifyTrack, error) {
+	// sqlxSpotifyTracks, err := upsertSpotifyTracksSqlx(b.sqlxDb, sTracks, bi.Clone())
+	// if err != nil {
+	// 	return nil, err
+	// }
+	gormSpotifyTracks, err := upsertSpotifyTracksGorm(b.gormDb, sTracks, bi)
+	if err != nil {
+		return nil, err
+	}
+	// // TODO(m-nny): check sqlxSpotifyTracks == gormSpotifyTracks
+	// if len(gormSpotifyTracks) != len(sqlxSpotifyTracks) {
+	// 	return nil, fmt.Errorf("len(gormSpotifyTracks) != len(sqlxSpotifyTracks): %d != %d", len(gormSpotifyTracks), len(sqlxSpotifyTracks))
+	// }
+	return gormSpotifyTracks, nil
+
+}
+
+func upsertSpotifyTracksGorm(db *gorm.DB, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*SpotifyTrack, error) {
 	var existingTracks []*SpotifyTrack
-	if err := b.gormDb.
+	if err := db.
 		Preload("Artists").
 		Where("spotify_id IN ?", sliceutils.Map(sTracks, func(item spotify.SimpleTrack) spotify.ID { return item.ID })).
 		Find(&existingTracks).Error; err != nil {
@@ -64,10 +82,11 @@ func upsertSpotifyTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex
 		}
 		newTracks = append(newTracks, newSpotifyTrack(sTrack, bSpotifyAlbum, bArtists, bMetaTrack))
 	}
-	if len(newTracks) > 0 {
-		if err := b.gormDb.Create(newTracks).Error; err != nil {
-			return nil, err
-		}
+	if len(newTracks) == 0 {
+		return existingTracks, nil
+	}
+	if err := db.Create(newTracks).Error; err != nil {
+		return nil, err
 	}
 	bi.AddSpotifyTracks(newTracks)
 	return append(existingTracks, newTracks...), nil

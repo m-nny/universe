@@ -50,7 +50,6 @@ func upsertMetaTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex) (
 		return nil, fmt.Errorf("len(gormMetaTracks) != len(sqlxMetaTracks): %d != %d", len(gormMetaTracks), len(sqlxMetaTracks))
 	}
 	return gormMetaTracks, nil
-
 }
 
 func upsertMetaTracksGorm(db *gorm.DB, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*MetaTrack, error) {
