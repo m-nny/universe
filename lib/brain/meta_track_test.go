@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/jmoiron/sqlx"
 	"github.com/zmb3/spotify/v2"
 	"gorm.io/gorm"
 )
@@ -217,8 +218,104 @@ func Test_upsertMetaTracksGorm(t *testing.T) {
 		}
 	})
 }
+func Test_upsertMetaTracksSqlx(t *testing.T) {
+	t.Run("returns same ID for same spotify ID", func(t *testing.T) {
+		sqlxDb := getInmemoryBrain(t).sqlxDb
+		// username := "test_username"
+		if want, got := 0, checkNMetaTracksSqlx(t, sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta tracks, but want %d rows", got, want)
+		}
+		if want, got := 0, checkNMetaTrackArtistsSqlx(t, sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta track artists, but want %d rows", got, want)
+		}
 
-var IGNORE_META_TRACK_FIELDS = cmpopts.IgnoreFields(MetaTrack{}, "MetaAlbum")
+		bi := newBrainIndex()
+		if _, err := upsertArtistsSqlx(sqlxDb, []spotify.SimpleArtist{sArtistLP, sArtistPR}, bi); err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+		if _, err := upsertMetaAlbumsSqlx(sqlxDb, []spotify.SimpleAlbum{sSimpleAlbumHT, sSimpleAlbumN}, bi); err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+
+		want1 := []*MetaTrack{bMetaTrackOS, bMetaTrackITE}
+		got1, err := upsertMetaTracksSqlx(sqlxDb, []spotify.SimpleTrack{sSimpleTrackOS, sSimpleTrackITE}, bi.Clone())
+		if err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+		if diff := diffMetaTracks(want1, got1); diff != "" {
+			t.Errorf("upsertMetaTracksSqlx() mismatch (-want +got):\n%s", diff)
+		}
+
+		got2, err := upsertMetaTracksSqlx(sqlxDb, []spotify.SimpleTrack{sSimpleTrackOS, sSimpleTrackITE}, bi.Clone())
+		if err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+		if diff := diffMetaTracks(want1, got2); diff != "" {
+			t.Errorf("upsertMetaTracksSqlx() mismatch (-want +got):\n%s", diff)
+		}
+
+		if want, got := 2, checkNMetaTracksSqlx(t, sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta tracks, but want %d rows", got, want)
+		}
+		if want, got := 2, checkNMetaTrackArtistsSqlx(t, sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta track artists, but want %d rows", got, want)
+		}
+	})
+	t.Run("returns different ID for different spotify ID", func(t *testing.T) {
+		sqlxDb := getInmemoryBrain(t).sqlxDb
+		// username := "test_username"
+		if want, got := 0, checkNMetaTracksSqlx(t, sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta tracks, but want %d rows", got, want)
+		}
+		if want, got := 0, checkNMetaTrackArtistsSqlx(t, sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta track artists, but want %d rows", got, want)
+		}
+
+		bi := newBrainIndex()
+		if _, err := upsertArtistsSqlx(sqlxDb, []spotify.SimpleArtist{sArtistLP, sArtistPR}, bi); err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+		if _, err := upsertMetaAlbumsSqlx(sqlxDb, []spotify.SimpleAlbum{sSimpleAlbumHT, sSimpleAlbumN}, bi); err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+
+		want1 := []*MetaTrack{bMetaTrackOS}
+		got1, err := upsertMetaTracksSqlx(sqlxDb, []spotify.SimpleTrack{sSimpleTrackOS}, bi.Clone())
+		if err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+		if diff := diffMetaTracks(want1, got1); diff != "" {
+			t.Errorf("upsertMetaTracksSqlx() mismatch (-want +got):\n%s", diff)
+		}
+
+		want2 := []*MetaTrack{bMetaTrackITE}
+		got2, err := upsertMetaTracksSqlx(sqlxDb, []spotify.SimpleTrack{sSimpleTrackITE}, bi.Clone())
+		if err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+		if diff := diffMetaTracks(want2, got2); diff != "" {
+			t.Errorf("upsertMetaTracksSqlx() mismatch (-want +got):\n%s", diff)
+		}
+
+		want3 := []*MetaTrack{bMetaTrackSC}
+		got3, err := upsertMetaTracksSqlx(sqlxDb, []spotify.SimpleTrack{sSimpleTrackSC}, bi.Clone())
+		if err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+		if diff := diffMetaTracks(want3, got3); diff != "" {
+			t.Errorf("upsertMetaTracksSqlx() mismatch (-want +got):\n%s", diff)
+		}
+
+		if want, got := 3, checkNMetaTracksSqlx(t, sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta tracks, but want %d rows", got, want)
+		}
+		if want, got := 3, checkNMetaTrackArtistsSqlx(t, sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta track artists, but want %d rows", got, want)
+		}
+	})
+}
+
+var IGNORE_META_TRACK_FIELDS = cmpopts.IgnoreFields(MetaTrack{}, "MetaAlbum", "Artists")
 
 func diffMetaTracks(want, got []*MetaTrack) string {
 	return cmp.Diff(want, got, IGNORE_META_ALBUM_FIELDS, IGNORE_META_TRACK_FIELDS)
@@ -230,4 +327,19 @@ func checkNMetaTracksGorm(tb testing.TB, db *gorm.DB) int {
 		tb.Fatalf("err: %v", err)
 	}
 	return len(allTracks)
+}
+
+func checkNMetaTracksSqlx(tb testing.TB, db *sqlx.DB) int {
+	var cnt int
+	if err := db.Get(&cnt, `SELECT COUNT(*) FROM meta_tracks`); err != nil {
+		tb.Fatalf("err: %v", err)
+	}
+	return cnt
+}
+func checkNMetaTrackArtistsSqlx(tb testing.TB, db *sqlx.DB) int {
+	var cnt int
+	if err := db.Get(&cnt, `SELECT COUNT(*) FROM meta_track_artists`); err != nil {
+		tb.Fatalf("err: %v", err)
+	}
+	return cnt
 }
