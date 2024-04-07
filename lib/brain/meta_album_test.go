@@ -114,19 +114,19 @@ func Test_SaveAlbums(t *testing.T) {
 
 func Test_upsertMetaAlbumsGorm(t *testing.T) {
 	t.Run("returns same ID for same spotify ID", func(t *testing.T) {
-		brain := getInmemoryBrain(t)
-		if want, got := 0, checkNMetaAlbumsGorm(t, brain.gormDb); got != want {
+		gormDb := getInmemoryBrain(t).gormDb
+		if want, got := 0, checkNMetaAlbumsGorm(t, gormDb); got != want {
 			t.Fatalf("gorm has %d meta albums, but want %d rows", got, want)
 		}
 
 		// Setup Artists
 		bi := newBrainIndex()
-		if _, err := upsertArtistsGorm(brain.gormDb, []spotify.SimpleArtist{sArtistLP, sArtistPR}, bi); err != nil {
+		if _, err := upsertArtistsGorm(gormDb, []spotify.SimpleArtist{sArtistLP, sArtistPR}, bi); err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
 
 		want1 := []*MetaAlbum{bMetaAlbumHT, bMetaAlbumN}
-		got1, err := upsertMetaAlbumsGorm(brain.gormDb, []spotify.SimpleAlbum{sSimpleAlbumHT, sSimpleAlbumHT20, sSimpleAlbumN}, bi.Clone())
+		got1, err := upsertMetaAlbumsGorm(gormDb, []spotify.SimpleAlbum{sSimpleAlbumHT, sSimpleAlbumHT20, sSimpleAlbumN}, bi.Clone())
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -134,7 +134,7 @@ func Test_upsertMetaAlbumsGorm(t *testing.T) {
 			t.Fatalf("upsertArtistsGorm() mismatch (-want +got):\n%s", diff)
 		}
 
-		got2, err := upsertMetaAlbumsGorm(brain.gormDb, []spotify.SimpleAlbum{sSimpleAlbumHT, sSimpleAlbumHT20, sSimpleAlbumN}, bi.Clone())
+		got2, err := upsertMetaAlbumsGorm(gormDb, []spotify.SimpleAlbum{sSimpleAlbumHT, sSimpleAlbumHT20, sSimpleAlbumN}, bi.Clone())
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -142,24 +142,24 @@ func Test_upsertMetaAlbumsGorm(t *testing.T) {
 			t.Fatalf("upsertArtistsGorm() mismatch (-want +got):\n%s", diff)
 		}
 
-		if want, got := 2, checkNMetaAlbumsGorm(t, brain.gormDb); got != want {
+		if want, got := 2, checkNMetaAlbumsGorm(t, gormDb); got != want {
 			t.Fatalf("gorm has %d meta albums, but want %d rows", got, want)
 		}
 	})
 	t.Run("returns different ID for different spotify ID", func(t *testing.T) {
-		brain := getInmemoryBrain(t)
-		if want, got := 0, checkNMetaAlbumsGorm(t, brain.gormDb); got != want {
+		gormDb := getInmemoryBrain(t).gormDb
+		if want, got := 0, checkNMetaAlbumsGorm(t, gormDb); got != want {
 			t.Fatalf("gorm has %d meta albums, but want %d rows", got, want)
 		}
 
 		// Setup Artists
 		bi := newBrainIndex()
-		if _, err := upsertArtistsGorm(brain.gormDb, []spotify.SimpleArtist{sArtistLP, sArtistPR}, bi); err != nil {
+		if _, err := upsertArtistsGorm(gormDb, []spotify.SimpleArtist{sArtistLP, sArtistPR}, bi); err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
 
 		want1 := []*MetaAlbum{bMetaAlbumHT}
-		got1, err := upsertMetaAlbumsGorm(brain.gormDb, []spotify.SimpleAlbum{sSimpleAlbumHT}, bi.Clone())
+		got1, err := upsertMetaAlbumsGorm(gormDb, []spotify.SimpleAlbum{sSimpleAlbumHT}, bi.Clone())
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -168,7 +168,7 @@ func Test_upsertMetaAlbumsGorm(t *testing.T) {
 		}
 
 		want2 := []*MetaAlbum{bMetaAlbumHT}
-		got2, err := upsertMetaAlbumsGorm(brain.gormDb, []spotify.SimpleAlbum{sSimpleAlbumHT20}, bi.Clone())
+		got2, err := upsertMetaAlbumsGorm(gormDb, []spotify.SimpleAlbum{sSimpleAlbumHT20}, bi.Clone())
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -177,14 +177,14 @@ func Test_upsertMetaAlbumsGorm(t *testing.T) {
 		}
 
 		want3 := []*MetaAlbum{bMetaAlbumN}
-		got3, err := upsertMetaAlbumsGorm(brain.gormDb, []spotify.SimpleAlbum{sSimpleAlbumN}, bi.Clone())
+		got3, err := upsertMetaAlbumsGorm(gormDb, []spotify.SimpleAlbum{sSimpleAlbumN}, bi.Clone())
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffMetaAlbums(want3, got3); diff != "" {
 			t.Fatalf("upsertArtistsGorm() mismatch (-want +got):\n%s", diff)
 		}
-		if want, got := 2, checkNMetaAlbumsGorm(t, brain.gormDb); got != want {
+		if want, got := 2, checkNMetaAlbumsGorm(t, gormDb); got != want {
 			t.Fatalf("gorm has %d meta albums, but want %d rows", got, want)
 		}
 	})
@@ -192,22 +192,22 @@ func Test_upsertMetaAlbumsGorm(t *testing.T) {
 
 func Test_upsertMetaAlbumsSqlx(t *testing.T) {
 	t.Run("returns same ID for same spotify ID", func(t *testing.T) {
-		brain := getInmemoryBrain(t)
-		if want, got := 0, checkNMetaAlbumsSqlx(t, brain.sqlxDb); got != want {
+		sqlxDb := getInmemoryBrain(t).sqlxDb
+		if want, got := 0, checkNMetaAlbumsSqlx(t, sqlxDb); got != want {
 			t.Fatalf("sqlx has %d meta albums, but want %d rows", got, want)
 		}
-		if want, got := 0, checkNMetaAlbumArtistsSqlx(t, brain.sqlxDb); got != want {
+		if want, got := 0, checkNMetaAlbumArtistsSqlx(t, sqlxDb); got != want {
 			t.Fatalf("sqlx has %d meta album artists, but want %d rows", got, want)
 		}
 
 		// Setup Artists
 		bi := newBrainIndex()
-		if _, err := upsertArtistsSqlx(brain.sqlxDb, []spotify.SimpleArtist{sArtistLP, sArtistPR}, bi); err != nil {
+		if _, err := upsertArtistsSqlx(sqlxDb, []spotify.SimpleArtist{sArtistLP, sArtistPR}, bi); err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
 
 		want1 := []*MetaAlbum{bMetaAlbumHT, bMetaAlbumN}
-		got1, err := upsertMetaAlbumsSqlx(brain.sqlxDb, []spotify.SimpleAlbum{sSimpleAlbumHT, sSimpleAlbumHT20, sSimpleAlbumN}, bi.Clone())
+		got1, err := upsertMetaAlbumsSqlx(sqlxDb, []spotify.SimpleAlbum{sSimpleAlbumHT, sSimpleAlbumHT20, sSimpleAlbumN}, bi.Clone())
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -215,37 +215,37 @@ func Test_upsertMetaAlbumsSqlx(t *testing.T) {
 			t.Fatalf("upsertMetaAlbumsSqlx() mismatch (-want +got):\n%s", diff)
 		}
 
-		got2, err := upsertMetaAlbumsSqlx(brain.sqlxDb, []spotify.SimpleAlbum{sSimpleAlbumHT, sSimpleAlbumHT20, sSimpleAlbumN}, bi.Clone())
+		got2, err := upsertMetaAlbumsSqlx(sqlxDb, []spotify.SimpleAlbum{sSimpleAlbumHT, sSimpleAlbumHT20, sSimpleAlbumN}, bi.Clone())
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffMetaAlbums(want1, got2); diff != "" {
 			t.Fatalf("upsertMetaAlbumsSqlx() mismatch (-want +got):\n%s", diff)
 		}
-		if want, got := 2, checkNMetaAlbumsSqlx(t, brain.sqlxDb); got != want {
+		if want, got := 2, checkNMetaAlbumsSqlx(t, sqlxDb); got != want {
 			t.Fatalf("sqlx has %d meta albums, but want %d rows", got, want)
 		}
-		if want, got := 2, checkNMetaAlbumArtistsSqlx(t, brain.sqlxDb); got != want {
+		if want, got := 2, checkNMetaAlbumArtistsSqlx(t, sqlxDb); got != want {
 			t.Fatalf("sqlx has %d meta album artists, but want %d rows", got, want)
 		}
 	})
 	t.Run("returns different ID for different spotify ID", func(t *testing.T) {
-		brain := getInmemoryBrain(t)
-		if want, got := 0, checkNMetaAlbumsSqlx(t, brain.sqlxDb); got != want {
+		sqlxDb := getInmemoryBrain(t).sqlxDb
+		if want, got := 0, checkNMetaAlbumsSqlx(t, sqlxDb); got != want {
 			t.Fatalf("sqlx has %d rows, but want %d rows", got, want)
 		}
-		if want, got := 0, checkNMetaAlbumArtistsSqlx(t, brain.sqlxDb); got != want {
+		if want, got := 0, checkNMetaAlbumArtistsSqlx(t, sqlxDb); got != want {
 			t.Fatalf("sqlx has %d meta album artists, but want %d rows", got, want)
 		}
 
 		// Setup Artists
 		bi := newBrainIndex()
-		if _, err := upsertArtistsSqlx(brain.sqlxDb, []spotify.SimpleArtist{sArtistLP, sArtistPR}, bi); err != nil {
+		if _, err := upsertArtistsSqlx(sqlxDb, []spotify.SimpleArtist{sArtistLP, sArtistPR}, bi); err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
 
 		want1 := []*MetaAlbum{bMetaAlbumHT}
-		got1, err := upsertMetaAlbumsSqlx(brain.sqlxDb, []spotify.SimpleAlbum{sSimpleAlbumHT}, bi.Clone())
+		got1, err := upsertMetaAlbumsSqlx(sqlxDb, []spotify.SimpleAlbum{sSimpleAlbumHT}, bi.Clone())
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -254,7 +254,7 @@ func Test_upsertMetaAlbumsSqlx(t *testing.T) {
 		}
 
 		want2 := []*MetaAlbum{bMetaAlbumHT}
-		got2, err := upsertMetaAlbumsSqlx(brain.sqlxDb, []spotify.SimpleAlbum{sSimpleAlbumHT20}, bi.Clone())
+		got2, err := upsertMetaAlbumsSqlx(sqlxDb, []spotify.SimpleAlbum{sSimpleAlbumHT20}, bi.Clone())
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
@@ -263,17 +263,17 @@ func Test_upsertMetaAlbumsSqlx(t *testing.T) {
 		}
 
 		want3 := []*MetaAlbum{bMetaAlbumN}
-		got3, err := upsertMetaAlbumsSqlx(brain.sqlxDb, []spotify.SimpleAlbum{sSimpleAlbumN}, bi.Clone())
+		got3, err := upsertMetaAlbumsSqlx(sqlxDb, []spotify.SimpleAlbum{sSimpleAlbumN}, bi.Clone())
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffMetaAlbums(want3, got3); diff != "" {
 			t.Fatalf("checkNMetaAlbumsSqlx() mismatch (-want +got):\n%s", diff)
 		}
-		if want, got := 2, checkNMetaAlbumsSqlx(t, brain.sqlxDb); got != want {
+		if want, got := 2, checkNMetaAlbumsSqlx(t, sqlxDb); got != want {
 			t.Fatalf("sqlx has %d meta albums, but want %d rows", got, want)
 		}
-		if want, got := 2, checkNMetaAlbumArtistsSqlx(t, brain.sqlxDb); got != want {
+		if want, got := 2, checkNMetaAlbumArtistsSqlx(t, sqlxDb); got != want {
 			t.Fatalf("sqlx has %d meta album artists, but want %d rows", got, want)
 		}
 	})

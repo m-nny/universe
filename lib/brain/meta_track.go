@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/zmb3/spotify/v2"
+	"gorm.io/gorm"
 
 	"github.com/m-nny/universe/lib/utils/sliceutils"
 	utils "github.com/m-nny/universe/lib/utils/spotifyutils"
@@ -41,6 +42,24 @@ func (b *Brain) MetaTrackCount() (int, error) {
 }
 
 func upsertMetaTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*MetaTrack, error) {
+	// sqlxBi := bi.Clone()
+	// sqlxMetaTracks, err := upsertMetaTracksSqlx(b.sqlxDb, sTracks, sqlxBi)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	gormMetaTracks, err := upsertMetaTracksGorm(b.gormDb, sTracks, bi)
+	if err != nil {
+		return nil, err
+	}
+	// // TODO(m-nny): check sqlxMetaTracks == gormMetaTracks
+	// if len(gormMetaTracks) != len(sqlxMetaTracks) {
+	// 	return nil, fmt.Errorf("len(gormMetaTracks) != len(sqlxMetaTracks): %d != %d", len(gormMetaTracks), len(sqlxMetaTracks))
+	// }
+	return gormMetaTracks, nil
+
+}
+
+func upsertMetaTracksGorm(db *gorm.DB, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*MetaTrack, error) {
 	sTracks = sliceutils.Unique(sTracks, bi.MustTrackSimplifiedName)
 	var trackSimps []string
 	for _, sTrack := range sTracks {
@@ -53,7 +72,7 @@ func upsertMetaTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex) (
 	}
 
 	var existingMetaTracks []*MetaTrack
-	if err := b.gormDb.
+	if err := db.
 		Preload("Artists").
 		Where("simplified_name IN ?", trackSimps).
 		Find(&existingMetaTracks).Error; err != nil {
@@ -82,7 +101,7 @@ func upsertMetaTracks(b *Brain, sTracks []spotify.SimpleTrack, bi *brainIndex) (
 	if len(newTracks) == 0 {
 		return existingMetaTracks, nil
 	}
-	if err := b.gormDb.Create(newTracks).Error; err != nil {
+	if err := db.Create(newTracks).Error; err != nil {
 		return nil, err
 	}
 	bi.AddMetaTracks(newTracks)
