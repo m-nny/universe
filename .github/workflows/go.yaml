@@ -20,8 +20,6 @@ jobs:
         with:
           go-version-file: "go.mod"
 
-      - uses: ent/contrib/ci@master
-
       - name: Build
         run: go build -v ./...
 
