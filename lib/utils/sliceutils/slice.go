@@ -1,13 +1,5 @@
 package sliceutils
 
-func Map[T, R any](arr []T, fn func(item T) R) []R {
-	var res []R
-	for _, item := range arr {
-		res = append(res, fn(item))
-	}
-	return res
-}
-
 func Unique[T any, K comparable](arr []T, fn func(item T) K) []T {
 	var result []T
 	has := make(map[K]bool)
