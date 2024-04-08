@@ -13,7 +13,6 @@ import (
 var (
 	bSpotifyTrackOS = &SpotifyTrack{
 		Artists:        []*Artist{bArtistLP},
-		ID:             1,
 		MetaTrackId:    1,
 		Name:           "One Step Closer",
 		SpotifyAlbumId: 1,
@@ -21,7 +20,6 @@ var (
 	}
 	bSpotifyTrackITE = &SpotifyTrack{
 		Artists:        []*Artist{bArtistLP},
-		ID:             2,
 		MetaTrackId:    2,
 		Name:           "In the end",
 		SpotifyAlbumId: 1,
@@ -29,7 +27,6 @@ var (
 	}
 	bSpotifyTrackSC = &SpotifyTrack{
 		Artists:        []*Artist{bArtistPR},
-		ID:             3,
 		MetaTrackId:    3,
 		Name:           "Something Comforting",
 		SpotifyAlbumId: 2,

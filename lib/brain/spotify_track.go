@@ -8,7 +8,6 @@ import (
 )
 
 type SpotifyTrack struct {
-	ID             uint
 	SpotifyId      spotify.ID `db:"spotify_id"`
 	Name           string
 	SpotifyAlbumId uint `db:"spotify_album_id"`
@@ -28,6 +27,11 @@ func newSpotifyTrack(sTrack spotify.SimpleTrack, bSpotifyAlbum *SpotifyAlbum, bA
 		MetaTrackId:    bMetaTrack.ID,
 		MetaTrack:      bMetaTrack,
 	}
+}
+
+type SpotifyTrackArtist struct {
+	SpotifyTrackId spotify.ID `db:"spotify_track_id"`
+	ArtistId       uint       `db:"artist_id"`
 }
 
 func upsertSpotifyTracksSqlx(db *sqlx.DB, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*SpotifyTrack, error) {
@@ -71,31 +75,24 @@ func upsertSpotifyTracksSqlx(db *sqlx.DB, sTracks []spotify.SimpleTrack, bi *bra
 	if len(newTracks) == 0 {
 		return existingTracks, nil
 	}
-	rows, err := db.NamedQuery(`INSERT INTO spotify_tracks (spotify_id, name, spotify_album_id, meta_track_id) VALUES (:spotify_id, :name, :spotify_album_id, :meta_track_id) RETURNING id`, newTracks)
-	if err != nil {
-		return nil, err
-	}
-	for idx := 0; rows.Next(); idx++ {
-		if err := rows.Scan(&newTracks[idx].ID); err != nil {
-			return nil, err
-		}
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
+	if _, err := db.NamedExec(`
+		INSERT INTO spotify_tracks (spotify_id, name, spotify_album_id, meta_track_id)
+		VALUES (:spotify_id, :name, :spotify_album_id, :meta_track_id)`, newTracks); err != nil {
+		return nil, fmt.Errorf("could not insert spotify tracks: %w", err)
 	}
 	bi.AddSpotifyTracks(newTracks)
-	var spotifyTrackArtsits []map[string]any
+	var spotifyTrackArtsits []SpotifyTrackArtist
 	for _, bMetaTrack := range newTracks {
 		for _, bArtist := range bMetaTrack.Artists {
-			spotifyTrackArtsits = append(spotifyTrackArtsits, map[string]any{
-				"spotify_track_id": bMetaTrack.ID,
-				"artist_id":        bArtist.ID,
+			spotifyTrackArtsits = append(spotifyTrackArtsits, SpotifyTrackArtist{
+				SpotifyTrackId: bMetaTrack.SpotifyId,
+				ArtistId:       bArtist.ID,
 			})
 		}
 	}
 	_, err = db.NamedExec(`INSERT INTO spotify_track_artists (spotify_track_id, artist_id) VALUES (:spotify_track_id, :artist_id)`, spotifyTrackArtsits)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not insert spotify track artists: %w", err)
 	}
 	return append(existingTracks, newTracks...), nil
 }

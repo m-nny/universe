@@ -3,6 +3,7 @@ package brain
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 
 	"github.com/jmoiron/sqlx"
@@ -71,9 +72,8 @@ func upsertUser(db *sqlx.DB, username string) error {
 	if _, err := db.Exec(`
 		INSERT INTO users (username)
 		VALUES (?)
-		ON CONFLICT DO NOTHING
-		`, username); err != nil {
-		return err
+		ON CONFLICT DO NOTHING`, username); err != nil {
+		return fmt.Errorf("could not upsert user: %w", err)
 	}
 	return nil
 }
@@ -89,8 +89,7 @@ func addSavedTracksSqlx(db *sqlx.DB, username string, tracks []*MetaTrack) error
 	if _, err := db.NamedExec(`
 		INSERT INTO user_saved_tracks (user_username, meta_track_id)
 		VALUES (:user_username, :meta_track_id)
-		ON CONFLICT DO NOTHING
-		`, userSavedTracks); err != nil {
+		ON CONFLICT DO NOTHING`, userSavedTracks); err != nil {
 		return err
 	}
 	return nil

@@ -1,6 +1,12 @@
 package brain
 
-import "github.com/jmoiron/sqlx"
+import (
+	"log"
+	"runtime"
+	"strings"
+
+	"github.com/jmoiron/sqlx"
+)
 
 const _INIT_DB_QUERY = `
 CREATE TABLE IF NOT EXISTS artists (
@@ -8,6 +14,7 @@ CREATE TABLE IF NOT EXISTS artists (
 	spotify_id text NOT NULL,
 	name text NOT NULL
 );
+
 CREATE TABLE IF NOT EXISTS users (
 	username text PRIMARY KEY NOT NULL,
 	spotify_token_str blob
@@ -28,6 +35,7 @@ CREATE TABLE IF NOT EXISTS meta_album_artists (
 	CONSTRAINT fk_meta_album_artists_artist
 		FOREIGN KEY (artist_id) REFERENCES artists(id)
 );
+
 CREATE TABLE IF NOT EXISTS spotify_albums (
 	id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	spotify_id text NOT NULL,
@@ -66,8 +74,7 @@ CREATE TABLE IF NOT EXISTS meta_tracks (
 );
 
 CREATE TABLE IF NOT EXISTS spotify_tracks (
-	id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	spotify_id text NOT NULL,
+	spotify_id text PRIMARY KEY NOT NULL,
 	name text NOT NULL,
 	spotify_album_id integer NOT NULL,
 	meta_track_id integer NOT NULL,
@@ -78,11 +85,11 @@ CREATE TABLE IF NOT EXISTS spotify_tracks (
 );
 
 CREATE TABLE IF NOT EXISTS spotify_track_artists (
-	spotify_track_id integer NOT NULL,
+	spotify_track_id text NOT NULL,
 	artist_id integer NOT NULL,
 	PRIMARY KEY (spotify_track_id,artist_id),
 	CONSTRAINT fk_spotify_track_artists_spotify_track
-		FOREIGN KEY (spotify_track_id) REFERENCES spotify_tracks(id),
+		FOREIGN KEY (spotify_track_id) REFERENCES spotify_tracks(spotify_id),
 	CONSTRAINT fk_spotify_track_artists_artist
 		FOREIGN KEY (artist_id) REFERENCES artists(id)
 );
@@ -131,4 +138,42 @@ func initSqlx(db *sqlx.DB) error {
 		return err
 	}
 	return nil
+}
+
+func printSchema(db *sqlx.DB) error {
+	rows, err := db.Queryx(`
+		SELECT *
+		FROM sqlite_master
+		WHERE type='table' AND name='users'`)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	log.Printf("==========")
+	fileWithLineNum()
+	log.Printf("==========")
+	for idx := 0; rows.Next(); idx++ {
+		row := make(map[string]any)
+		if err := rows.MapScan(row); err != nil {
+			return err
+		}
+		log.Printf("[%d] name: %s\n%s", idx, row["name"], row["sql"])
+	}
+	log.Printf("========\n\n\n\n\n")
+	if err := rows.Err(); err != nil {
+		return err
+	}
+	return nil
+}
+func fileWithLineNum() {
+	// the second caller usually from gorm internal, so set i start from 2
+	for i := 2; i < 15; i++ {
+		_, file, line, ok := runtime.Caller(i)
+		if !ok {
+			continue
+		}
+		if strings.Contains(file, "univese") {
+			log.Printf("%s:%d", file, line)
+		}
+	}
 }

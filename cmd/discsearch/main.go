@@ -33,17 +33,17 @@ func main() {
 	// 	log.Fatalf("%v", err)
 	// }
 
-	// if err := benchGetUserTracks(ctx, app); err != nil {
-	// 	log.Fatalf("%v", err)
-	// }
+	if err := benchGetUserTracks(ctx, app); err != nil {
+		log.Fatalf("%v", err)
+	}
 
 	// if err := getDiscogs(ctx, app); err != nil {
 	// 	log.Fatalf("%v", err)
 	// }
 
-	if err := getSellerInventory(ctx, app); err != nil {
-		log.Fatalf("%v", err)
-	}
+	// if err := getSellerInventory(ctx, app); err != nil {
+	// 	log.Fatalf("%v", err)
+	// }
 
 	log.Printf("Done")
 }
