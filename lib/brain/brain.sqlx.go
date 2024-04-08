@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS spotify_album_artists (
 	artist_id text NOT NULL,
 	PRIMARY KEY (spotify_album_id, artist_id),
 	CONSTRAINT fk_spotify_album_artists_spotify_album
-		FOREIGN KEY (spotify_album_id) REFERENCES spotify_albums(id),
+		FOREIGN KEY (spotify_album_id) REFERENCES spotify_albums(spotify_id),
 	CONSTRAINT fk_spotify_album_artists_artist
 		FOREIGN KEY (artist_id) REFERENCES artists(spotify_id)
 );
@@ -103,8 +103,7 @@ CREATE TABLE IF NOT EXISTS user_saved_tracks (
 );
 
 CREATE TABLE IF NOT EXISTS discogs_releases (
-	id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	discogs_id integer NOT NULL,
+	discogs_id integer PRIMARY KEY NOT NULL,
 	name text NOT NULL,
 	artist_name text NOT NULL,
 	format text NOT NULL,
@@ -126,7 +125,7 @@ CREATE TABLE IF NOT EXISTS discogs_seller_selling_releases (
 	CONSTRAINT fk_discogs_seller_selling_releases_discogs_seller
 		FOREIGN KEY (discogs_seller_username) REFERENCES discogs_sellers(username),
 	CONSTRAINT fk_discogs_seller_selling_releases_discogs_release
-		FOREIGN KEY (discogs_release_id) REFERENCES discogs_releases(id)
+		FOREIGN KEY (discogs_release_id) REFERENCES discogs_releases(discogs_id)
 );
 
 `

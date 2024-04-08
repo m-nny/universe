@@ -13,7 +13,7 @@ type DiscogsSeller struct {
 
 type discogsSellerReleases struct {
 	DiscogsSeller string `db:"discogs_seller_username"`
-	ReleaseId     uint   `db:"discogs_release_id"`
+	ReleaseId     int    `db:"discogs_release_id"`
 }
 
 func upsertDiscogsSeller(db *sqlx.DB, username string) error {
@@ -36,7 +36,7 @@ func addDiscogsReleases(db *sqlx.DB, username string, releases []*DiscogsRelease
 	}
 	var sellingReleases []discogsSellerReleases
 	for _, item := range releases {
-		sellingReleases = append(sellingReleases, discogsSellerReleases{username, item.ID})
+		sellingReleases = append(sellingReleases, discogsSellerReleases{username, item.DiscogsID})
 	}
 	log.Printf("sellingReleases[0]=%v", sellingReleases[0])
 	if _, err := db.NamedExec(`

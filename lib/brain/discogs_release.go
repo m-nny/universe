@@ -10,8 +10,6 @@ import (
 )
 
 type DiscogsRelease struct {
-	ID uint
-
 	ArtistName string `db:"artist_name"`
 	DiscogsID  int    `db:"discogs_id"`
 	Format     string
@@ -77,22 +75,9 @@ func upsertDiscogsReleases(db *sqlx.DB, dReleases []discogs.ListingRelease) ([]*
 	if len(newReleases) == 0 {
 		return existingReleases, nil
 	}
-	rows, err := db.NamedQuery(`
+	if _, err := db.NamedExec(`
 		INSERT INTO discogs_releases (discogs_id, name, artist_name, format)
-		VALUES (:discogs_id, :name, :artist_name, :format)
-		RETURNING id`, newReleases)
-	if err != nil {
-		return nil, err
-	}
-	for idx := 0; rows.Next(); idx++ {
-		if err := rows.Scan(&newReleases[idx].ID); err != nil {
-			return nil, err
-		}
-		if newReleases[idx].ID == 0 {
-			return nil, fmt.Errorf("ID is null: %v", newReleases[idx])
-		}
-	}
-	if err := rows.Err(); err != nil {
+		VALUES (:discogs_id, :name, :artist_name, :format)`, newReleases); err != nil {
 		return nil, err
 	}
 	return append(existingReleases, newReleases...), nil

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/jmoiron/sqlx"
 	"github.com/m-nny/universe/lib/discogs"
 )
@@ -37,14 +38,12 @@ var (
 // outputs
 var (
 	bDiscogsReleaseDT = &DiscogsRelease{
-		ID:         1,
 		ArtistName: "Dream Theater",
 		DiscogsID:  2519936,
 		Format:     "2xCD, Album",
 		Name:       "Six Degrees Of Inner Turbulence",
 	}
 	bDiscogsReleaseIR = &DiscogsRelease{
-		ID:         2,
 		ArtistName: "I Romans",
 		DiscogsID:  1485800,
 		Format:     `7"`,
@@ -133,7 +132,7 @@ func Test_upsertDiscogsRelease(t *testing.T) {
 	})
 }
 func diffDiscogsReleases(want, got []*DiscogsRelease) string {
-	return cmp.Diff(want, got)
+	return cmp.Diff(want, got, cmpopts.SortSlices(func(a, b *DiscogsRelease) bool { return a.DiscogsID < b.DiscogsID }))
 }
 
 func checkNDiscogsReleasesSqlx(tb testing.TB, db *sqlx.DB) int {
