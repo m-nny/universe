@@ -34,8 +34,8 @@ func newSpotifyAlbum(sAlbum spotify.SimpleAlbum, bArtists []*Artist, bMetaAlbum 
 }
 
 type SpotifyAlbumArtist struct {
-	SpotifyAlbumId uint `db:"spotify_album_id"`
-	ArtistId       uint `db:"artist_id"`
+	SpotifyAlbumId uint       `db:"spotify_album_id"`
+	ArtistId       spotify.ID `db:"artist_id"`
 }
 
 func upsertSpotifyAlbumsSqlx(db *sqlx.DB, sAlbums []spotify.SimpleAlbum, bi *brainIndex) ([]*SpotifyAlbum, error) {
@@ -92,7 +92,7 @@ func upsertSpotifyAlbumsSqlx(db *sqlx.DB, sAlbums []spotify.SimpleAlbum, bi *bra
 	var spotifyAlbumArtists []SpotifyAlbumArtist
 	for _, bAlbum := range newAlbums {
 		for _, bArtist := range bAlbum.Artists {
-			spotifyAlbumArtists = append(spotifyAlbumArtists, SpotifyAlbumArtist{bAlbum.ID, bArtist.ID})
+			spotifyAlbumArtists = append(spotifyAlbumArtists, SpotifyAlbumArtist{bAlbum.ID, bArtist.SpotifyId})
 		}
 	}
 	_, err = db.NamedExec(`INSERT INTO spotify_album_artists (spotify_album_id, artist_id) VALUES (:spotify_album_id, :artist_id)`, spotifyAlbumArtists)

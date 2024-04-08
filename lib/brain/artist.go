@@ -8,7 +8,6 @@ import (
 )
 
 type Artist struct {
-	ID        uint
 	SpotifyId spotify.ID `db:"spotify_id"`
 	Name      string
 	Albums    []*SpotifyAlbum
@@ -50,16 +49,9 @@ func upsertArtistsSqlx(db *sqlx.DB, sArtists []spotify.SimpleArtist, bi *brainIn
 	if len(newArtists) == 0 {
 		return existingArtists, nil
 	}
-	rows, err := db.NamedQuery(`INSERT INTO artists (spotify_id, name) VALUES (:spotify_id, :name) RETURNING id`, newArtists)
-	if err != nil {
-		return nil, err
-	}
-	for idx := 0; rows.Next(); idx++ {
-		if err := rows.Scan(&newArtists[idx].ID); err != nil {
-			return nil, err
-		}
-	}
-	if err := rows.Err(); err != nil {
+	if _, err := db.NamedExec(`
+		INSERT INTO artists (spotify_id, name)
+		VALUES (:spotify_id, :name)`, newArtists); err != nil {
 		return nil, err
 	}
 	bi.AddArtists(newArtists)

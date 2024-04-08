@@ -34,6 +34,11 @@ func newMetaTrack(sTrack spotify.SimpleTrack, bMetaAlbum *MetaAlbum, bArtists []
 	}
 }
 
+type MetaTrackArtist struct {
+	MetaTrackId uint       `db:"meta_track_id"`
+	ArtistId    spotify.ID `db:"artist_id"`
+}
+
 func upsertMetaTracksSqlx(db *sqlx.DB, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*MetaTrack, error) {
 	if len(sTracks) == 0 {
 		return []*MetaTrack{}, nil
@@ -90,12 +95,12 @@ func upsertMetaTracksSqlx(db *sqlx.DB, sTracks []spotify.SimpleTrack, bi *brainI
 		return nil, err
 	}
 	bi.AddMetaTracks(newTracks)
-	var metaTrackArtsits []map[string]any
+	var metaTrackArtsits []MetaTrackArtist
 	for _, bMetaTrack := range newTracks {
 		for _, bArtist := range bMetaTrack.Artists {
-			metaTrackArtsits = append(metaTrackArtsits, map[string]any{
-				"meta_track_id": bMetaTrack.ID,
-				"artist_id":     bArtist.ID,
+			metaTrackArtsits = append(metaTrackArtsits, MetaTrackArtist{
+				MetaTrackId: bMetaTrack.ID,
+				ArtistId:    bArtist.SpotifyId,
 			})
 		}
 	}

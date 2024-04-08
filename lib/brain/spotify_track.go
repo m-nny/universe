@@ -31,7 +31,7 @@ func newSpotifyTrack(sTrack spotify.SimpleTrack, bSpotifyAlbum *SpotifyAlbum, bA
 
 type SpotifyTrackArtist struct {
 	SpotifyTrackId spotify.ID `db:"spotify_track_id"`
-	ArtistId       uint       `db:"artist_id"`
+	ArtistId       spotify.ID `db:"artist_id"`
 }
 
 func upsertSpotifyTracksSqlx(db *sqlx.DB, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*SpotifyTrack, error) {
@@ -85,8 +85,8 @@ func upsertSpotifyTracksSqlx(db *sqlx.DB, sTracks []spotify.SimpleTrack, bi *bra
 	for _, bMetaTrack := range newTracks {
 		for _, bArtist := range bMetaTrack.Artists {
 			spotifyTrackArtsits = append(spotifyTrackArtsits, SpotifyTrackArtist{
+				ArtistId:       bArtist.SpotifyId,
 				SpotifyTrackId: bMetaTrack.SpotifyId,
-				ArtistId:       bArtist.ID,
 			})
 		}
 	}

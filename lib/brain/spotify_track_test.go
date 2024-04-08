@@ -1,6 +1,7 @@
 package brain
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -168,7 +169,7 @@ func Test_upsertSpotifyTracksSqlx(t *testing.T) {
 var IGNORE_SPOTIFY_TRACK_FIELDS = cmpopts.IgnoreFields(SpotifyTrack{}, "Artists", "MetaTrack", "SpotifyAlbum")
 
 func diffSpotifyTracks(want, got []*SpotifyTrack) string {
-	return cmp.Diff(want, got, IGNORE_SPOTIFY_TRACK_FIELDS)
+	return cmp.Diff(want, got, IGNORE_SPOTIFY_TRACK_FIELDS, cmpopts.SortSlices(func(a, b *SpotifyTrack) bool { return strings.Compare(a.Name, b.Name) < 0 }))
 }
 
 func checkNSpotifyTracksSqlx(tb testing.TB, db *sqlx.DB) int {

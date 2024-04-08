@@ -18,12 +18,10 @@ var (
 		Name: "Porter Robinson",
 	}
 	bArtistLP = &Artist{
-		ID:        1,
 		Name:      "Linkin Park",
 		SpotifyId: "spotify:linkin_park",
 	}
 	bArtistPR = &Artist{
-		ID:        2,
 		Name:      "Porter Robinson",
 		SpotifyId: "spotify:porter_robinson",
 	}

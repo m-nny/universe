@@ -10,8 +10,7 @@ import (
 
 const _INIT_DB_QUERY = `
 CREATE TABLE IF NOT EXISTS artists (
-	id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	spotify_id text NOT NULL,
+	spotify_id text PRIMARY KEY NOT NULL,
 	name text NOT NULL
 );
 
@@ -28,12 +27,12 @@ CREATE TABLE IF NOT EXISTS meta_albums (
 
 CREATE TABLE IF NOT EXISTS meta_album_artists (
 	meta_album_id integer NOT NULL,
-	artist_id integer NOT NULL,
+	artist_id text NOT NULL,
 	PRIMARY KEY (meta_album_id, artist_id),
 	CONSTRAINT fk_meta_album_artists_meta_album
 		FOREIGN KEY (meta_album_id) REFERENCES meta_albums(id),
 	CONSTRAINT fk_meta_album_artists_artist
-		FOREIGN KEY (artist_id) REFERENCES artists(id)
+		FOREIGN KEY (artist_id) REFERENCES artists(spotify_id)
 );
 
 CREATE TABLE IF NOT EXISTS spotify_albums (
@@ -47,22 +46,12 @@ CREATE TABLE IF NOT EXISTS spotify_albums (
 
 CREATE TABLE IF NOT EXISTS spotify_album_artists (
 	spotify_album_id integer NOT NULL,
-	artist_id integer NOT NULL,
+	artist_id text NOT NULL,
 	PRIMARY KEY (spotify_album_id, artist_id),
 	CONSTRAINT fk_spotify_album_artists_spotify_album
 		FOREIGN KEY (spotify_album_id) REFERENCES spotify_albums(id),
 	CONSTRAINT fk_spotify_album_artists_artist
-		FOREIGN KEY (artist_id) REFERENCES artists(id)
-);
-
-CREATE TABLE IF NOT EXISTS meta_track_artists (
-	meta_track_id integer NOT NULL,
-	artist_id integer NOT NULL,
-	PRIMARY KEY (meta_track_id,artist_id),
-	CONSTRAINT fk_meta_track_artists_meta_track
-		FOREIGN KEY (meta_track_id) REFERENCES meta_tracks(id),
-	CONSTRAINT fk_meta_track_artists_artist
-		FOREIGN KEY (artist_id) REFERENCES artists(id)
+		FOREIGN KEY (artist_id) REFERENCES artists(spotify_id)
 );
 
 CREATE TABLE IF NOT EXISTS meta_tracks (
@@ -71,6 +60,16 @@ CREATE TABLE IF NOT EXISTS meta_tracks (
 	meta_album_id integer NOT NULL,
 	CONSTRAINT fk_meta_tracks_meta_album
 		FOREIGN KEY (meta_album_id) REFERENCES meta_albums(id)
+);
+
+CREATE TABLE IF NOT EXISTS meta_track_artists (
+	meta_track_id integer NOT NULL,
+	artist_id text NOT NULL,
+	PRIMARY KEY (meta_track_id,artist_id),
+	CONSTRAINT fk_meta_track_artists_meta_track
+		FOREIGN KEY (meta_track_id) REFERENCES meta_tracks(id),
+	CONSTRAINT fk_meta_track_artists_artist
+		FOREIGN KEY (artist_id) REFERENCES artists(spotify_id)
 );
 
 CREATE TABLE IF NOT EXISTS spotify_tracks (
@@ -86,12 +85,12 @@ CREATE TABLE IF NOT EXISTS spotify_tracks (
 
 CREATE TABLE IF NOT EXISTS spotify_track_artists (
 	spotify_track_id text NOT NULL,
-	artist_id integer NOT NULL,
+	artist_id text NOT NULL,
 	PRIMARY KEY (spotify_track_id,artist_id),
 	CONSTRAINT fk_spotify_track_artists_spotify_track
 		FOREIGN KEY (spotify_track_id) REFERENCES spotify_tracks(spotify_id),
 	CONSTRAINT fk_spotify_track_artists_artist
-		FOREIGN KEY (artist_id) REFERENCES artists(id)
+		FOREIGN KEY (artist_id) REFERENCES artists(spotify_id)
 );
 
 CREATE TABLE IF NOT EXISTS user_saved_tracks (
