@@ -10,7 +10,7 @@ import (
 type SpotifyTrack struct {
 	SpotifyId      spotify.ID `db:"spotify_id"`
 	Name           string
-	SpotifyAlbumId uint `db:"spotify_album_id"`
+	SpotifyAlbumId spotify.ID `db:"spotify_album_id"`
 	SpotifyAlbum   *SpotifyAlbum
 	Artists        []*Artist
 	MetaTrackId    uint `db:"meta_track_id"`
@@ -21,7 +21,7 @@ func newSpotifyTrack(sTrack spotify.SimpleTrack, bSpotifyAlbum *SpotifyAlbum, bA
 	return &SpotifyTrack{
 		Name:           sTrack.Name,
 		SpotifyId:      sTrack.ID,
-		SpotifyAlbumId: bSpotifyAlbum.ID,
+		SpotifyAlbumId: bSpotifyAlbum.SpotifyId,
 		SpotifyAlbum:   bSpotifyAlbum,
 		Artists:        bArtists,
 		MetaTrackId:    bMetaTrack.ID,

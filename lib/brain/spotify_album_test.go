@@ -12,21 +12,18 @@ import (
 // Expected outputs
 var (
 	bSpotifyAlbumHT = &SpotifyAlbum{
-		ID:          1,
 		Artists:     []*Artist{bArtistLP},
 		SpotifyId:   "spotify:hybrid_theory",
 		Name:        "Hybrid Theory",
 		MetaAlbumId: 1,
 	}
 	bSpotifyAlbumHT20 = &SpotifyAlbum{
-		ID:          2,
 		Artists:     []*Artist{bArtistLP},
 		SpotifyId:   "spotify:hybryd_theory_20",
 		Name:        "Hybrid Theory (20th Anniversary Edition)",
 		MetaAlbumId: 1,
 	}
 	bSpotifyAlbumN = &SpotifyAlbum{
-		ID:          3,
 		Artists:     []*Artist{bArtistPR},
 		SpotifyId:   "spotify:nurture",
 		Name:        "Nurture",

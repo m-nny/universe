@@ -16,21 +16,21 @@ var (
 		Artists:        []*Artist{bArtistLP},
 		MetaTrackId:    1,
 		Name:           "One Step Closer",
-		SpotifyAlbumId: 1,
+		SpotifyAlbumId: sSimpleAlbumHT.ID,
 		SpotifyId:      "spotify:one_step",
 	}
 	bSpotifyTrackITE = &SpotifyTrack{
 		Artists:        []*Artist{bArtistLP},
 		MetaTrackId:    2,
 		Name:           "In the end",
-		SpotifyAlbumId: 1,
+		SpotifyAlbumId: sSimpleAlbumHT.ID,
 		SpotifyId:      "spotify:in_the_end",
 	}
 	bSpotifyTrackSC = &SpotifyTrack{
 		Artists:        []*Artist{bArtistPR},
 		MetaTrackId:    3,
 		Name:           "Something Comforting",
-		SpotifyAlbumId: 2,
+		SpotifyAlbumId: sSimpleAlbumN.ID,
 		SpotifyId:      "spotify:something_comforting",
 	}
 )
