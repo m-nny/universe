@@ -3,9 +3,6 @@ package brain
 import "github.com/jmoiron/sqlx"
 
 const _INIT_DB_QUERY = `
--- CREATE TABLE IF NOT EXISTS discogs_seller_selling_releases (discogs_seller_username text,discogs_release_id integer,PRIMARY KEY (discogs_seller_username,discogs_release_id),CONSTRAINT fk_discogs_seller_selling_releases_discogs_seller FOREIGN KEY (discogs_seller_username) REFERENCES discogs_sellers(username),CONSTRAINT fk_discogs_seller_selling_releases_discogs_release FOREIGN KEY (discogs_release_id) REFERENCES discogs_releases(id));
--- CREATE TABLE IF NOT EXISTS discogs_sellers (username text,PRIMARY KEY (username));                                                                                                                                                      
-
 CREATE TABLE IF NOT EXISTS artists (
 	id integer PRIMARY KEY AUTOINCREMENT,
 	spotify_id text,
@@ -112,6 +109,22 @@ CREATE TABLE IF NOT EXISTS discogs_releases (
 	CONSTRAINT fk_discogs_releases_meta_album
 		FOREIGN KEY (meta_album_id) REFERENCES meta_albums(id)
 );
+
+CREATE TABLE IF NOT EXISTS discogs_sellers (
+	username text,
+	PRIMARY KEY (username)
+);
+
+CREATE TABLE IF NOT EXISTS discogs_seller_selling_releases (
+	discogs_seller_username text,
+	discogs_release_id integer,
+	PRIMARY KEY (discogs_seller_username,discogs_release_id),
+	CONSTRAINT fk_discogs_seller_selling_releases_discogs_seller
+		FOREIGN KEY (discogs_seller_username) REFERENCES discogs_sellers(username),
+	CONSTRAINT fk_discogs_seller_selling_releases_discogs_release
+		FOREIGN KEY (discogs_release_id) REFERENCES discogs_releases(id)
+);
+
 `
 
 func initSqlx(db *sqlx.DB) error {

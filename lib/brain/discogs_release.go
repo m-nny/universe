@@ -37,17 +37,17 @@ func newDiscogsRelease(release discogs.ListingRelease) *DiscogsRelease {
 }
 
 func (b *Brain) SaveDiscorgsReleases(dReleases []discogs.ListingRelease, username string) ([]*DiscogsRelease, error) {
-	bReleases, err := b._SaveDiscorgsReleases(dReleases)
+	bReleases, err := upsertDiscogsReleases(b.sqlxDb, dReleases)
 	if err != nil {
 		return nil, err
 	}
-	// if err := b.addDiscogsReleases(username, bReleases); err != nil {
-	// 	return nil, err
-	// }
+	if err := addDiscogsReleases(b.sqlxDb, username, bReleases); err != nil {
+		return nil, err
+	}
 	return bReleases, nil
 }
 
-func (b *Brain) _SaveDiscorgsReleases(dReleases []discogs.ListingRelease) ([]*DiscogsRelease, error) {
+func upsertDiscogsReleases(db *sqlx.DB, dReleases []discogs.ListingRelease) ([]*DiscogsRelease, error) {
 	if len(dReleases) == 0 {
 		return []*DiscogsRelease{}, nil
 	}
@@ -62,7 +62,7 @@ func (b *Brain) _SaveDiscorgsReleases(dReleases []discogs.ListingRelease) ([]*Di
 		return nil, err
 	}
 	var existingReleases []*DiscogsRelease
-	if err := b.sqlxDb.Select(&existingReleases, query, args...); err != nil {
+	if err := db.Select(&existingReleases, query, args...); err != nil {
 		return nil, err
 	}
 	releaseMap := sliceutils.ToMap(existingReleases, func(item *DiscogsRelease) int { return item.DiscogsID })
@@ -77,10 +77,10 @@ func (b *Brain) _SaveDiscorgsReleases(dReleases []discogs.ListingRelease) ([]*Di
 	if len(newReleases) == 0 {
 		return existingReleases, nil
 	}
-	rows, err := b.sqlxDb.NamedQuery(`
+	rows, err := db.NamedQuery(`
 		INSERT INTO discogs_releases (discogs_id, name, artist_name, format)
 		VALUES (:discogs_id, :name, :artist_name, :format)
-	`, newReleases)
+		RETURNING id`, newReleases)
 	if err != nil {
 		return nil, err
 	}

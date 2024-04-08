@@ -53,10 +53,10 @@ func (b *Brain) StoreSpotifyToken(ctx context.Context, username string, spotifyT
 	if err != nil {
 		return err
 	}
-	if _, err := b.sqlxDb.ExecContext(ctx, `
-		INSERT INTO users (username, spotify_token_str) VALUES (?, ?)
+	if _, err := b.sqlxDb.NamedExecContext(ctx, `
+		INSERT INTO users (username, spotify_token_str) VALUES (:username, :spotify_token_str)
 		ON CONFLICT DO UPDATE SET spotify_token_str = excluded.spotify_token_str
-	`, user.Username, user.SpotifyTokenStr); err != nil {
+	`, user); err != nil {
 		return nil
 	}
 	return nil
@@ -67,13 +67,20 @@ type UserSavedTrack struct {
 	MetaTrackId uint   `db:"meta_track_id"`
 }
 
-func addSavedTracksSqlx(db *sqlx.DB, username string, tracks []*MetaTrack) error {
+func upsertUser(db *sqlx.DB, username string) error {
 	if _, err := db.Exec(`
 		INSERT INTO users (username)
 		VALUES (?)
 		ON CONFLICT DO NOTHING
 		`, username); err != nil {
-		return nil
+		return err
+	}
+	return nil
+}
+
+func addSavedTracksSqlx(db *sqlx.DB, username string, tracks []*MetaTrack) error {
+	if err := upsertUser(db, username); err != nil {
+		return err
 	}
 	var userSavedTracks []UserSavedTrack
 	for _, bMetaTrack := range tracks {

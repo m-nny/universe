@@ -9,6 +9,7 @@ import (
 	"github.com/zmb3/spotify/v2"
 )
 
+// inputs
 var (
 	sSimpleTrackOS = spotify.SimpleTrack{
 		ID:          "spotify:one_step",
@@ -49,6 +50,10 @@ var (
 			Album:       sSimpleAlbumN,
 		},
 	}
+)
+
+// outputs
+var (
 	bMetaTrackOS = &MetaTrack{
 		ID:             1,
 		Artists:        []*Artist{bArtistLP},

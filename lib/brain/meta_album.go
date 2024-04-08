@@ -65,7 +65,10 @@ func upsertMetaAlbumsSqlx(db *sqlx.DB, sAlbums []spotify.SimpleAlbum, bi *brainI
 	if len(newAlbums) == 0 {
 		return existingMetaAlbums, nil
 	}
-	rows, err := db.NamedQuery(`INSERT INTO meta_albums (simplified_name, any_name) VALUES (:simplified_name, :any_name) RETURNING id`, newAlbums)
+	rows, err := db.NamedQuery(`
+		INSERT INTO meta_albums (simplified_name, any_name)
+		VALUES (:simplified_name, :any_name)
+		RETURNING id`, newAlbums)
 	if err != nil {
 		return nil, err
 	}
