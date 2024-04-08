@@ -84,6 +84,9 @@ func upsertSpotifyAlbumsSqlx(db *sqlx.DB, sAlbums []spotify.SimpleAlbum, bi *bra
 			return nil, err
 		}
 	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
 	bi.AddSpotifyAlbums(newAlbums)
 
 	var spotifyAlbumArtists []SpotifyAlbumArtist

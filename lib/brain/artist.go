@@ -59,6 +59,9 @@ func upsertArtistsSqlx(db *sqlx.DB, sArtists []spotify.SimpleArtist, bi *brainIn
 			return nil, err
 		}
 	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
 	bi.AddArtists(newArtists)
 	return append(existingArtists, newArtists...), nil
 }

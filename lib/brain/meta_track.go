@@ -86,6 +86,9 @@ func upsertMetaTracksSqlx(db *sqlx.DB, sTracks []spotify.SimpleTrack, bi *brainI
 			return nil, err
 		}
 	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
 	bi.AddMetaTracks(newTracks)
 	var metaTrackArtsits []map[string]any
 	for _, bMetaTrack := range newTracks {

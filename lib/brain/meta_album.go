@@ -77,6 +77,9 @@ func upsertMetaAlbumsSqlx(db *sqlx.DB, sAlbums []spotify.SimpleAlbum, bi *brainI
 			return nil, err
 		}
 	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
 	bi.AddMetaAlbums(newAlbums)
 	var metaAlbumArtists []MetaAlbumArtist
 	for _, bAlbum := range newAlbums {

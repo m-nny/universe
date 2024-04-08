@@ -80,6 +80,9 @@ func upsertSpotifyTracksSqlx(db *sqlx.DB, sTracks []spotify.SimpleTrack, bi *bra
 			return nil, err
 		}
 	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
 	bi.AddSpotifyTracks(newTracks)
 	var spotifyTrackArtsits []map[string]any
 	for _, bMetaTrack := range newTracks {

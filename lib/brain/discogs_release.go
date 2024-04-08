@@ -88,6 +88,12 @@ func upsertDiscogsReleases(db *sqlx.DB, dReleases []discogs.ListingRelease) ([]*
 		if err := rows.Scan(&newReleases[idx].ID); err != nil {
 			return nil, err
 		}
+		if newReleases[idx].ID == 0 {
+			return nil, fmt.Errorf("ID is null: %v", newReleases[idx])
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 	return append(existingReleases, newReleases...), nil
 }
