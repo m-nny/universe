@@ -11,7 +11,6 @@ import (
 )
 
 type MetaTrack struct {
-	ID             uint
 	SimplifiedName string `db:"simplified_name"`
 	MetaAlbumID    string `db:"meta_album_id"`
 	MetaAlbum      *MetaAlbum
@@ -32,11 +31,6 @@ func newMetaTrack(sTrack spotify.SimpleTrack, bMetaAlbum *MetaAlbum, bArtists []
 		MetaAlbum:      bMetaAlbum,
 		Artists:        bArtists,
 	}
-}
-
-type MetaTrackArtist struct {
-	MetaTrackId uint       `db:"meta_track_id"`
-	ArtistId    spotify.ID `db:"artist_id"`
 }
 
 func upsertMetaTracksSqlx(db *sqlx.DB, sTracks []spotify.SimpleTrack, bi *brainIndex) ([]*MetaTrack, error) {
@@ -82,29 +76,28 @@ func upsertMetaTracksSqlx(db *sqlx.DB, sTracks []spotify.SimpleTrack, bi *brainI
 	if len(newTracks) == 0 {
 		return existingMetaTracks, nil
 	}
-	rows, err := db.NamedQuery(`INSERT INTO meta_tracks (simplified_name, meta_album_id) VALUES (:simplified_name, :meta_album_id) RETURNING id`, newTracks)
-	if err != nil {
-		return nil, err
-	}
-	for idx := 0; rows.Next(); idx++ {
-		if err := rows.Scan(&newTracks[idx].ID); err != nil {
-			return nil, err
-		}
-	}
-	if err := rows.Err(); err != nil {
+	if _, err := db.NamedExec(`
+		INSERT INTO meta_tracks (simplified_name, meta_album_id)
+		VALUES (:simplified_name, :meta_album_id)`, newTracks); err != nil {
 		return nil, err
 	}
 	bi.AddMetaTracks(newTracks)
-	var metaTrackArtsits []MetaTrackArtist
+	type metaTrackArtistIds struct {
+		MetaTrackId string     `db:"meta_track_id"`
+		ArtistId    spotify.ID `db:"artist_id"`
+	}
+	var metaTrackArtsitIds []metaTrackArtistIds
 	for _, bMetaTrack := range newTracks {
 		for _, bArtist := range bMetaTrack.Artists {
-			metaTrackArtsits = append(metaTrackArtsits, MetaTrackArtist{
-				MetaTrackId: bMetaTrack.ID,
+			metaTrackArtsitIds = append(metaTrackArtsitIds, metaTrackArtistIds{
+				MetaTrackId: bMetaTrack.SimplifiedName,
 				ArtistId:    bArtist.SpotifyId,
 			})
 		}
 	}
-	_, err = db.NamedExec(`INSERT INTO meta_track_artists (meta_track_id, artist_id) VALUES (:meta_track_id, :artist_id)`, metaTrackArtsits)
+	_, err = db.NamedExec(`
+		INSERT INTO meta_track_artists (meta_track_id, artist_id)
+		VALUES (:meta_track_id, :artist_id)`, metaTrackArtsitIds)
 	if err != nil {
 		return nil, err
 	}

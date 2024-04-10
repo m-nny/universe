@@ -53,19 +53,18 @@ CREATE TABLE IF NOT EXISTS spotify_album_artists (
 );
 
 CREATE TABLE IF NOT EXISTS meta_tracks (
-	id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	simplified_name text NOT NULL,
+	simplified_name text PRIMARY KEY NOT NULL,
 	meta_album_id text NOT NULL,
 	CONSTRAINT fk_meta_tracks_meta_album
 		FOREIGN KEY (meta_album_id) REFERENCES meta_albums(simplified_name)
 );
 
 CREATE TABLE IF NOT EXISTS meta_track_artists (
-	meta_track_id integer NOT NULL,
+	meta_track_id text NOT NULL,
 	artist_id text NOT NULL,
 	PRIMARY KEY (meta_track_id,artist_id),
 	CONSTRAINT fk_meta_track_artists_meta_track
-		FOREIGN KEY (meta_track_id) REFERENCES meta_tracks(id),
+		FOREIGN KEY (meta_track_id) REFERENCES meta_tracks(simplified_name),
 	CONSTRAINT fk_meta_track_artists_artist
 		FOREIGN KEY (artist_id) REFERENCES artists(spotify_id)
 );
@@ -78,7 +77,7 @@ CREATE TABLE IF NOT EXISTS spotify_tracks (
 	CONSTRAINT fk_spotify_tracks_spotify_album
 		FOREIGN KEY (spotify_album_id) REFERENCES spotify_albums(spotify_id),
 	CONSTRAINT fk_spotify_tracks_meta_track
-		FOREIGN KEY (meta_track_id) REFERENCES meta_tracks(id)
+		FOREIGN KEY (meta_track_id) REFERENCES meta_tracks(simplified_name)
 );
 
 CREATE TABLE IF NOT EXISTS spotify_track_artists (
@@ -93,12 +92,12 @@ CREATE TABLE IF NOT EXISTS spotify_track_artists (
 
 CREATE TABLE IF NOT EXISTS user_saved_tracks (
 	user_username text NOT NULL,
-	meta_track_id integer NOT NULL,
+	meta_track_id text NOT NULL,
 	PRIMARY KEY (user_username,meta_track_id),
 	CONSTRAINT fk_user_saved_tracks_user
 		FOREIGN KEY (user_username) REFERENCES users(username),
 	CONSTRAINT fk_user_saved_tracks_meta_track
-		FOREIGN KEY (meta_track_id) REFERENCES meta_tracks(id)
+		FOREIGN KEY (meta_track_id) REFERENCES meta_tracks(simplified_name)
 );
 
 CREATE TABLE IF NOT EXISTS discogs_releases (

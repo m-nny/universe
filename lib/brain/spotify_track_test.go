@@ -14,21 +14,21 @@ import (
 var (
 	bSpotifyTrackOS = &SpotifyTrack{
 		Artists:        []*Artist{bArtistLP},
-		MetaTrackId:    1,
+		MetaTrackId:    bMetaTrackOS.SimplifiedName,
 		Name:           "One Step Closer",
 		SpotifyAlbumId: sSimpleAlbumHT.ID,
 		SpotifyId:      "spotify:one_step",
 	}
 	bSpotifyTrackITE = &SpotifyTrack{
 		Artists:        []*Artist{bArtistLP},
-		MetaTrackId:    2,
+		MetaTrackId:    bMetaTrackITE.SimplifiedName,
 		Name:           "In the end",
 		SpotifyAlbumId: sSimpleAlbumHT.ID,
 		SpotifyId:      "spotify:in_the_end",
 	}
 	bSpotifyTrackSC = &SpotifyTrack{
 		Artists:        []*Artist{bArtistPR},
-		MetaTrackId:    3,
+		MetaTrackId:    bMetaTrackSC.SimplifiedName,
 		Name:           "Something Comforting",
 		SpotifyAlbumId: sSimpleAlbumN.ID,
 		SpotifyId:      "spotify:something_comforting",

@@ -13,7 +13,7 @@ type SpotifyTrack struct {
 	SpotifyAlbumId spotify.ID `db:"spotify_album_id"`
 	SpotifyAlbum   *SpotifyAlbum
 	Artists        []*Artist
-	MetaTrackId    uint `db:"meta_track_id"`
+	MetaTrackId    string `db:"meta_track_id"`
 	MetaTrack      *MetaTrack
 }
 
@@ -24,7 +24,7 @@ func newSpotifyTrack(sTrack spotify.SimpleTrack, bSpotifyAlbum *SpotifyAlbum, bA
 		SpotifyAlbumId: bSpotifyAlbum.SpotifyId,
 		SpotifyAlbum:   bSpotifyAlbum,
 		Artists:        bArtists,
-		MetaTrackId:    bMetaTrack.ID,
+		MetaTrackId:    bMetaTrack.SimplifiedName,
 		MetaTrack:      bMetaTrack,
 	}
 }

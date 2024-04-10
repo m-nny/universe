@@ -63,11 +63,6 @@ func (b *Brain) StoreSpotifyToken(ctx context.Context, username string, spotifyT
 	return nil
 }
 
-type UserSavedTrack struct {
-	Username    string `db:"user_username"`
-	MetaTrackId uint   `db:"meta_track_id"`
-}
-
 func upsertUser(db *sqlx.DB, username string) error {
 	if _, err := db.Exec(`
 		INSERT INTO users (username)
@@ -82,9 +77,13 @@ func addSavedTracksSqlx(db *sqlx.DB, username string, tracks []*MetaTrack) error
 	if err := upsertUser(db, username); err != nil {
 		return err
 	}
-	var userSavedTracks []UserSavedTrack
+	type userSavedTrackIds struct {
+		Username    string `db:"user_username"`
+		MetaTrackId string `db:"meta_track_id"`
+	}
+	var userSavedTracks []userSavedTrackIds
 	for _, bMetaTrack := range tracks {
-		userSavedTracks = append(userSavedTracks, UserSavedTrack{username, bMetaTrack.ID})
+		userSavedTracks = append(userSavedTracks, userSavedTrackIds{username, bMetaTrack.SimplifiedName})
 	}
 	if _, err := db.NamedExec(`
 		INSERT INTO user_saved_tracks (user_username, meta_track_id)
