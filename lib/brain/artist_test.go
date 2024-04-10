@@ -1,9 +1,11 @@
 package brain
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/jmoiron/sqlx"
 	"github.com/zmb3/spotify/v2"
 )
@@ -13,6 +15,10 @@ var (
 		ID:   "spotify:linkin_park",
 		Name: "Linkin Park",
 	}
+	sArtistJZ = spotify.SimpleArtist{
+		ID:   "spotify:jay_z",
+		Name: "Jay-Z",
+	}
 	sArtistPR = spotify.SimpleArtist{
 		ID:   "spotify:porter_robinson",
 		Name: "Porter Robinson",
@@ -20,6 +26,10 @@ var (
 	bArtistLP = &Artist{
 		Name:      "Linkin Park",
 		SpotifyId: "spotify:linkin_park",
+	}
+	bArtistJZ = &Artist{
+		Name:      "Jay-Z",
+		SpotifyId: "spotify:jay_z",
 	}
 	bArtistPR = &Artist{
 		Name:      "Porter Robinson",
@@ -100,6 +110,10 @@ func Test_upsertArtistsSqlx(t *testing.T) {
 		}
 	})
 }
+
+var SORT_ARTISTS = cmpopts.SortSlices(func(a, b *Artist) bool {
+	return strings.Compare(string(a.SpotifyId), string(b.SpotifyId)) < 0
+})
 
 func diffArtists(want, got []*Artist) string {
 	return cmp.Diff(want, got)

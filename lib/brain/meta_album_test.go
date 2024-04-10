@@ -26,8 +26,14 @@ var (
 		Name:    "Nurture",
 		Artists: []spotify.SimpleArtist{sArtistPR},
 	}
+	sSimpleAlbumCC = spotify.SimpleAlbum{
+		ID:      "spotify:collision_course",
+		Name:    "Collision Course",
+		Artists: []spotify.SimpleArtist{sArtistLP, sArtistJZ},
+	}
 	sFullAlbumHT   = &spotify.FullAlbum{SimpleAlbum: sSimpleAlbumHT}
 	sFullAlbumHT20 = &spotify.FullAlbum{SimpleAlbum: sSimpleAlbumHT20}
+	sFullAlbumCC   = &spotify.FullAlbum{SimpleAlbum: sSimpleAlbumCC}
 	sFullAlbumN    = &spotify.FullAlbum{SimpleAlbum: sSimpleAlbumN}
 )
 
@@ -36,6 +42,10 @@ var (
 	bMetaAlbumHT = &MetaAlbum{
 		Artists:        []*Artist{bArtistLP},
 		SimplifiedName: "linkin park - hybrid theory",
+	}
+	bMetaAlbumCC = &MetaAlbum{
+		Artists:        []*Artist{bArtistLP, bArtistJZ},
+		SimplifiedName: "linkin park, jay-z - collision course",
 	}
 	bMetaAlbumN = &MetaAlbum{
 		Artists:        []*Artist{bArtistPR},
@@ -131,26 +141,68 @@ func Test_upsertMetaAlbumsSqlx(t *testing.T) {
 		}
 	})
 	t.Run("handles 0 args", func(t *testing.T) {
-		brain := getInmemoryBrain(t)
+		sqlxDb := getInmemoryBrain(t).sqlxDb
 
 		want1 := []*MetaAlbum{}
-		got1, err := upsertMetaAlbumsSqlx(brain.sqlxDb, []spotify.SimpleAlbum{}, newBrainIndex())
+		got1, err := upsertMetaAlbumsSqlx(sqlxDb, []spotify.SimpleAlbum{}, newBrainIndex())
 		if err != nil {
 			t.Fatalf("got Error: %v", err)
 		}
 		if diff := diffMetaAlbums(want1, got1); diff != "" {
 			t.Errorf("upsertMetaAlbumsSqlx() mismatch (-want +got):\n%s", diff)
 		}
-		if wantN, nArtists := 0, checkNArtistsSqlx(t, brain.sqlxDb); nArtists != wantN {
-			t.Fatalf("sqlx have %d rows, but want %d rows", nArtists, wantN)
+		if want, got := 0, checkNMetaAlbumsSqlx(t, sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta albums, but want %d rows", got, want)
+		}
+		if want, got := 0, checkNMetaAlbumArtistsSqlx(t, sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta album artists, but want %d rows", got, want)
+		}
+	})
+
+	t.Run("handles album with multiple artists", func(t *testing.T) {
+		sqlxDb := getInmemoryBrain(t).sqlxDb
+
+		// Setup Artists
+		bi := newBrainIndex()
+		if _, err := upsertArtistsSqlx(sqlxDb, []spotify.SimpleArtist{sArtistLP, sArtistJZ}, bi); err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+
+		want1 := []*MetaAlbum{bMetaAlbumCC}
+		got1, err := upsertMetaAlbumsSqlx(sqlxDb, []spotify.SimpleAlbum{sSimpleAlbumCC}, bi)
+		if err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+		if diff := diffMetaAlbums(want1, got1); diff != "" {
+			t.Errorf("upsertMetaAlbumsSqlx() mismatch (-want +got):\n%s", diff)
+		}
+		if want, got := 1, checkNMetaAlbumsSqlx(t, sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta albums, but want %d rows", got, want)
+		}
+		if want, got := 2, checkNMetaAlbumArtistsSqlx(t, sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta album artists, but want %d rows", got, want)
+		}
+
+		got2, err := upsertMetaAlbumsSqlx(sqlxDb, []spotify.SimpleAlbum{sSimpleAlbumCC}, bi)
+		if err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+		if diff := diffMetaAlbums(want1, got2); diff != "" {
+			t.Errorf("upsertMetaAlbumsSqlx() mismatch (-want +got):\n%s", diff)
+		}
+		if want, got := 1, checkNMetaAlbumsSqlx(t, sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta albums, but want %d rows", got, want)
+		}
+		if want, got := 2, checkNMetaAlbumArtistsSqlx(t, sqlxDb); got != want {
+			t.Fatalf("sqlx has %d meta album artists, but want %d rows", got, want)
 		}
 	})
 }
 
-var IGNORE_META_ALBUM_FIELDS = cmpopts.IgnoreFields(MetaAlbum{}, "AnyName", "Artists")
+var IGNORE_META_ALBUM_FIELDS = cmpopts.IgnoreFields(MetaAlbum{}, "AnyName")
 
 func diffMetaAlbums(want, got []*MetaAlbum) string {
-	return cmp.Diff(want, got, IGNORE_META_ALBUM_FIELDS)
+	return cmp.Diff(want, got, IGNORE_META_ALBUM_FIELDS, SORT_ARTISTS)
 }
 
 func checkNMetaAlbumsSqlx(tb testing.TB, db *sqlx.DB) int {
@@ -167,4 +219,26 @@ func checkNMetaAlbumArtistsSqlx(tb testing.TB, db *sqlx.DB) int {
 		tb.Fatalf("err: %v", err)
 	}
 	return cnt
+}
+
+func Test_groupMetaAlbumArtists(t *testing.T) {
+	inputs := []metaAlbumArtist{
+		{
+			MetaAlbum: MetaAlbum{SimplifiedName: "linkin park - hybrid theory"},
+			Artist:    *bArtistLP,
+		},
+		{
+			MetaAlbum: MetaAlbum{SimplifiedName: "linkin park, jay-z - collision course"},
+			Artist:    *bArtistLP,
+		},
+		{
+			MetaAlbum: MetaAlbum{SimplifiedName: "linkin park, jay-z - collision course"},
+			Artist:    *bArtistJZ,
+		},
+	}
+	want := []*MetaAlbum{bMetaAlbumHT, bMetaAlbumCC}
+	got := groupMetaAlbumArtists(inputs)
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("groupMetaAlbumArtists() mismatch (-want +got):\n%s", diff)
+	}
 }

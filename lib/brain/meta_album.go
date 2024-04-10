@@ -2,6 +2,7 @@ package brain
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/zmb3/spotify/v2"
@@ -34,15 +35,25 @@ func upsertMetaAlbumsSqlx(db *sqlx.DB, sAlbums []spotify.SimpleAlbum, bi *brainI
 		simpNames = append(simpNames, spotifyutils.SimplifiedAlbumName(sAlbum))
 	}
 
-	query, args, err := sqlx.In(`SELECT * FROM meta_albums WHERE simplified_name IN (?)`, simpNames)
+	query, args, err := sqlx.In(`
+		SELECT ma.*, a.*
+		FROM meta_albums as ma
+		LEFT JOIN meta_album_artists as maa ON (ma.simplified_name = maa.meta_album_id)
+		LEFT JOIN artists as a ON (maa.artist_id = a.spotify_id)
+		WHERE ma.simplified_name IN (?)
+		ORDER BY ma.simplified_name, a.spotify_id
+		`, simpNames)
 	if err != nil {
+		log.Printf("sql: %v\n", query)
 		return nil, fmt.Errorf("could not prepare query for existing meta albums: %w", err)
 	}
 	query = db.Rebind(query)
-	var existingMetaAlbums []*MetaAlbum
-	if err := db.Select(&existingMetaAlbums, query, args...); err != nil {
+	var metaAlbumArtist []metaAlbumArtist
+	if err := db.Select(&metaAlbumArtist, query, args...); err != nil {
+		log.Printf("sql: %v\n", query)
 		return nil, fmt.Errorf("could not get existing meta albums: %w", err)
 	}
+	existingMetaAlbums := groupMetaAlbumArtists(metaAlbumArtist)
 	bi.AddMetaAlbums(existingMetaAlbums)
 
 	var newAlbums []*MetaAlbum
@@ -82,4 +93,30 @@ func upsertMetaAlbumsSqlx(db *sqlx.DB, sAlbums []spotify.SimpleAlbum, bi *brainI
 		return nil, fmt.Errorf("could not insert meta album artists: %w", err)
 	}
 	return append(existingMetaAlbums, newAlbums...), nil
+}
+
+type metaAlbumArtist struct {
+	MetaAlbum
+	Artist
+}
+
+// groupMetaAlbumArtists returns MetaAlbums with Artists populated
+func groupMetaAlbumArtists(xItems []metaAlbumArtist) []*MetaAlbum {
+	var res []*MetaAlbum
+	var lastAlbum *MetaAlbum
+	for _, item := range xItems {
+		item := item
+		if lastAlbum == nil {
+			lastAlbum = &item.MetaAlbum
+		}
+		if lastAlbum.SimplifiedName != item.SimplifiedName {
+			res = append(res, lastAlbum)
+			lastAlbum = &item.MetaAlbum
+		}
+		lastAlbum.Artists = append(lastAlbum.Artists, &item.Artist)
+	}
+	if lastAlbum != nil {
+		res = append(res, lastAlbum)
+	}
+	return res
 }
