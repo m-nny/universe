@@ -25,11 +25,6 @@ func newMetaAlbum(sAlbum spotify.SimpleAlbum, bArtists []*Artist) *MetaAlbum {
 	}
 }
 
-type MetaAlbumArtist struct {
-	MetaAlbumId uint       `db:"meta_album_id"`
-	ArtistId    spotify.ID `db:"artist_id"`
-}
-
 func upsertMetaAlbumsSqlx(db *sqlx.DB, sAlbums []spotify.SimpleAlbum, bi *brainIndex) ([]*MetaAlbum, error) {
 	if len(sAlbums) == 0 {
 		return []*MetaAlbum{}, nil
@@ -81,13 +76,19 @@ func upsertMetaAlbumsSqlx(db *sqlx.DB, sAlbums []spotify.SimpleAlbum, bi *brainI
 		return nil, err
 	}
 	bi.AddMetaAlbums(newAlbums)
-	var metaAlbumArtists []MetaAlbumArtist
+	type metaAlbumArtistIds struct {
+		MetaAlbumId uint       `db:"meta_album_id"`
+		ArtistId    spotify.ID `db:"artist_id"`
+	}
+	var metaAlbumArtistsIds []metaAlbumArtistIds
 	for _, bAlbum := range newAlbums {
 		for _, bArtist := range bAlbum.Artists {
-			metaAlbumArtists = append(metaAlbumArtists, MetaAlbumArtist{bAlbum.ID, bArtist.SpotifyId})
+			metaAlbumArtistsIds = append(metaAlbumArtistsIds, metaAlbumArtistIds{bAlbum.ID, bArtist.SpotifyId})
 		}
 	}
-	_, err = db.NamedExec(`INSERT INTO meta_album_artists (meta_album_id, artist_id) VALUES (:meta_album_id, :artist_id)`, metaAlbumArtists)
+	_, err = db.NamedExec(`
+		INSERT INTO meta_album_artists (meta_album_id, artist_id)
+		VALUES (:meta_album_id, :artist_id)`, metaAlbumArtistsIds)
 	if err != nil {
 		return nil, err
 	}
