@@ -34,12 +34,10 @@ var (
 // Expected outputs
 var (
 	bMetaAlbumHT = &MetaAlbum{
-		ID:             1,
 		Artists:        []*Artist{bArtistLP},
 		SimplifiedName: "linkin park - hybrid theory",
 	}
 	bMetaAlbumN = &MetaAlbum{
-		ID:             2,
 		Artists:        []*Artist{bArtistPR},
 		SimplifiedName: "porter robinson - nurture",
 	}

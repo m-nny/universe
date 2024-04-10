@@ -13,7 +13,7 @@ import (
 type MetaTrack struct {
 	ID             uint
 	SimplifiedName string `db:"simplified_name"`
-	MetaAlbumID    uint   `db:"meta_album_id"`
+	MetaAlbumID    string `db:"meta_album_id"`
 	MetaAlbum      *MetaAlbum
 	Artists        []*Artist
 }
@@ -28,7 +28,7 @@ func (s *MetaTrack) String() string {
 func newMetaTrack(sTrack spotify.SimpleTrack, bMetaAlbum *MetaAlbum, bArtists []*Artist) *MetaTrack {
 	return &MetaTrack{
 		SimplifiedName: utils.SimplifiedTrackName(sTrack, bMetaAlbum.SimplifiedName),
-		MetaAlbumID:    bMetaAlbum.ID,
+		MetaAlbumID:    bMetaAlbum.SimplifiedName,
 		MetaAlbum:      bMetaAlbum,
 		Artists:        bArtists,
 	}

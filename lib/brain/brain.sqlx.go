@@ -20,17 +20,16 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS meta_albums (
-	id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	simplified_name text NOT NULL,
+	simplified_name text PRIMARY KEY NOT NULL,
 	any_name text NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS meta_album_artists (
-	meta_album_id integer NOT NULL,
+	meta_album_id text NOT NULL,
 	artist_id text NOT NULL,
 	PRIMARY KEY (meta_album_id, artist_id),
 	CONSTRAINT fk_meta_album_artists_meta_album
-		FOREIGN KEY (meta_album_id) REFERENCES meta_albums(id),
+		FOREIGN KEY (meta_album_id) REFERENCES meta_albums(simplified_name),
 	CONSTRAINT fk_meta_album_artists_artist
 		FOREIGN KEY (artist_id) REFERENCES artists(spotify_id)
 );
@@ -38,9 +37,9 @@ CREATE TABLE IF NOT EXISTS meta_album_artists (
 CREATE TABLE IF NOT EXISTS spotify_albums (
 	spotify_id text PRIMARY KEY NOT NULL,
 	name text NOT NULL,
-	meta_album_id integer NOT NULL,
+	meta_album_id text NOT NULL,
 	CONSTRAINT fk_spotify_albums_meta_album
-		FOREIGN KEY (meta_album_id) REFERENCES meta_albums(id)
+		FOREIGN KEY (meta_album_id) REFERENCES meta_albums(simplified_name)
 );
 
 CREATE TABLE IF NOT EXISTS spotify_album_artists (
@@ -56,9 +55,9 @@ CREATE TABLE IF NOT EXISTS spotify_album_artists (
 CREATE TABLE IF NOT EXISTS meta_tracks (
 	id integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	simplified_name text NOT NULL,
-	meta_album_id integer NOT NULL,
+	meta_album_id text NOT NULL,
 	CONSTRAINT fk_meta_tracks_meta_album
-		FOREIGN KEY (meta_album_id) REFERENCES meta_albums(id)
+		FOREIGN KEY (meta_album_id) REFERENCES meta_albums(simplified_name)
 );
 
 CREATE TABLE IF NOT EXISTS meta_track_artists (
@@ -109,9 +108,9 @@ CREATE TABLE IF NOT EXISTS discogs_releases (
 	format text NOT NULL,
 	searched_meta_album integer DEFAULT FALSE NOT NULL,
 	meta_album_score integer DEFAULT 0 NOT NULL,
-	meta_album_id integer,
+	meta_album_id text,
 	CONSTRAINT fk_discogs_releases_meta_album
-		FOREIGN KEY (meta_album_id) REFERENCES meta_albums(id)
+		FOREIGN KEY (meta_album_id) REFERENCES meta_albums(simplified_name)
 );
 
 CREATE TABLE IF NOT EXISTS discogs_sellers (

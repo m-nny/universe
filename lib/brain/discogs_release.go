@@ -15,9 +15,9 @@ type DiscogsRelease struct {
 	Format     string
 	Name       string
 
-	MetaAlbumId              *uint `db:"meta_album_id"`
-	MetaAlbumSimilariryScore int   `db:"meta_album_score"`
-	SearchedMetaAlbum        bool  `db:"searched_meta_album"`
+	MetaAlbumId              *string `db:"meta_album_id"`
+	MetaAlbumSimilariryScore int     `db:"meta_album_score"`
+	SearchedMetaAlbum        bool    `db:"searched_meta_album"`
 
 	MetaAlbum *MetaAlbum
 }
@@ -86,7 +86,7 @@ func upsertDiscogsReleases(db *sqlx.DB, dReleases []discogs.ListingRelease) ([]*
 func (b *Brain) AssociateDiscogsRelease(bRelease *DiscogsRelease, bMetaAlbum *MetaAlbum, score int) error {
 	bRelease.MetaAlbum = bMetaAlbum
 	if bMetaAlbum != nil {
-		bRelease.MetaAlbumId = &bMetaAlbum.ID
+		bRelease.MetaAlbumId = &bMetaAlbum.SimplifiedName
 	}
 	bRelease.MetaAlbumSimilariryScore = score
 	bRelease.SearchedMetaAlbum = true

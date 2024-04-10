@@ -15,19 +15,19 @@ var (
 		Artists:     []*Artist{bArtistLP},
 		SpotifyId:   "spotify:hybrid_theory",
 		Name:        "Hybrid Theory",
-		MetaAlbumId: 1,
+		MetaAlbumId: "linkin park - hybrid theory",
 	}
 	bSpotifyAlbumHT20 = &SpotifyAlbum{
 		Artists:     []*Artist{bArtistLP},
 		SpotifyId:   "spotify:hybryd_theory_20",
 		Name:        "Hybrid Theory (20th Anniversary Edition)",
-		MetaAlbumId: 1,
+		MetaAlbumId: "linkin park - hybrid theory",
 	}
 	bSpotifyAlbumN = &SpotifyAlbum{
 		Artists:     []*Artist{bArtistPR},
 		SpotifyId:   "spotify:nurture",
 		Name:        "Nurture",
-		MetaAlbumId: 2,
+		MetaAlbumId: "porter robinson - nurture",
 	}
 )
 

@@ -10,9 +10,9 @@ import (
 type SpotifyAlbum struct {
 	SpotifyId   spotify.ID `db:"spotify_id"`
 	Name        string
-	Artists     []*Artist
-	MetaAlbumId uint `db:"meta_album_id"`
+	MetaAlbumId string `db:"meta_album_id"`
 	MetaAlbum   *MetaAlbum
+	Artists     []*Artist
 }
 
 func (s *SpotifyAlbum) String() string {
@@ -27,7 +27,7 @@ func newSpotifyAlbum(sAlbum spotify.SimpleAlbum, bArtists []*Artist, bMetaAlbum 
 		Name:        sAlbum.Name,
 		SpotifyId:   sAlbum.ID,
 		Artists:     bArtists,
-		MetaAlbumId: bMetaAlbum.ID,
+		MetaAlbumId: bMetaAlbum.SimplifiedName,
 		MetaAlbum:   bMetaAlbum,
 	}
 }

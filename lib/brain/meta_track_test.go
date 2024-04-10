@@ -58,21 +58,21 @@ var (
 		ID:             1,
 		Artists:        []*Artist{bArtistLP},
 		SimplifiedName: bMetaAlbumHT.SimplifiedName + " - 02. one step closer",
-		MetaAlbumID:    bMetaAlbumHT.ID,
+		MetaAlbumID:    bMetaAlbumHT.SimplifiedName,
 		MetaAlbum:      bMetaAlbumHT,
 	}
 	bMetaTrackITE = &MetaTrack{
 		ID:             2,
 		Artists:        []*Artist{bArtistLP},
 		SimplifiedName: bMetaAlbumHT.SimplifiedName + " - 08. in the end",
-		MetaAlbumID:    bMetaAlbumHT.ID,
+		MetaAlbumID:    bMetaAlbumHT.SimplifiedName,
 		MetaAlbum:      bMetaAlbumHT,
 	}
 	bMetaTrackSC = &MetaTrack{
 		ID:             3,
 		Artists:        []*Artist{bArtistPR},
 		SimplifiedName: bMetaAlbumN.SimplifiedName + " - 11. something comforting",
-		MetaAlbumID:    bMetaAlbumN.ID,
+		MetaAlbumID:    bMetaAlbumN.SimplifiedName,
 		MetaAlbum:      bMetaAlbumN,
 	}
 )

@@ -11,7 +11,6 @@ import (
 )
 
 type MetaAlbum struct {
-	ID             uint
 	SimplifiedName string `db:"simplified_name"`
 	AnyName        string `db:"any_name"`
 	Artists        []*Artist
@@ -37,12 +36,12 @@ func upsertMetaAlbumsSqlx(db *sqlx.DB, sAlbums []spotify.SimpleAlbum, bi *brainI
 
 	query, args, err := sqlx.In(`SELECT * FROM meta_albums WHERE simplified_name IN (?)`, simpNames)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not prepare query for existing meta albums: %w", err)
 	}
 	query = db.Rebind(query)
 	var existingMetaAlbums []*MetaAlbum
 	if err := db.Select(&existingMetaAlbums, query, args...); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not get existing meta albums: %w", err)
 	}
 	bi.AddMetaAlbums(existingMetaAlbums)
 
@@ -60,37 +59,27 @@ func upsertMetaAlbumsSqlx(db *sqlx.DB, sAlbums []spotify.SimpleAlbum, bi *brainI
 	if len(newAlbums) == 0 {
 		return existingMetaAlbums, nil
 	}
-	rows, err := db.NamedQuery(`
+	if _, err = db.NamedExec(`
 		INSERT INTO meta_albums (simplified_name, any_name)
-		VALUES (:simplified_name, :any_name)
-		RETURNING id`, newAlbums)
-	if err != nil {
-		return nil, err
-	}
-	for idx := 0; rows.Next(); idx++ {
-		if err := rows.Scan(&newAlbums[idx].ID); err != nil {
-			return nil, err
-		}
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
+		VALUES (:simplified_name, :any_name)`, newAlbums); err != nil {
+		return nil, fmt.Errorf("could not insert meta albums: %w", err)
 	}
 	bi.AddMetaAlbums(newAlbums)
 	type metaAlbumArtistIds struct {
-		MetaAlbumId uint       `db:"meta_album_id"`
+		MetaAlbumId string     `db:"meta_album_id"`
 		ArtistId    spotify.ID `db:"artist_id"`
 	}
 	var metaAlbumArtistsIds []metaAlbumArtistIds
 	for _, bAlbum := range newAlbums {
 		for _, bArtist := range bAlbum.Artists {
-			metaAlbumArtistsIds = append(metaAlbumArtistsIds, metaAlbumArtistIds{bAlbum.ID, bArtist.SpotifyId})
+			metaAlbumArtistsIds = append(metaAlbumArtistsIds, metaAlbumArtistIds{bAlbum.SimplifiedName, bArtist.SpotifyId})
 		}
 	}
 	_, err = db.NamedExec(`
 		INSERT INTO meta_album_artists (meta_album_id, artist_id)
 		VALUES (:meta_album_id, :artist_id)`, metaAlbumArtistsIds)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not insert meta album artists: %w", err)
 	}
 	return append(existingMetaAlbums, newAlbums...), nil
 }
