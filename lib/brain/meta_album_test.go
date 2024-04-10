@@ -31,6 +31,11 @@ var (
 		Name:    "Collision Course",
 		Artists: []spotify.SimpleArtist{sArtistLP, sArtistJZ},
 	}
+	sSimpleAlbumDT = spotify.SimpleAlbum{
+		ID:      "spotify:sig_degrees",
+		Name:    "Six Degrees Of Inner Turbulence",
+		Artists: []spotify.SimpleArtist{sArtistDT},
+	}
 	sFullAlbumHT   = &spotify.FullAlbum{SimpleAlbum: sSimpleAlbumHT}
 	sFullAlbumHT20 = &spotify.FullAlbum{SimpleAlbum: sSimpleAlbumHT20}
 	sFullAlbumCC   = &spotify.FullAlbum{SimpleAlbum: sSimpleAlbumCC}
@@ -50,6 +55,10 @@ var (
 	bMetaAlbumN = &MetaAlbum{
 		Artists:        []*Artist{bArtistPR},
 		SimplifiedName: "porter robinson - nurture",
+	}
+	bMetaAlbumDT = &MetaAlbum{
+		Artists:        []*Artist{bArtistDT},
+		SimplifiedName: "dream theater - six degrees of inner turbulence",
 	}
 )
 

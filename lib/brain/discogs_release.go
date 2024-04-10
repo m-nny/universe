@@ -93,10 +93,10 @@ func (b *Brain) AssociateDiscogsRelease(bRelease *DiscogsRelease, bMetaAlbum *Me
 	_, err := b.sqlxDb.NamedExec(`
 		UPDATE discogs_releases 
 		SET  meta_album_id=:meta_album_id, meta_album_score=:meta_album_score, searched_meta_album=:searched_meta_album
-		WHERE id=:id
+		WHERE discogs_id=:discogs_id
 	`, bRelease)
 	if err != nil {
-		return err
+		return fmt.Errorf("could not update discogs_releases: %w", err)
 	}
 	return nil
 }

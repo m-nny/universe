@@ -23,6 +23,11 @@ var (
 		ID:   "spotify:porter_robinson",
 		Name: "Porter Robinson",
 	}
+	sArtistDT = spotify.SimpleArtist{
+		ID:   "spotify:dream_theater",
+		Name: "Dream Theater",
+	}
+
 	bArtistLP = &Artist{
 		Name:      "Linkin Park",
 		SpotifyId: "spotify:linkin_park",
@@ -34,6 +39,10 @@ var (
 	bArtistPR = &Artist{
 		Name:      "Porter Robinson",
 		SpotifyId: "spotify:porter_robinson",
+	}
+	bArtistDT = &Artist{
+		Name:      "Dream Theater",
+		SpotifyId: "spotify:dream_theater",
 	}
 )
 

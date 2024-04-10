@@ -7,6 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/jmoiron/sqlx"
 	"github.com/m-nny/universe/lib/discogs"
+	"github.com/zmb3/spotify/v2"
 )
 
 // inputs
@@ -131,6 +132,57 @@ func Test_upsertDiscogsRelease(t *testing.T) {
 		}
 	})
 }
+
+func Test_AssociateDiscogsRelease(t *testing.T) {
+	t.Run("returns same ID for same spotify ID", func(t *testing.T) {
+		brain := getInmemoryBrain(t)
+		sqlxDb := brain.sqlxDb
+		// username := "test_username"
+		if want, got := 0, checkNDiscogsReleasesSqlx(t, sqlxDb); got != want {
+			t.Fatalf("sqlx has %d discogs releases, but want %d rows", got, want)
+		}
+
+		want1 := []*DiscogsRelease{bDiscogsReleaseDT}
+		got1, err := upsertDiscogsReleases(sqlxDb, []discogs.ListingRelease{dListingReleaseDT})
+		if err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+		if diff := diffDiscogsReleases(want1, got1); diff != "" {
+			t.Errorf("upsertDiscogsReleases() mismatch (-want +got):\n%s", diff)
+		}
+
+		// Setup Artists
+		bi := newBrainIndex()
+		if _, err := upsertArtistsSqlx(sqlxDb, []spotify.SimpleArtist{sArtistDT}, bi); err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+		if _, err := upsertMetaAlbumsSqlx(sqlxDb, []spotify.SimpleAlbum{sSimpleAlbumDT}, bi); err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+
+		if err := brain.AssociateDiscogsRelease(got1[0], bMetaAlbumDT, 100); err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+
+		got2, err := upsertDiscogsReleases(sqlxDb, []discogs.ListingRelease{dListingReleaseDT})
+		if err != nil {
+			t.Fatalf("got Error: %v", err)
+		}
+		wantDT := *bDiscogsReleaseDT
+		wantDT.MetaAlbumId = &bMetaAlbumDT.SimplifiedName
+		wantDT.MetaAlbumSimilariryScore = 100
+		wantDT.SearchedMetaAlbum = true
+		want2 := []*DiscogsRelease{&wantDT}
+		if diff := diffDiscogsReleases(want2, got2); diff != "" {
+			t.Errorf("upsertDiscogsReleases() mismatch (-want +got):\n%s", diff)
+		}
+
+		if want, got := 1, checkNDiscogsReleasesSqlx(t, sqlxDb); got != want {
+			t.Fatalf("sqlx has %d discogs releases, but want %d rows", got, want)
+		}
+	})
+}
+
 func diffDiscogsReleases(want, got []*DiscogsRelease) string {
 	return cmp.Diff(want, got, cmpopts.SortSlices(func(a, b *DiscogsRelease) bool { return a.DiscogsID < b.DiscogsID }))
 }
