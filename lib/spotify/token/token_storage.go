@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -24,7 +25,7 @@ func GetToken(ctx context.Context, auth *spotifyauth.Authenticator, serverAddres
 		if storedToken != nil {
 			tokenExpiry = storedToken.Expiry
 		}
-		log.Printf("storedToken.Expiriry: %v storedToken.Valid(): %v err: %v", tokenExpiry, storedToken.Valid(), err)
+		slog.DebugContext(ctx, "token.GetToken():", "storedToken.Expiriry", tokenExpiry, "storedToken.Valid", storedToken.Valid(), "err", err)
 	}
 	if err == nil && storedToken.Valid() {
 		return storedToken, nil

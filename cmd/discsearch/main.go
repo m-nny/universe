@@ -5,10 +5,12 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"log/slog"
 	"time"
 
 	"github.com/m-nny/universe/lib/discsearch"
 	"github.com/m-nny/universe/lib/spotify"
+	"github.com/m-nny/universe/lib/utils/logutils"
 )
 
 var (
@@ -19,10 +21,11 @@ const username = "m-nny"
 
 func main() {
 	flag.Parse()
+	slog.SetLogLoggerLevel(slog.LevelDebug)
 	ctx := context.Background()
 	app, err := discsearch.New(ctx, username, *offlineMode)
 	if err != nil {
-		log.Fatalf("Could not init app: %v", err)
+		logutils.Fatal("Could not init app", "err", err)
 	}
 
 	// if err := getAlbumsById(ctx, app); err != nil {

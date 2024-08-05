@@ -2,7 +2,6 @@ package discsearch
 
 import (
 	"context"
-	"log"
 	"slices"
 	"strings"
 
@@ -10,6 +9,7 @@ import (
 
 	"github.com/m-nny/universe/lib/brain"
 	"github.com/m-nny/universe/lib/discogs"
+	"github.com/m-nny/universe/lib/utils/logutils"
 )
 
 func (a *App) Inventory(ctx context.Context, sellerId string) ([]*brain.MetaAlbum, error) {
@@ -48,14 +48,14 @@ func (a *App) Inventory(ctx context.Context, sellerId string) ([]*brain.MetaAlbu
 		}
 		bAlbums = append(bAlbums, bMetaAlbum)
 	}
-	log.Printf("Found %d bAlbums for %d bReleases for %d dReleases", len(bAlbums), len(bReleases), len(dReleases))
+	logutils.Debugf("Found %d bAlbums for %d bReleases for %d dReleases", len(bAlbums), len(bReleases), len(dReleases))
 	slices.SortFunc(missedBRelease, func(a, b brain.DiscogsRelease) int {
 		if val := strings.Compare(a.ArtistName, b.ArtistName); val != 0 {
 			return val
 		}
 		return strings.Compare(a.Name, b.Name)
 	})
-	log.Printf("Missed %d bReleases", len(missedBRelease))
+	logutils.Debugf("Missed %d bReleases", len(missedBRelease))
 	// for idx, bRelease := range missedBRelease {
 	// 	log.Printf("%3d. %08d %s - %s", idx+1, bRelease.DiscogsID, bRelease.ArtistName, bRelease.Name)
 	// 	log.Printf("              https://www.discogs.com/release/%d", bRelease.DiscogsID)

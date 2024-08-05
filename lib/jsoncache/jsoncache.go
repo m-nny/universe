@@ -2,7 +2,7 @@ package jsoncache
 
 import (
 	"encoding/json"
-	"log"
+	"log/slog"
 	"os"
 	"path"
 )
@@ -46,9 +46,9 @@ func CachedExec[Data any](key string, fn func() (Data, error)) (Data, error) {
 	file := cacheFile(key)
 	cachedVal, err := getValue[Data](file)
 	if err != nil {
-		log.Printf("[cache] miss on key %s: %v", key, err)
-	} else if err == nil {
-		log.Printf("[cache] hit on key %s", key)
+		slog.Debug("jsoncahe.CachedExec(): miss on", "key", key, "err", err)
+	} else {
+		slog.Debug("jsoncahe.CachedExec(): hit on key", "key", key)
 		return cachedVal, nil
 	}
 	val, err := fn()
@@ -58,6 +58,6 @@ func CachedExec[Data any](key string, fn func() (Data, error)) (Data, error) {
 	if err := setValue(file, val); err != nil {
 		return val, err
 	}
-	log.Printf("[cache] saved for key %s", key)
+	slog.Debug("jsoncahe.CachedExec(): saved for", "key", key)
 	return val, nil
 }

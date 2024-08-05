@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 
 	"github.com/jmoiron/sqlx"
 	"golang.org/x/oauth2"
@@ -45,7 +45,7 @@ func (b *Brain) GetSpotifyToken(ctx context.Context, username string) (*oauth2.T
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("GetSpotifyToken(): userToken.tokenExpiry: %v", userToken.Expiry)
+	slog.Debug("GetSpotifyToken()", "userToken.tokenExpiry", userToken.Expiry)
 	return userToken, nil
 }
 
