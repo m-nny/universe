@@ -14,13 +14,14 @@ import (
 
 var (
 	offlineMode = flag.Bool("offline", false, "Offline mode")
+	loggerLevel = logutils.Level("log", slog.LevelInfo, "slog level")
 )
 
 const username = "m-nny"
 
 func main() {
 	flag.Parse()
-	slog.SetLogLoggerLevel(slog.LevelDebug)
+	slog.SetLogLoggerLevel(*loggerLevel)
 	ctx := context.Background()
 	app, err := discsearch.New(ctx, username, *offlineMode)
 	if err != nil {
