@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"log"
 	"log/slog"
 	"time"
 
@@ -32,23 +31,19 @@ func main() {
 	// 	log.Fatalf("%v", err)
 	// }
 
-	// if err := benchGetUserTracks(ctx, app); err != nil {
-	// 	log.Fatalf("%v", err)
-	// }
-
-	// if err := benchGetUserTracks(ctx, app); err != nil {
-	// 	log.Fatalf("%v", err)
-	// }
-
-	// if err := getDiscogs(ctx, app); err != nil {
-	// 	log.Fatalf("%v", err)
-	// }
-
-	if err := getSellerInventory(ctx, app); err != nil {
-		log.Fatalf("%v", err)
+	if err := benchGetUserTracks(ctx, app); err != nil {
+		logutils.Fatal("Could not bench GetUserTracks", "err", err)
 	}
 
-	log.Printf("Done")
+	// if err := getDiscogs(ctx, app); err != nil {
+	// 	logutils.Fatal("Could not get discogs", "err", err)
+	// }
+
+	// if err := getSellerInventory(ctx, app); err != nil {
+	// 	logutils.Fatal("Could not get seller inventory", "err", err)
+	// }
+
+	slog.Info("Done")
 }
 
 func getDiscogs(ctx context.Context, app *discsearch.App) error {
@@ -65,11 +60,7 @@ func getAlbumsById(ctx context.Context, app *discsearch.App) error {
 	if err != nil {
 		return err
 	}
-	log.Print("targetAlbums:")
-	for i, album := range targetAlbums {
-		log.Printf("%2d %+v", i+1, album)
-	}
-	log.Print()
+	slog.Info("targetAlbums", "targetAlbums", targetAlbums)
 
 	// if err := getTopAlbums(ctx, app); err != nil {
 	// 	return err
@@ -87,28 +78,28 @@ func benchGetUserTracks(ctx context.Context, app *discsearch.App) error {
 	if err != nil {
 		return err
 	}
-	log.Printf("brain.GetUserTracks: finished in %s", time.Since(start))
+	logutils.Infof("brain.GetUserTracks: finished in %s", time.Since(start))
 
-	log.Printf("==========================")
-	log.Printf("brain.SaveTracksSqlx")
+	logutils.Infof("==========================")
+	logutils.Infof("brain.SaveTracksSqlx")
 	start = time.Now()
 	sqlxTracks, err := app.Brain.SaveTracksSqlx(userTracks, username)
 	if err != nil {
 		return fmt.Errorf("error getting all tracks: %w", err)
 	}
-	log.Printf("finished in %s", time.Since(start))
-	log.Printf("returned %d tracks", len(sqlxTracks))
+	logutils.Infof("finished in %s", time.Since(start))
+	logutils.Infof("returned %d tracks", len(sqlxTracks))
 
 	sqlxTrackCnt, err := app.Brain.MetaTrackCountSqlx()
 	if err != nil {
 		return err
 	}
-	log.Printf("track cnt in db: %d", sqlxTrackCnt)
+	logutils.Infof("track cnt in db: %d", sqlxTrackCnt)
 	sqlxAlbumCnt, err := app.Brain.MetaAlbumCountSqlx()
 	if err != nil {
 		return err
 	}
-	log.Printf("album cnt in db: %d", sqlxAlbumCnt)
+	logutils.Infof("album cnt in db: %d", sqlxAlbumCnt)
 
 	return nil
 }
