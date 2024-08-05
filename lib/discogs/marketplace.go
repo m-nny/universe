@@ -3,10 +3,10 @@ package discogs
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/url"
 
 	"github.com/m-nny/universe/lib/jsoncache"
+	"github.com/m-nny/universe/lib/utils/logutils"
 )
 
 func (d *Service) SellerInventory(ctx context.Context, username string) ([]Listing, error) {
@@ -32,7 +32,7 @@ func (d *Service) _SellerInventory(ctx context.Context, username string) ([]List
 		}
 		discogsUrl = inventory.nextPage()
 	}
-	log.Printf("Inventory.totalItems=%d len(results)=%d", inventory.totalItems(), len(results))
+	logutils.Infof("Inventory.totalItems=%d len(results)=%d", inventory.totalItems(), len(results))
 	if inventory.totalItems() != len(results) {
 		return results, fmt.Errorf("could not get all items got:%d total:%d", len(results), inventory.totalItems())
 	}

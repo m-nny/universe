@@ -3,7 +3,7 @@ package spotify
 import (
 	"context"
 	"errors"
-	"log"
+	"log/slog"
 
 	"github.com/zmb3/spotify/v2"
 
@@ -21,7 +21,7 @@ func (s *Service) GetUserTracks(ctx context.Context, username string) ([]spotify
 			// spotify.Offset(3300),
 		)
 		for ; err == nil; err = s.spotify.NextPage(ctx, resp) {
-			log.Printf("len(resp.Tracks)=%d offest=%d total=%d", len(resp.Tracks), resp.Offset, resp.Total)
+			slog.Debug("spotify.GetUserTracks():", "len(resp.Tracks)=", len(resp.Tracks), "offset", resp.Offset, "total", resp.Total)
 			rawTracks = append(rawTracks, resp.Tracks...)
 		}
 		if !errors.Is(err, spotify.ErrNoMorePages) && err != nil {

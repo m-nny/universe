@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
+
+	"golang.org/x/exp/slog"
 )
 
 type Config struct {
@@ -74,7 +75,7 @@ func (d *Service) headers() http.Header {
 }
 
 func get(ctx context.Context, fullUrl string, h http.Header, result any) error {
-	log.Printf("[discogs] GET: %s", fullUrl)
+	slog.Debug("[discogs.get]", "fullUrl", fullUrl)
 	req, err := http.NewRequestWithContext(ctx, "GET", fullUrl, nil)
 	if err != nil {
 		return err

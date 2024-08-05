@@ -3,7 +3,6 @@ package discsearch
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -43,6 +42,10 @@ func New(ctx context.Context, username string, offlineMode bool) (*App, error) {
 	}, nil
 }
 
+func (app *App) Close() error {
+	return app.Brain.Close()
+}
+
 func getDbPath(db string) (string, error) {
 	databasePath := fmt.Sprintf("data/%s.db", db)
 	databasePath, err := filepath.Abs(databasePath)
@@ -50,7 +53,7 @@ func getDbPath(db string) (string, error) {
 		return "", err
 	}
 	if _, err := os.Stat(databasePath); err != nil {
-		log.Printf("err: %v", err)
+		// log.Printf("err: %v", err)
 		return "", err
 	}
 	return databasePath, nil

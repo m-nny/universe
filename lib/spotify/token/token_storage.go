@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"log/slog"
 	"net/http"
 	"time"
@@ -43,7 +42,7 @@ func GetToken(ctx context.Context, auth *spotifyauth.Authenticator, serverAddres
 func GetFreshToken(ctx context.Context, auth *spotifyauth.Authenticator, serverAddress string) (*oauth2.Token, error) {
 	state := "42"
 	url := auth.AuthURL(state)
-	log.Printf("Login using following url:\n%s", url)
+	slog.Info("Login using following url", "url", url)
 	tokenCh := make(chan *oauth2.Token)
 	errCh := make(chan error)
 	callbackHandler := func(w http.ResponseWriter, r *http.Request) {
@@ -60,7 +59,7 @@ func GetFreshToken(ctx context.Context, auth *spotifyauth.Authenticator, serverA
 	server := &http.Server{Addr: serverAddress, Handler: serverMux}
 	go func() {
 		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Printf("Could not start server: %v", err)
+			slog.Error("Could not start server", "err", err)
 			errCh <- err
 		}
 	}()

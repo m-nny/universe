@@ -48,14 +48,14 @@ func (a *App) Inventory(ctx context.Context, sellerId string) ([]*brain.MetaAlbu
 		}
 		bAlbums = append(bAlbums, bMetaAlbum)
 	}
-	logutils.Debugf("Found %d bAlbums for %d bReleases for %d dReleases", len(bAlbums), len(bReleases), len(dReleases))
+	logutils.Infof("Found %d bAlbums for %d bReleases for %d dReleases", len(bAlbums), len(bReleases), len(dReleases))
 	slices.SortFunc(missedBRelease, func(a, b brain.DiscogsRelease) int {
 		if val := strings.Compare(a.ArtistName, b.ArtistName); val != 0 {
 			return val
 		}
 		return strings.Compare(a.Name, b.Name)
 	})
-	logutils.Debugf("Missed %d bReleases", len(missedBRelease))
+	logutils.Infof("Missed %d bReleases", len(missedBRelease))
 	// for idx, bRelease := range missedBRelease {
 	// 	log.Printf("%3d. %08d %s - %s", idx+1, bRelease.DiscogsID, bRelease.ArtistName, bRelease.Name)
 	// 	log.Printf("              https://www.discogs.com/release/%d", bRelease.DiscogsID)

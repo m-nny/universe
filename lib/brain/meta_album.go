@@ -2,7 +2,7 @@ package brain
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/zmb3/spotify/v2"
@@ -44,13 +44,13 @@ func upsertMetaAlbumsSqlx(db *sqlx.DB, sAlbums []spotify.SimpleAlbum, bi *brainI
 		ORDER BY ma.simplified_name, a.spotify_id
 		`, simpNames)
 	if err != nil {
-		log.Printf("sql: %v\n", query)
+		slog.Error("could not prepare query", "query", query)
 		return nil, fmt.Errorf("could not prepare query for existing meta albums: %w", err)
 	}
 	query = db.Rebind(query)
 	var metaAlbumArtist []metaAlbumArtist
 	if err := db.Select(&metaAlbumArtist, query, args...); err != nil {
-		log.Printf("sql: %v\n", query)
+		slog.Error("could not run query", "query", query)
 		return nil, fmt.Errorf("could not get existing meta albums: %w", err)
 	}
 	existingMetaAlbums := groupMetaAlbumArtists(metaAlbumArtist)

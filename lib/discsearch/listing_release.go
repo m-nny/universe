@@ -3,10 +3,10 @@ package discsearch
 import (
 	"context"
 	"fmt"
-	"log"
 	"regexp"
 
 	"github.com/m-nny/universe/lib/brain"
+	"golang.org/x/exp/slog"
 )
 
 func (a *App) FindRelease(ctx context.Context, bRelease *brain.DiscogsRelease) (*brain.MetaAlbum, error) {
@@ -27,9 +27,9 @@ func (a *App) FindRelease(ctx context.Context, bRelease *brain.DiscogsRelease) (
 		return nil, err
 	}
 	if bMetaAlbum == nil {
-		log.Printf("album: not found release_id: %d %+v", bRelease.DiscogsID, bRelease)
+		slog.Error("discsearch.FindRelease(): not found", "bRelease.DiscogsID", bRelease.DiscogsID, "bRelease", bRelease)
 	} else {
-		log.Printf("album: %s score: %d", bMetaAlbum.SimplifiedName, score)
+		slog.Debug("discsearch.FindRelease(): found", "album", bMetaAlbum.SimplifiedName, "score", score)
 	}
 	if err := a.Brain.AssociateDiscogsRelease(bRelease, bMetaAlbum, score); err != nil {
 		return nil, err

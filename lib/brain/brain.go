@@ -19,3 +19,7 @@ func New(sqlxDsn string, enableLogging bool) (*Brain, error) {
 	}
 	return &Brain{sqlxDb: sqlxDb}, nil
 }
+
+func (b *Brain) Close() error {
+	return b.sqlxDb.Close()
+}

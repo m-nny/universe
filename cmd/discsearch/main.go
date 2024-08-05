@@ -27,22 +27,27 @@ func main() {
 	if err != nil {
 		logutils.Fatal("Could not init app", "err", err)
 	}
+	defer func() {
+		if err := app.Close(); err != nil {
+			slog.Error("Error closing app", "err", err)
+		}
+	}()
 
 	// if err := getAlbumsById(ctx, app); err != nil {
 	// 	log.Fatalf("%v", err)
 	// }
 
-	if err := benchGetUserTracks(ctx, app); err != nil {
-		logutils.Fatal("Could not bench GetUserTracks", "err", err)
-	}
+	// if err := benchGetUserTracks(ctx, app); err != nil {
+	// 	logutils.Fatal("Could not bench GetUserTracks", "err", err)
+	// }
 
 	// if err := getDiscogs(ctx, app); err != nil {
 	// 	logutils.Fatal("Could not get discogs", "err", err)
 	// }
 
-	// if err := getSellerInventory(ctx, app); err != nil {
-	// 	logutils.Fatal("Could not get seller inventory", "err", err)
-	// }
+	if err := getSellerInventory(ctx, app); err != nil {
+		logutils.Fatal("Could not get seller inventory", "err", err)
+	}
 
 	slog.Info("Done")
 }
